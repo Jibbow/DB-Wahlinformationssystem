@@ -35,15 +35,18 @@ a = (Anzahl der Stimmkreise (s. o.) - 1) / 7
 /html/body/div[2]/table[1]/tbody/tr[16]
 
 tr.content_z bis zur ersten tr.content_sz
+
 tr.content_z, letzten 4 Ergebnisse auslassen (, dies sind die zusammengezählten Stimmen)
 
 ### innerhalb einer Zeile
 #### 2.td - Name
 Im Format:
+
 Nachname, [Titel] Vorname
 
 #### 4.td - Landtag eingezogen (erstmal unwichtig, zum testen der Implementierung wichtig)
 S = Direkt gewählt im Stimmkreise
+
 L = Wahlkreisliste
 
 ### 5.td - Stimmen gesammt
