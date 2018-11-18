@@ -5,11 +5,12 @@ CREATE TABLE wahlkreis (
 	sitzzahl INT,
 	PRIMARY KEY(nr,jahr));
 CREATE TABLE stimmkreis (
-  nr INT,
+  	nr INT,
 	jahr INT,
 	name VARCHAR(20),
-	wahlkreisnr INT REFERENCES wahlkreis ON DELETE CASCADE,
-	PRIMARY KEY(nr,jahr));
+	wahlkreisnr int,
+	FOREIGN KEY (wahlkreisnr,jahr) REFERENCES wahlkreis ON DELETE CASCADE,
+	PRIMARY KEY(nr, jahr));
 CREATE TABLE partei (
 	id INT PRIMARY KEY,
 	abkuerzung NVARCHAR(10),
