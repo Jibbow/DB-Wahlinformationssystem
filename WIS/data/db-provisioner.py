@@ -1,11 +1,15 @@
 import pyhdb
 import csv
+import os
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join('..', '.env'))
 
 connection = pyhdb.connect(
-    host='ec2-18-195-119-179.eu-central-1.compute.amazonaws.com',
-    port='39015',
-    user='SYSTEM',
-    password='Jibbow123'
+    host=os.getenv('DATABASE_URL'),
+    port=os.getenv('DATABASE_PORT'),
+    user=os.getenv('DATABASE_USER'),
+    password=os.getenv('DATABASE_PASSWORD')
 )
 print('successfully connected to SAP HANA!')
 
