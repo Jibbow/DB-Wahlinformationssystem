@@ -70,6 +70,7 @@ def load_csv_file(connection, filepath, csv_delimiter, table):
 
 
 def load_data(connection):
+    load_csv_file(connection, './2018/Wahlkreise.csv', ',', 'WIS.WAHLKREIS')
     load_csv_file(connection, './2018/Parteien.csv', ';', 'WIS.PARTEI')
 
 
