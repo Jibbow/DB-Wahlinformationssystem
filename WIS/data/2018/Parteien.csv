@@ -1,24 +1,24 @@
-ID;Abkuerzung;Name;Farbe
-1;CSU;Christlich Soziale Union in Bayern;0088ce
-2;SPD;Sozialdemokratische Partei Deutschlands;e3000f
-3;FREIE WÄHLER;Freie Wähler;ff8000
-4;GRÜNE;Bündnis 90/Die Grünen;46962b
-5;FDP;Freie Demokratische Partei;ffff00
-6;DIE LINKE;Die Linke;be3075
-7;BP;Bayernpartei;98f5ff
-8;ÖDP;Ökologisch-Demokratische Partei;f47920
-9;PIRATEN;Piratenpartei Deutschland;ff820a
-10;DIE FRANKEN;Partei für Franken;f30022
-11;AfD;Alternative für Deutschland;009ee0
-12;LKR;Liberal-Konservative Reformer;f39200
-13;mut;mut;00a0e1
-14;Die Humanisten;Partei der Humanisten;005a82
-15;Die PARTEI;Partei für Arbeit, Rechtsstaat, Tierschutz, Elitenförderung und basisdemokratische Initiative;b5152b
-16;Gesundheitsforschung;Partei für Gesundheitsforschung;000000
-17;Tierschutzpartei;Partei Mensch Umwelt Tierschutz;013e7e
-18;V-Partei³;V-Partei³ - Partei für Veränderung, Vegetarier und Veganer;a3c02a
-19;REP;Die Republikaner;005993
-20;NPD;Nationaldemokratische Partei Deutschlands;8b4726
-21;FRAUENLISTE;Frauenliste Bayern;d9357c
-22;BüSo;Bürgerrechtsbewegung Solidarität;1f4569
-23;DIE FREIHEIT;Bürgerrechtspartei für mehr Freiheit und Demokratie - Die Freiheit;115faa
+ID,Abkuerzung,Name,Farbe
+1,CSU,Christlich Soziale Union in Bayern,0088ce
+2,SPD,Sozialdemokratische Partei Deutschlands,e3000f
+3,FREIE WÄHLER,Freie Wähler,ff8000
+4,GRÜNE,Bündnis 90/Die Grünen,46962b
+5,FDP,Freie Demokratische Partei,ffff00
+6,DIE LINKE,Die Linke,be3075
+7,BP,Bayernpartei,98f5ff
+8,ÖDP,Ökologisch-Demokratische Partei,f47920
+9,PIRATEN,Piratenpartei Deutschland,ff820a
+10,DIE FRANKEN,Partei für Franken,f30022
+11,AfD,Alternative für Deutschland,009ee0
+12,LKR,Liberal-Konservative Reformer,f39200
+13,mut,mut,00a0e1
+14,Die Humanisten,Partei der Humanisten,005a82
+15,Die PARTEI,"Partei für Arbeit, Rechtsstaat, Tierschutz, Elitenförderung und basisdemokratische Initiative",b5152b
+16,Gesundheitsforschung,Partei für Gesundheitsforschung,000000
+17,Tierschutzpartei,Partei Mensch Umwelt Tierschutz,013e7e
+18,V-Partei³,"V-Partei³ - Partei für Veränderung, Vegetarier und Veganer",a3c02a
+19,REP,Die Republikaner,005993
+20,NPD,Nationaldemokratische Partei Deutschlands,8b4726
+21,FRAUENLISTE,Frauenliste Bayern,d9357c
+22,BüSo,Bürgerrechtsbewegung Solidarität,1f4569
+23,DIE FREIHEIT,Bürgerrechtspartei für mehr Freiheit und Demokratie - Die Freiheit,115faa

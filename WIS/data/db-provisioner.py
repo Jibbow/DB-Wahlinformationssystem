@@ -53,11 +53,11 @@ def setup_schema(connection):
 
 
 
-def load_csv_file(connection, filepath, csv_delimiter, table):
+def load_csv_file(connection, filepath, table):
     cursor = connection.cursor()
     print('Loading %s into DB...' % filepath)
     with open(filepath, newline='') as f:
-        csvreader = csv.reader(f, delimiter=csv_delimiter)
+        csvreader = csv.reader(f, delimiter=',')
         firstrow = next(csvreader, None) # skip header
         v_str = ','.join(['?' for _ in range(0, len(firstrow))]) # get number of fields
 
@@ -70,8 +70,9 @@ def load_csv_file(connection, filepath, csv_delimiter, table):
 
 
 def load_data(connection):
-    load_csv_file(connection, './2018/Wahlkreise.csv', ',', 'WIS.WAHLKREIS')
-    load_csv_file(connection, './2018/Parteien.csv', ';', 'WIS.PARTEI')
+    load_csv_file(connection, './2018/Wahlkreise.csv', 'WIS.WAHLKREIS')
+    load_csv_file(connection, './2018/Stimmkreise.csv', 'WIS.STIMMKREIS')
+    load_csv_file(connection, './2018/Parteien.csv', 'WIS.PARTEI')
 
 
 
