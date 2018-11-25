@@ -82,7 +82,7 @@ def get_wahlkreis_csv(wahlkreis, wahlkreisId):
 
 
 # create directory for storing the raw data from the website
-directory = 'raw_data'
+directory = 'generated'
 if not os.path.exists(directory):
    os.makedirs(directory)
 os.chdir(directory)
