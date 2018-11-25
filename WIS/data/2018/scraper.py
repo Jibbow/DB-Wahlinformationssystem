@@ -30,7 +30,7 @@ def get_wahlkreis_partys(parteiId,wahlkreisId,first):
    page = requests.get(url)
    print(url)
    tree = html.fromstring(page.content)
-   header = ['WahlkreisId', 'ParteiId','KandidatId','KandidatName', 'StimmzettelReihenfolge','PlatzNummer','Gesamtstimmen','Zweitstimmen']
+   header = ['WahlkreisId', 'ParteiId','KandidatId','KandidatName', 'KandidatVorname', 'StimmzettelReihenfolge','PlatzNummer','Gesamtstimmen','Zweitstimmen']
    stimmkreise = tree.xpath('//tr[@class="tabellenkopfhoheeinzelbewerberansicht"]/th/text()')
    stimmkreise = remove_strings_from_list(stimmkreise)
 
@@ -41,6 +41,18 @@ def get_wahlkreis_partys(parteiId,wahlkreisId,first):
    listlength = len(stimmkreise) + 6 
    chunks = [elements[x:x+listlength] for x in range(0, len(elements), listlength)]
    pageNumber = 0
+
+   # format fine-tuning (very hacky):
+
+   # separate firstname and lastname:
+   for i in range(0,len(chunks)):
+      chunks[i] = [chunks[i][0]] + chunks[i][1].split(', ') + chunks[i][2:]
+   # remove '.' in numbers
+   for i in range(0,len(chunks)):
+      for a in range(4,len(chunks[i])):
+         chunks[i][a] = chunks[i][a].replace('.', '')
+   
+   
    while True:
       pageNumber += 1
       url = 'https://www.landtagswahl2018.bayern.de/ergebnis_einzelbewerber_90' +  str(wahlkreisId) + '_' + str(parteiId) + '_' + str(pageNumber) +'.html#anker'
@@ -60,10 +72,11 @@ def get_wahlkreis_partys(parteiId,wahlkreisId,first):
       chunks_helper = remove_first_x_elements_from_list(chunks_helper,6)
       stimmkreise = stimmkreise + stimmkreise_helper
 
+
       for i in range(0,len(chunks)):
          chunks[i] = chunks[i] + chunks_helper[i]
 
-
+   # add 'wahlkreisid' and 'parteiid' as first two columns for every element in the list
    add_element_to_list_of_lists(chunks,parteiId)
    add_element_to_list_of_lists(chunks,wahlkreisId)
    if(first):
