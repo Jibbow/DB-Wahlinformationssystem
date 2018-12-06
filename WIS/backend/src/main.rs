@@ -5,24 +5,37 @@ extern crate dotenv;
 extern crate handlebars;
 extern crate hdbconnect;
 extern crate rocket;
+extern crate serde;
+extern crate serde_json;
+
+#[macro_use]
+extern crate serde_derive;
 
 use dotenv::dotenv;
-use hdbconnect::{ConnectParams, Connection, HdbResult};
+use hdbconnect::{ConnectParams, Connection};
 use std::env;
 
 // load sql queries during compile time
 const TEST_QUERY: &str = include_str!("../queries/test.sql");
 
-#[get("/")]
-fn test() -> String {
-    let result: Vec<(usize, String, usize)> = get_db_connection().query(TEST_QUERY).expect("msg").try_into().expect("msg");
-    return result[0].1.to_string();
-}
 
 fn main() {
     // start webserver
-    rocket::ignite().mount("/test", routes![test]).launch();
+    rocket::ignite().mount("/", routes![test]).launch();
 }
+
+
+#[get("/test.json")]
+fn test() -> String {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { SITZZAHL: usize, NAME: String, NR: usize }
+
+    let result: Vec<Result> = get_db_connection().query(TEST_QUERY).unwrap().try_into().unwrap();
+    serde_json::to_string(&result).unwrap()
+}
+
 
 fn get_db_connection() -> Connection {
     // get configuration for database connection from environment or .env file
