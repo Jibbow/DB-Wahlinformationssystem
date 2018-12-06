@@ -1138,6 +1138,7 @@ dependencies = [
  "hdbconnect 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_codegen 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.33 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
