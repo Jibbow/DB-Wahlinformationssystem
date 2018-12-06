@@ -1,0 +1,11 @@
+[package]
+name = "wis-backend"
+version = "0.1.0"
+authors = ["Andreas Zimmerer <andreas.zimmerer@tum.de>"]
+
+[dependencies]
+rocket = "0.3.6"
+rocket_codegen = "0.3.6"
+hdbconnect = "0.9"
+dotenv = "0.13.0"
+handlebars = "1.1.0"
