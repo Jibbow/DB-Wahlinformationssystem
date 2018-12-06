@@ -25,7 +25,7 @@ fn main() {
 }
 
 
-#[get("/test.json")]
+#[get("/test")]
 fn test() -> String {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
