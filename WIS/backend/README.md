@@ -1,12 +1,12 @@
 ## How to add a new Query+Endpoint
 
-Load a file that contains the query by adding another line here:
+Load a file that contains the query by adding another line here in `routes.rs`:
 ```rust
 // load sql queries during compile time
 const TEST_QUERY: &str = include_str!("../queries/test.sql");
 ...
 ```
-Create a new route ([documentation](https://github.com/SergioBenitez/Rocket)):
+Create a new route ([documentation](https://github.com/SergioBenitez/Rocket)) in `routes.rs`:
 ```rust
 #[get("/test")]
 fn test() -> String {
@@ -20,9 +20,9 @@ fn test() -> String {
 }
 ```
 
-Add your now route to the webserver in `routes![test, ...]`:
+Add your now route to the webserver in `routes![routes::test, ...]` in `main.rs`:
 ```rust
-rocket::ignite().mount("/", routes![test]).launch();
+rocket::ignite().mount("/", routes![routes::test]).launch();
 ```
 
 
