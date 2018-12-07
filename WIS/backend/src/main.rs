@@ -10,22 +10,28 @@ extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 
+use std::env;
 use dotenv::dotenv;
 use hdbconnect::{ConnectParams, Connection};
-use std::env;
 
 mod routes;
 
 
+
 lazy_static! {
     static ref DB_CONNECTION_PARAMS: ConnectParams = ConnectParams::builder()
-        .hostname(env::var("DATABASE_URL").unwrap())
-        .port(env::var("DATABASE_PORT").unwrap().parse::<u16>().unwrap())
-        .dbuser(env::var("DATABASE_USER").unwrap())
-        .password(env::var("DATABASE_PASSWORD").unwrap())
+        .hostname(env::var("DATABASE_URL")
+            .expect("Please provide DATABASE_URL env var"))
+        .port(env::var("DATABASE_PORT")
+            .expect("Please provide DATABASE_PORT env var").parse::<u16>().expect("Unable to parse DATABASE_PORT"))
+        .dbuser(env::var("DATABASE_USER")
+            .expect("Please provide DATABASE_USER env var"))
+        .password(env::var("DATABASE_PASSWORD")
+            .expect("Please provide DATABASE_PASSWORD env var"))
         .build()
         .unwrap();
 }
+
 
 fn main() {
     // get configuration for database connection from environment or .env file
