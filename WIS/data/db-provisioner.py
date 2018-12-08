@@ -3,7 +3,7 @@ import csv
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=os.path.join('..', '.env'))
+load_dotenv()
 
 connection = pyhdb.connect(
     host=os.getenv('DATABASE_URL'),
