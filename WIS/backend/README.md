@@ -8,7 +8,7 @@ docker build -t wis-backend .
 ```
 Start the backend with:
 ```
-docker run -p 8000:8000/tcp wis-backend --env-file ../.env
+docker run -p 8000:8000/tcp --env-file ../.env wis-backend
 ```
 
 
@@ -54,3 +54,17 @@ Add your now route to the webserver in `routes![routes::test, ...]` in `main.rs`
 rocket::ignite().mount("/", routes![routes::test]).launch();
 ```
 Done!
+
+## Tipp: How to quickly test new queries
+The directory `queries` contains a python script `query.py` which runs a specified query against the database specified in the project's `.env` file (=zero setup).
+
+Simple write your query into a file and pass it as an argument to the script. Example:
+```
+python query.py --file test.sql
+```
+Alternatively, you can also pass a query directly as a parameter to the script:
+```
+python query.py --sql "select * from WIS.PARTEI"
+```
+
+The result of the query is printed to STDOUT.
