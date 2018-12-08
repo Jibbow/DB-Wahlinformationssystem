@@ -1,10 +1,11 @@
 #![feature(plugin)]
-#![plugin(rocket_codegen)]
+#![feature(proc_macro_hygiene, decl_macro)]
 
 extern crate dotenv;
 extern crate hdbconnect;
-extern crate rocket;
 
+#[macro_use]
+extern crate rocket;
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
