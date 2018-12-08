@@ -2,7 +2,7 @@ Backend for WIS
 =====
 
 ## Build Docker image
-The backend can also be packed into a docker image. Just install docker and run the following command inside the `backend/` directory:
+The backend can also be packed into a highly optimized docker image. Just install docker and run the following command inside the `backend/` directory:
 ```
 docker build -t wis-backend .
 ```
@@ -10,7 +10,7 @@ Start the backend with:
 ```
 docker run -p 8000:8000/tcp --env-file ../.env wis-backend
 ```
-
+You can reach the backend under [localhost:8000](localhost:8000)
 
 ## Build and run the backend without Docker
 If you don't want to use docker, you can also build and run the backend directly on your machine.
@@ -56,7 +56,7 @@ rocket::ignite().mount("/", routes![routes::test]).launch();
 Done!
 
 ## Tipp: How to quickly test new queries
-The directory `queries` contains a python script `query.py` which runs a specified query against the database specified in the project's `.env` file (=zero setup).
+The directory "`queries/`" contains a python script "`query.py`" which runs a specified query against the database specified in the project's `.env` file (=zero setup).
 
 Simple write your query into a file and pass it as an argument to the script. Example:
 ```
