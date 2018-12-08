@@ -29,6 +29,7 @@ def clean_up_db(connection):
     cursor.execute('DROP TABLE WIS.STIMMKREIS')
     cursor.execute('DROP TABLE WIS.WAHLKREIS')
     cursor.execute('DROP SCHEMA WIS')
+    cursor.close()
     print('Database cleaned up!!')
 
 
@@ -49,6 +50,7 @@ def setup_schema(connection):
                     cursor.execute(command)
                 except Exception as e:
                     print(e.args)
+        cursor.close()
         print('Applying SQL schema done!')
 
 
@@ -66,6 +68,7 @@ def load_csv_file(connection, filepath, table):
     cursor.execute('SELECT COUNT(*) FROM %s' % table)
     number = cursor.fetchone()
     print('...done! (now %i entries in %s)' % (number[0], table))
+    cursor.close()
 
 
 
