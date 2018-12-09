@@ -52,7 +52,12 @@ fn main() {
         .port(BACKEND_PORT.unwrap_or(8000))
         .unwrap();
     let app = rocket::custom(config);
-    app.attach(cors::CORS()).mount("/", routes![routes::test, routes::stimmverteilung, routes::sitzverteilung]).launch();
+    app.attach(cors::CORS()).mount("/", routes![
+        routes::test,
+        routes::stimmverteilung,
+        routes::sitzverteilung,
+        routes::landtagsmitglieder
+        ]).launch();
 }
 
 
