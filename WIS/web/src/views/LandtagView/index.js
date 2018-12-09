@@ -22,7 +22,8 @@ export default class LandtagView extends Component {
           options: {
             rotation: 1 * Math.PI,
             circumference: 1 * Math.PI
-          }
+          },
+          time: 0
       },
       stimmverteilung: {
           data: {
@@ -46,7 +47,12 @@ export default class LandtagView extends Component {
           },
           options: {
 
-          }
+          },
+          time: 0
+      },
+      landtagsmitglieder: {
+          data: [],
+          time: 0
       }
     };
   }
@@ -59,6 +65,9 @@ export default class LandtagView extends Component {
                 </div>
                 <div class="col-xs-6">
                     <h2>Sitzverteilung im Landtag</h2>
+                    {this.state.sitzverteilung.time !== 0 &&
+                        <small class="text-muted">Took {this.state.sitzverteilung.time} milliseconds</small>   
+                    }
                     <Doughnut width={600} data={this.state.sitzverteilung.data} options={this.state.sitzverteilung.options}/>
                     <h4>Für die Landtagswahl ergab sich folgende Verteilung der Sitze an die Parteien:</h4>
                     <table class="table">
@@ -81,6 +90,23 @@ export default class LandtagView extends Component {
                     <Bar width={600} data={this.state.stimmverteilung.data} options={this.state.sitzverteilung.options}/>
 
                     <h2>Mitglieder im Landtag</h2>
+                    {this.state.landtagsmitglieder.time !== 0 &&
+                        <small class="text-muted">Took {this.state.landtagsmitglieder.time} milliseconds</small>   
+                    }
+                    <table class="table">
+                        <thead>
+                            <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Partei</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                this.state.landtagsmitglieder.data
+                                    .map(v => <tr><td>{v.name}</td><td>{v.partei}</td></tr>)
+                            }
+                        </tbody>
+                    </table>
                     
                     <h2>Knappste Sieger in den Stimmkreisen</h2>
                     sdf
@@ -90,9 +116,12 @@ export default class LandtagView extends Component {
     }
 
     componentDidMount() {
+        let start = performance.now();
         fetch('http://localhost:8000/stimmverteilung/2018')
             .then(response => response.json())
             .then(data => {
+                let end = performance.now();
+                this.state.stimmverteilung.time = end - start;
                 this.state.stimmverteilung.data.labels = data.map(v => v.PARTEI);
                 this.state.stimmverteilung.data.datasets[0].data = data.map(v => v.PROZENT);
                 this.forceUpdate();
@@ -100,8 +129,23 @@ export default class LandtagView extends Component {
         fetch('http://localhost:8000/sitzverteilung/2018')
             .then(response => response.json())
             .then(data => {
+                let end = performance.now();
+                this.state.sitzverteilung.time = end - start;
                 this.state.sitzverteilung.data.labels = data.map(v => v.PARTEI);
                 this.state.sitzverteilung.data.datasets[0].data = data.map(v => v.SITZE);
+                this.forceUpdate();
+            });
+        fetch('http://localhost:8000/landtagsmitglieder/2018')
+            .then(response => response.json())
+            .then(data => {
+                let end = performance.now();
+                this.state.landtagsmitglieder.time = end - start;
+                this.state.landtagsmitglieder.data = data.map(v => {
+                    return {
+                        name: v.VORNAME + ' ' + v.NACHNAME,
+                        partei: v.PARTEI
+                    }
+                });
                 this.forceUpdate();
             });
     }
