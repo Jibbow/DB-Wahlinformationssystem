@@ -17,6 +17,7 @@ use hdbconnect::{ConnectParams, Connection};
 use rocket::config::{Config, Environment};
 
 mod routes;
+mod cors;
 
 
 
@@ -51,7 +52,7 @@ fn main() {
         .port(BACKEND_PORT.unwrap_or(8000))
         .unwrap();
     let app = rocket::custom(config);
-    app.mount("/", routes![routes::test]).launch();
+    app.attach(cors::CORS()).mount("/", routes![routes::test, routes::stimmverteilung]).launch();
 }
 
 
