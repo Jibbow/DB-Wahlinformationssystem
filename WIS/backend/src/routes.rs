@@ -9,6 +9,7 @@ use rocket::response::content;
 const TEST_QUERY: &str = include_str!("../queries/test.sql");
 const SITZVERTEILUNG_QUERY: &str = include_str!("../queries/sitzverteilung.sql");
 const LANDTAGSMITGLIEDER_QUERY: &str = include_str!("../queries/landtagsmitglieder.sql");
+const WAHLKREIS_UEBERHANGMANDATE_QUERY: &str = include_str!("../queries/wahlkreis-überhangmandate.sql");
 
 
 #[get("/test")]
@@ -43,6 +44,18 @@ pub fn landtagsmitglieder(jahr: u32) -> content::Json<String> {
     struct Result { VORNAME: String, NACHNAME: String, PARTEI: String }
 
     let result: Vec<Result> = get_db_connection().query(LANDTAGSMITGLIEDER_QUERY).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+
+#[get("/ueberhangmandate/<jahr>")]
+pub fn ueberhangmandate(jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { WAHLKREISID: String, PARTEI: String, UEBERHANGMANDATE: u32, WAHLKREIS: String }
+
+    let result: Vec<Result> = get_db_connection().query(WAHLKREIS_UEBERHANGMANDATE_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 

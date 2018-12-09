@@ -56,7 +56,8 @@ fn main() {
         routes::test,
         routes::stimmverteilung,
         routes::sitzverteilung,
-        routes::landtagsmitglieder
+        routes::landtagsmitglieder,
+        routes::ueberhangmandate,
         ]).launch();
 }
 
