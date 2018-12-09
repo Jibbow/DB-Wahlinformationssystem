@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
 import './App.css';
 import LandtagView from './views/LandtagView'
+import WahlkreisView from './views/WahlkreisView'
 
 class App extends Component {
   render() {
@@ -12,7 +13,7 @@ class App extends Component {
             <LandtagView/>
           </Tab>
           <Tab eventKey={2} title="Überblick Wahlkreise">
-            Tab 2 content
+            <WahlkreisView/>
           </Tab>
           <Tab eventKey={3} title="Überblick Stimmkreise">
             Tab 3 content

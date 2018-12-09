@@ -36,7 +36,7 @@ export default class LandtagView extends Component {
                   },
                   {
                       label: "2013",
-                      data: [40.5, 15.2, 3.4],
+                      data: [],
                       backgroundColor: ["#3e95cd"],
                   }
               ],
