@@ -60,18 +60,12 @@ CREATE TABLE WIS.ERSTSTIMME (
 	FOREIGN KEY (kandidat, jahr) REFERENCES WIS.KANDIDAT,
 	FOREIGN KEY (stimmkreis, jahr) REFERENCES WIS.STIMMKREIS);
 
-		CREATE TABLE WIS.ERSTSTIMME (
-			kandidat INT,
-			stimmkreis INT,
-			jahr INT,
-			FOREIGN KEY (kandidat, jahr) REFERENCES WIS.KANDIDAT,
-			FOREIGN KEY (stimmkreis, jahr) REFERENCES WIS.STIMMKREIS);
-
-CREATE TABLE WIS.ZWEITSTIMMEPARTEI (
-	parteiId INT REFERENCES WIS.PARTEI ON DELETE SET NULL,
-	stimmkreis INT,
-	jahr INT,
-	FOREIGN KEY (stimmkreis,jahr) REFERENCES WIS.stimmkreis);
+	CREATE TABLE WIS.ZWEITSTIMMEPARTEI (
+		parteiId INT,
+		stimmkreis INT,
+		jahr INT,
+		FOREIGN KEY (stimmkreis,jahr) REFERENCES WIS.stimmkreis,
+		FOREIGN KEY (parteiId, jahr) REFERENCES WIS.partei);
 
 CREATE TABLE WIS.ZWEITSTIMMEKANDIDAT (
 	kandidat INT,
@@ -79,3 +73,12 @@ CREATE TABLE WIS.ZWEITSTIMMEKANDIDAT (
 	jahr INT,
 	FOREIGN KEY (kandidat, jahr) REFERENCES WIS.KANDIDAT,
 	FOREIGN KEY (stimmkreis,jahr) REFERENCES WIS.STIMMKREIS);
+
+	CREATE TABLE WIS.AGGZWEITSTIMMEPARTEI (
+		parteiId INT,
+		stimmkreis INT,
+		stimmen INT,
+		jahr INT,
+		FOREIGN KEY (stimmkreis,jahr) REFERENCES WIS.stimmkreis,
+		FOREIGN KEY (parteiId, jahr) REFERENCES WIS.partei
+	);

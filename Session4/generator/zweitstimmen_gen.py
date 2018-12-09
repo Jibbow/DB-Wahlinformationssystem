@@ -8,7 +8,7 @@ listStimmkreise = [209, 105, 201, 108, 124, 304, 601, 702, 121, 129, 511, 512, 5
                    305, 130, 510, 605, 114, 101, 404, 306, 701, 402, 401, 307, 111, 405, 602, 110, 112, 403, 607,
                    115, 117, 303, 302, 119, 122, 406, 707, 603, 123, 508, 505, 109, 126, 710, 204, 203, 104, 127,
                    116, 128, 509, 503, 504, 712, 408, 706, 604, 125, 507, 708, 407, 703, 709, 107, 711, 207, 206,
-                   713, 502, 106, 606, 506, 608, 610, 103, 301, 705, 202, 120, 113, 208]
+                   713, 502, 106, 606, 506, 608, 610, 103, 301, 705, 202, 120, 113, 208, 131]
 listYears = [2013, 2018]
 
 paraSk = ""
@@ -24,7 +24,7 @@ if len(sys.argv) > 2:
         print("Nice try! " + paraYear)
         exit(-2)
 else:
-    paraYear = 2013
+    paraYear = 2018
 
 
 def createErstisForSK(y, sk):
@@ -33,7 +33,7 @@ def createErstisForSK(y, sk):
 
     print("Starting on Stimmkreis: " + str(sk))
     sqlsel = """select *
-            from wis.aggzweitstimmen
+            from wis.AGGZWEITSTIMMEN
             where stimmkreis = """ + str(sk) + """
             and jahr = """ + str(y)
     cursor.execute(sqlsel)
@@ -41,32 +41,13 @@ def createErstisForSK(y, sk):
     test = []
     for a in t:
         test.append(list(a))
-    # print(test)
+    print(test)
     sum = 0
     for row in test:
-        sum += row[2]
-    while sum > 0:
-        n = random.random()
-        index = 0
-        partial = test[0][2]
-        while partial * 1.00 / sum < n:
-            index += 1
-            partial += test[index][2]
-        sum -= 1
-        test[index][2] -= 1
-        id = test[index][0]
-        # sqlins = sqlins + """insert into WIS.ERSTSTIMME (kandidat, jahr, stimmkreis) values"""
-        # sqlins = sqlins + "(" + str(id) + "," + str(y) + "," + str(sk) + ");\n"
-        l.append([y, id, sk])
-        #sqlins = """insert into "WIS"."ERSTSTIMME" (kandidat, jahr, stimmkreis) values( """ + str(id) + "," + str(y) + "," + str(sk) + ")"
-        # print sqlins
-
-        if sum % 10000 == 0:
-            print("Noch " + str(sum) + " Stimmen verbleibend.")
-    # sqlins = sqlins[:-2] + ';'
-    # print sqlins
-    #cursor.execute(sqlins)
-    #connection.commit()
+        for i in range(row[2]):
+            id = row[0]
+            l.append([y, id, sk])
+    random.shuffle(l)
 
 
 connection = pyhdb.connect(
@@ -86,6 +67,6 @@ else:
 
 print("size: " + str(len(l)))
 
-with open("zweitstimmeneinzeln.csv", "w+") as my_csv:
+with open("2018zweitstimmeneinzeln.csv", "w+") as my_csv:
     csvWriter = csv.writer(my_csv, delimiter=';')
     csvWriter.writerows(l)
