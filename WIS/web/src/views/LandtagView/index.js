@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Doughnut, Bar } from 'react-chartjs-2';
+import { Button, Collapse } from 'react-bootstrap'
 import bayern_map from '../../assets/Bayern_Landtagswahlkreise_2018.svg';
 
 
@@ -90,24 +91,33 @@ export default class LandtagView extends Component {
                     <Bar width={600} data={this.state.stimmverteilung.data} options={this.state.sitzverteilung.options}/>
 
                     <h2>Mitglieder im Landtag</h2>
+                    <Button onClick={() => this.setState({ open: !this.state.open })}>
+                        Mitglieder im Landtag {!this.state.open && 'anzeigen' || 'verbergen'}
+                    </Button>
+                    <div>
                     {this.state.landtagsmitglieder.time !== 0 &&
                         <small class="text-muted">Took {this.state.landtagsmitglieder.time} milliseconds</small>   
                     }
-                    <table class="table">
-                        <thead>
-                            <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Partei</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                this.state.landtagsmitglieder.data
-                                    .map(v => <tr><td>{v.name}</td><td>{v.partei}</td></tr>)
-                            }
-                        </tbody>
-                    </table>
-                    
+                    </div>
+                    <Collapse in={this.state.open}>
+                        <div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Partei</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.landtagsmitglieder.data
+                                            .map(v => <tr><td>{v.name}</td><td>{v.partei}</td></tr>)
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </Collapse>
+ 
                     <h2>Knappste Sieger in den Stimmkreisen</h2>
                     sdf
                 </div>
