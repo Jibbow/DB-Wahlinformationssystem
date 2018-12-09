@@ -17,4 +17,4 @@ RUN cargo +nightly build --release --target x86_64-unknown-linux-musl --manifest
 FROM scratch
 COPY --from=build /wis-backend/target/x86_64-unknown-linux-musl/release/wis-backend /bin/wis-backend
 ENTRYPOINT ["/bin/wis-backend"]
-EXPOSE 8000/tcp
+EXPOSE 8000
