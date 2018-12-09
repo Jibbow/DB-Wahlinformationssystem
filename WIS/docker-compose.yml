@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  backend:
+    build: backend
+    image: wis-backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"

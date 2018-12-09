@@ -3,7 +3,7 @@ import csv
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=os.path.join('..', '.env'))
+load_dotenv()
 
 connection = pyhdb.connect(
     host=os.getenv('DATABASE_URL'),
@@ -19,16 +19,20 @@ print('successfully connected to SAP HANA!')
 def clean_up_db(connection):
     print('Cleaning up DB...')
     cursor = connection.cursor()
-    cursor.execute('DROP TABLE WIS.ZWEITSTIMMEKANDIDAT')
-    cursor.execute('DROP TABLE WIS.ZWEITSTIMMEPARTEI')
-    cursor.execute('DROP TABLE WIS.ERSTSTIMME')
-    cursor.execute('DROP TABLE WIS.STIMMKREISLISTE')
-    cursor.execute('DROP TABLE WIS.WAHLKREISLISTE')
-    cursor.execute('DROP TABLE WIS.KANDIDAT')
-    cursor.execute('DROP TABLE WIS.PARTEI')
-    cursor.execute('DROP TABLE WIS.STIMMKREIS')
-    cursor.execute('DROP TABLE WIS.WAHLKREIS')
-    cursor.execute('DROP SCHEMA WIS')
+    try:
+        cursor.execute('DROP TABLE WIS.ZWEITSTIMMEKANDIDAT')
+        cursor.execute('DROP TABLE WIS.ZWEITSTIMMEPARTEI')
+        cursor.execute('DROP TABLE WIS.ERSTSTIMME')
+        cursor.execute('DROP TABLE WIS.STIMMKREISLISTE')
+        cursor.execute('DROP TABLE WIS.WAHLKREISLISTE')
+        cursor.execute('DROP TABLE WIS.KANDIDAT')
+        cursor.execute('DROP TABLE WIS.PARTEI')
+        cursor.execute('DROP TABLE WIS.STIMMKREIS')
+        cursor.execute('DROP TABLE WIS.WAHLKREIS')
+        cursor.execute('DROP SCHEMA WIS')
+    except:
+        print("DROP TABLE failed (tables might not exists...)")
+    cursor.close()
     print('Database cleaned up!!')
 
 
@@ -49,6 +53,7 @@ def setup_schema(connection):
                     cursor.execute(command)
                 except Exception as e:
                     print(e.args)
+        cursor.close()
         print('Applying SQL schema done!')
 
 
@@ -66,6 +71,7 @@ def load_csv_file(connection, filepath, table):
     cursor.execute('SELECT COUNT(*) FROM %s' % table)
     number = cursor.fetchone()
     print('...done! (now %i entries in %s)' % (number[0], table))
+    cursor.close()
 
 
 

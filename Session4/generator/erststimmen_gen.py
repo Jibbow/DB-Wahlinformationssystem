@@ -1,90 +1,14 @@
 import pyhdb, random, sys
+from time import sleep
+import unicodecsv as csv
 import secrets
 
-listStimmkreise = [209,105,201,108,124,304,601,
-702,
-121,
-129,
-511,
-512,
-501,
-118,
-102,
-609,
-704,
-308,
-205,
-305,
-130,
-510,
-605,
-114,
-101,
-404,
-306,
-701,
-402,
-401,
-307,
-111,
-405,
-602,
-110,
-112,
-403,
-607,
-115,
-117,
-303,
-302,
-119,
-122,
-406,
-707,
-603,
-123,
-508,
-505,
-109,
-126,
-710,
-204,
-203,
-104,
-127,
-116,
-128,
-509,
-503,
-504,
-712,
-408,
-706,
-604,
-125,
-507,
-708,
-407,
-703,
-709,
-107,
-711,
-207,
-206,
-713,
-502,
-106,
-606,
-506,
-608,
-610,
-103,
-301,
-705,
-202,
-120,
-113,
-208]
+
+listStimmkreise = [209, 105, 201, 108, 124, 304, 601, 702, 121, 129, 511, 512, 501, 118, 102, 609, 704, 308, 205,
+                   305, 130, 510, 605, 114, 101, 404, 306, 701, 402, 401, 307, 111, 405, 602, 110, 112, 403, 607,
+                   115, 117, 303, 302, 119, 122, 406, 707, 603, 123, 508, 505, 109, 126, 710, 204, 203, 104, 127,
+                   116, 128, 509, 503, 504, 712, 408, 706, 604, 125, 507, 708, 407, 703, 709, 107, 711, 207, 206,
+                   713, 502, 106, 606, 506, 608, 610, 103, 301, 705, 202, 120, 113, 208, 131]
 listYears = [2013, 2018]
 
 paraSk = ""
@@ -100,13 +24,16 @@ if len(sys.argv) > 2:
         print("Nice try! " + paraYear)
         exit(-2)
 else:
-    paraYear = 2013
+    paraYear = 2018
 
 
 def createErstisForSK(y, sk):
+    cursor = connection.cursor()
+    sqlins = ""
+
     print("Starting on Stimmkreis: " + str(sk))
-    sqlsel = """select * 
-            from wis.aggerststimme 
+    sqlsel = """select *
+            from wis.AGGERSTSTIMME
             where stimmkreisnr = """ + str(sk) + """
             and jahr = """ + str(y)
     cursor.execute(sqlsel)
@@ -117,37 +44,29 @@ def createErstisForSK(y, sk):
     print(test)
     sum = 0
     for row in test:
-        sum += row[3]
-    while sum > 0:
-        n = random.random()
-        index = 0
-        partial = test[0][3]
-        while partial * 1.00 / sum < n:
-            index += 1
-            partial += test[index][3]
-        sum -= 1
-        test[index][3] -= 1
-        id = test[index][2]
-        sqlins = """insert into "WIS"."ERSTSTIMME" (kandidat, jahr) values( """ + str(id) + "," + str(
-            y) + ")"
-        cursor.execute(sqlins)
-        if sum % 10000 == 0:
-            print("Noch " + str(sum) + " Stimmen vebrleibend.")
+        for i in range(row[2]):
+            id = row[0]
+            l.append([y, id, sk])
+    random.shuffle(l)
+
 
 connection = pyhdb.connect(
-    host="192.168.0.5",
-    port=39015,
+    host=secrets.ADRESS,
+    port=secrets.PORT,
     user=secrets.USERNAME,
     password=secrets.PASSWORD
 )
-cursor = connection.cursor()
 
+l = []
 if paraSk != "":
     createErstisForSK(paraYear, paraSk)
 else:
     for sk in listStimmkreise:
+        # sleep(0.5)
         createErstisForSK(paraYear, sk)
 
-connection.commit()
+print("size: " + str(len(l)))
 
-connection.close()
+with open("2018erststimmeneinzeln.csv", "w+") as my_csv:
+    csvWriter = csv.writer(my_csv, delimiter=';')
+    csvWriter.writerows(l)
