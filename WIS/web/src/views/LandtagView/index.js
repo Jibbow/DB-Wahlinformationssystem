@@ -11,14 +11,12 @@ export default class LandtagView extends Component {
           data: {
               datasets: [
                   {
-                      data: [10, 20, 30],
-                      backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f"],
+                      data: [0],
+                      backgroundColor: ["#3e95cd"],
                   }
               ],
               labels: [
                   '...',
-                  '...',
-                  '...'
               ]
           },
           options: {
@@ -32,12 +30,12 @@ export default class LandtagView extends Component {
                   {
                       label: "2018",
                       data: [20.5, 13.2, 5.0],
-                      backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f"],
+                      backgroundColor: ["#3e95cd"],
                   },
                   {
                       label: "2013",
                       data: [40.5, 15.2, 3.4],
-                      backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f"],
+                      backgroundColor: ["#3e95cd"],
                   }
               ],
               labels: [
@@ -103,7 +101,7 @@ export default class LandtagView extends Component {
             .then(response => response.json())
             .then(data => {
                 this.state.sitzverteilung.data.labels = data.map(v => v.PARTEI);
-                this.state.stimmverteilung.data.datasets[0].data = data.map(v => v.SITZE);
+                this.state.sitzverteilung.data.datasets[0].data = data.map(v => v.SITZE);
                 this.forceUpdate();
             });
     }
