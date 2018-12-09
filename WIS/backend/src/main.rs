@@ -14,6 +14,7 @@ extern crate lazy_static;
 use std::env;
 use dotenv::dotenv;
 use hdbconnect::{ConnectParams, Connection};
+use rocket::config::{Config, Environment};
 
 mod routes;
 
@@ -31,6 +32,8 @@ lazy_static! {
             .expect("Please provide DATABASE_PASSWORD env var"))
         .build()
         .unwrap();
+    static ref BACKEND_PORT: Option<u16> = env::var("BACKEND_PORT")
+        .map(|s| {s.parse::<u16>().expect("Unable to parse BACKEND_PORT")}).ok();
 }
 
 
@@ -43,7 +46,12 @@ fn main() {
         .expect("Could not establish connection to SAP HANA");
 
     // start webserver
-    rocket::ignite().mount("/", routes![routes::test]).launch();
+    let config = Config::build(Environment::Production)
+        .address("0.0.0.0")
+        .port(BACKEND_PORT.unwrap_or(8000))
+        .unwrap();
+    let app = rocket::custom(config);
+    app.mount("/", routes![routes::test]).launch();
 }
 
 
