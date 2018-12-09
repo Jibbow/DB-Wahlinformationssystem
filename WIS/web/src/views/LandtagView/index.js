@@ -41,9 +41,9 @@ export default class LandtagView extends Component {
                   }
               ],
               labels: [
-                  'CSU',
-                  'SPD',
-                  'FDP'
+                  '...',
+                  '...',
+                  '...'
               ]
           },
           options: {
@@ -75,8 +75,12 @@ export default class LandtagView extends Component {
     }
 
     componentDidMount() {
-    fetch('http://localhost:8000/hello')
-      .then(response => response.json())
-      .then(data => this.setState({ sitzplatzverteilung: data }));
+        fetch('http://localhost:8000/stimmverteilung/2018')
+            .then(response => response.json())
+            .then(data => {
+                this.state.stimmverteilung.data.labels = data.map(v => v.PARTEI);
+                this.state.stimmverteilung.data.datasets[0].data = data.map(v => v.PROZENT);
+                this.forceUpdate();
+            });
     }
 }
