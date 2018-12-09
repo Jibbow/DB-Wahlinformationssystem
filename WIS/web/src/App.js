@@ -1,30 +1,27 @@
 import React, { Component } from 'react';
+import { Tabs, Tab } from 'react-bootstrap';
 import './App.css';
+import LandtagView from './views/LandtagView';
+import WahlkreisView from './views/WahlkreisView';
+import StimmkreisView from './views/StimmkreisView';
 
 class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      result: 0,
-    };
-    this.getResult = this.getResult.bind(this);
-  }
-
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <p>{this.state.result}</p>
-          <button onClick={this.getResult}>click!</button>
-        </header>
+        <Tabs defaultActiveKey={1} id="uncontrolled-tab-example">
+          <Tab eventKey={1} title="Überblick Landtagswahl">
+            <LandtagView/>
+          </Tab>
+          <Tab eventKey={2} title="Überblick Wahlkreise">
+            <WahlkreisView/>
+          </Tab>
+          <Tab eventKey={3} title="Überblick Stimmkreise">
+            <StimmkreisView/>
+          </Tab>
+        </Tabs>
       </div>
     );
-  }
-
-  getResult() {
-    this.setState({
-      result: 'yeah!',
-    });
   }
 }
 

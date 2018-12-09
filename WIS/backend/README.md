@@ -38,14 +38,14 @@ const TEST_QUERY: &str = include_str!("../queries/test.sql");
 Create a new route ([documentation](https://github.com/SergioBenitez/Rocket)) in `routes.rs`:
 ```rust
 #[get("/test")]
-fn test() -> String {
+pub fn test() -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { SITZZAHL: usize, NAME: String, NR: usize }
+    struct Result { SITZZAHL: u32, NAME: String, NR: u32 }
 
     let result: Vec<Result> = get_db_connection().query(TEST_QUERY).unwrap().try_into().unwrap();
-    serde_json::to_string(&result).unwrap()
+    content::Json(serde_json::to_string(&result).unwrap())
 }
 ```
 

@@ -10,6 +10,8 @@ extern crate rocket;
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate serde_json;
 
 use std::env;
 use dotenv::dotenv;
@@ -17,6 +19,7 @@ use hdbconnect::{ConnectParams, Connection};
 use rocket::config::{Config, Environment};
 
 mod routes;
+mod cors;
 
 
 
@@ -51,7 +54,13 @@ fn main() {
         .port(BACKEND_PORT.unwrap_or(8000))
         .unwrap();
     let app = rocket::custom(config);
-    app.mount("/", routes![routes::test]).launch();
+    app.attach(cors::CORS()).mount("/", routes![
+        routes::test,
+        routes::stimmverteilung,
+        routes::sitzverteilung,
+        routes::landtagsmitglieder,
+        routes::ueberhangmandate,
+        ]).launch();
 }
 
 
