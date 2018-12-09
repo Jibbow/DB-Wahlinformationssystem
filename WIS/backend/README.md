@@ -8,7 +8,7 @@ docker build -t wis-backend .
 ```
 Start the backend with:
 ```
-docker run -p 8000:8000/tcp --env-file ../.env wis-backend
+docker run -p 8000:8000 --env-file ../.env wis-backend
 ```
 You can reach the backend under [localhost:8000](localhost:8000)
 
