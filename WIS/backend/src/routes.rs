@@ -7,6 +7,7 @@ use rocket::response::content;
 
 // load sql queries during compile time
 const TEST_QUERY: &str = include_str!("../queries/test.sql");
+const SITZVERTEILUNG_QUERY: &str = include_str!("../queries/sitzverteilung.sql");
 
 
 #[get("/test")]
@@ -17,6 +18,18 @@ pub fn test() -> content::Json<String> {
     struct Result { SITZZAHL: u32, NAME: String, NR: u32 }
 
     let result: Vec<Result> = get_db_connection().query(TEST_QUERY).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+
+#[get("/sitzverteilung/<jahr>")]
+pub fn sitzverteilung(jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { PARTEI: String, SITZE: u32 }
+
+    let result: Vec<Result> = get_db_connection().query(SITZVERTEILUNG_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
