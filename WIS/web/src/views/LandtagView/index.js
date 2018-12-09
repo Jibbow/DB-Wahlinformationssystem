@@ -15,10 +15,10 @@ export default class LandtagView extends Component {
     render() {
         return (
             <div>
-                <div>
+                <div class="container">
                     <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
                 </div>
-                <div>
+                <div class="container-fluid">
                     <C3Chart data={data} />
                 </div>
             </div>
