@@ -4,11 +4,12 @@ extern crate handlebars;
 
 use super::get_db_connection;
 use rocket::response::content;
+use self::handlebars::{Handlebars};
 
 // load sql queries during compile time
 const TEST_QUERY: &str = include_str!("../queries/test.sql");
-const SITZVERTEILUNG_QUERY: &str = include_str!("../queries/sitzverteilung.sql");
-const LANDTAGSMITGLIEDER_QUERY: &str = include_str!("../queries/landtagsmitglieder.sql");
+const SITZVERTEILUNG_QUERY: &str = include_str!("../queries/wahl-sitzverteilung.sql");
+const LANDTAGSMITGLIEDER_QUERY: &str = include_str!("../queries/wahl-landtagsmitglieder.sql");
 const WAHLKREIS_UEBERHANGMANDATE_QUERY: &str = include_str!("../queries/wahlkreis-überhangmandate.sql");
 
 
