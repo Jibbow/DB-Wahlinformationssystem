@@ -14,7 +14,7 @@ const WAHLKREIS_UEBERHANGMANDATE_QUERY: &str = include_str!("../queries/wahlkrei
 const TOP10_QUERY: &str = include_str!("../queries/top10.sql");
 
 #[get("/top10/<jahr>")]
-pub fn ueberhangmandate(jahr: u32) -> content::Json<String> {
+pub fn top10(jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
