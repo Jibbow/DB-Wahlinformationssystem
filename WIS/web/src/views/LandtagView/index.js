@@ -67,7 +67,7 @@ export default class LandtagView extends Component {
                 <div class="col-xs-6">
                     <h2>Sitzverteilung im Landtag</h2>
                     {this.state.sitzverteilung.time !== 0 &&
-                        <small class="text-muted">Took {this.state.sitzverteilung.time} milliseconds</small>   
+                        <small class="text-muted">Took {this.state.sitzverteilung.time} milliseconds</small>
                     }
                     <Doughnut width={600} data={this.state.sitzverteilung.data} options={this.state.sitzverteilung.options}/>
                     <h4>Für die Landtagswahl ergab sich folgende Verteilung der Sitze an die Parteien:</h4>
@@ -96,7 +96,7 @@ export default class LandtagView extends Component {
                     </Button>
                     <div>
                     {this.state.landtagsmitglieder.time !== 0 &&
-                        <small class="text-muted">Took {this.state.landtagsmitglieder.time} milliseconds</small>   
+                        <small class="text-muted">Took {this.state.landtagsmitglieder.time} milliseconds</small>
                     }
                     </div>
                     <Collapse in={this.state.open}>
@@ -117,9 +117,33 @@ export default class LandtagView extends Component {
                             </table>
                         </div>
                     </Collapse>
- 
+
                     <h2>Knappste Sieger in den Stimmkreisen</h2>
-                    sdf
+                    <div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Partei</th>
+                                <th scope="col">Unterschied</th>
+                                <th scope="col">Pos</th>
+                                <th scope="col">GegnerID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    this.state.top10.data
+                                        .map(v => <tr>
+                                                    <td>{v.name}</td>
+                                                    <td>{v.partei}</td>
+                                                    <td>{v.diff}</td>
+                                                    <td>{v.pos}</td>
+                                                    <td>{v.gegner}</td>
+                                                  </tr>)
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         );
@@ -158,5 +182,21 @@ export default class LandtagView extends Component {
                 });
                 this.forceUpdate();
             });
+            fetch('http://localhost:8000/top10/2018')
+                .then(response => response.json())
+                .then(data => {
+                    let end = performance.now();
+                    this.state.top10.time = end - start;
+                    this.state.top10.data = data.map(v => {
+                        return {
+                            name: v.VORNAME + ' ' + v.NACHNAME,
+                            partei: v.ABKUERZUNG,
+                            diff: v.DIFF,
+                            pos: v.POS,
+                            gegner: v.VKANDIDAT
+                        }
+                    });
+                    this.forceUpdate();
+                });
     }
 }

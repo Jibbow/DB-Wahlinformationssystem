@@ -11,7 +11,26 @@ const TEST_QUERY: &str = include_str!("../queries/test.sql");
 const SITZVERTEILUNG_QUERY: &str = include_str!("../queries/wahl-sitzverteilung.sql");
 const LANDTAGSMITGLIEDER_QUERY: &str = include_str!("../queries/wahl-landtagsmitglieder.sql");
 const WAHLKREIS_UEBERHANGMANDATE_QUERY: &str = include_str!("../queries/wahlkreis-überhangmandate.sql");
+const TOP10_QUERY: &str = include_str!("../queries/top10.sql");
 
+#[get("/top10/<jahr>")]
+pub fn ueberhangmandate(jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { ID: u32,
+                    JAHR: u32,
+                    DIFF: u32,
+                    VKANDIDAT: u32,
+                    PARTEI: u32,
+                    POS: u32,
+                    NACHNAME: String,
+                    VORNAME: String,
+                    ABKUERZUNG: String }
+
+    let result: Vec<Result> = get_db_connection().query(TOP10_QUERY).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
 
 #[get("/test")]
 pub fn test() -> content::Json<String> {
