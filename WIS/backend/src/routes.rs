@@ -63,9 +63,16 @@ pub fn direktkandidatengewinner(stimmkreis: u32, jahr: u32) -> content::Json<Str
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result {  }
+    struct Result { ID: u32, VORNAME: String, NACHNAME: String, PARTEI: String }
 
-    let result: Vec<Result> = get_db_connection().query(STIMMKREIS_DIREKTKANDIDATENGEWINNER_QUERY).unwrap().try_into().unwrap();
+    let reg = Handlebars::new();
+    let query = reg.render_template(STIMMKREIS_DIREKTKANDIDATENGEWINNER_QUERY, &json!(
+        {
+            "JAHR": jahr,
+            "STIMMKREIS": stimmkreis
+        })).expect("Could not template query :(");
+
+    let result: Vec<Result> = get_db_connection().query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
