@@ -20,7 +20,7 @@ export default class ParteiView extends Component {
         <div class="col-xs-6">
           <DropdownButton title={'Wähle eine Partei'} id={'dropdown-parteien'} onSelect={(key, event) => this.setState({ selectedParteiId: key })}>
             {this.state.parteien.map(p => (
-              <MenuItem eventKey={p.ID}>{p.NAME}</MenuItem>
+              <MenuItem key={p.ID} eventKey={p.ID}>{p.NAME}</MenuItem>
             ))}
           </DropdownButton>
 
