@@ -14,8 +14,9 @@ const STIMMKREIS_DIREKTKANDIDATENGEWINNER_QUERY: &str = include_str!("../queries
 const STIMMKREIS_PARTEISTATISTIK_QUERY: &str = include_str!("../queries/stimmkreis-parteistatistik.sql");
 const STIMMKREIS_SIEGERPARTEI_ERSTSTIMMER_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-erststimmen.sql");
 const STIMMKREIS_SIEGERPARTEI_ZWEITSTIMME_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-zweitstimmen.sql");
-const KNAPPSTE_SIEGER: &str = include_str!("../queries/wahl-top-10-knappste-sieger.sql");
-const KNAPPSTE_VERLIERER: &str = include_str!("../queries/wahl-top-10-knappste-verlierer.sql");
+const KNAPPSTE_SIEGER_QUERY: &str = include_str!("../queries/wahl-top-10-knappste-sieger.sql");
+const KNAPPSTE_VERLIERER_QUERY: &str = include_str!("../queries/wahl-top-10-knappste-verlierer.sql");
+const PARTEIEN_QUERY: &str = include_str!("../queries/wahl-parteien.sql");
 
 
 
@@ -137,7 +138,7 @@ pub fn knappstesieger(jahr: u32) -> content::Json<String> {
     #[allow(non_snake_case)]
     struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(KNAPPSTE_SIEGER).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(KNAPPSTE_SIEGER_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -153,7 +154,20 @@ pub fn knappsteverlierer(jahr: u32) -> content::Json<String> {
     #[allow(non_snake_case)]
     struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(KNAPPSTE_VERLIERER).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(KNAPPSTE_VERLIERER_QUERY).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+
+/// Gibt einer Liste aller Parteien bei der Landtagswahl zurück.
+#[get("/parteien")]
+pub fn parteien() -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { ID: u32, NAME: String, ABKUERZUNG: String, FARBE: Option<String> } //FIXME: one option !!!!!!!!
+
+    let result: Vec<Result> = get_db_connection().query(PARTEIEN_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 

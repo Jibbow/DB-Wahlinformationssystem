@@ -65,6 +65,7 @@ fn main() {
         routes::ueberhangmandate,
         routes::knappstesieger,
         routes::knappsteverlierer,
+        routes::parteien,
         routes::stimmverteilunggesamt,
         ]).launch();
 }

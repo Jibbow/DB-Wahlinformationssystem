@@ -20,7 +20,7 @@ class App extends Component {
           <Tab eventKey={3} title="Überblick Stimmkreise">
             <StimmkreisView/>
           </Tab>
-          <Tab eventKey={3} title="Parteien">
+          <Tab eventKey={4} title="Parteien">
             <ParteiView/>
           </Tab>
         </Tabs>
