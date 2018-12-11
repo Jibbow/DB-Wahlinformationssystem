@@ -12,6 +12,7 @@ const LANDTAGSMITGLIEDER_QUERY: &str = include_str!("../queries/wahl-landtagsmit
 const WAHLKREIS_UEBERHANGMANDATE_QUERY: &str = include_str!("../queries/wahlkreis-überhangmandate.sql");
 const STIMMKREIS_DIREKTKANDIDATENGEWINNER_QUERY: &str = include_str!("../queries/stimmkreis-direktkandidatengewinner.sql");
 const STIMMKREIS_PARTEIERGEBNIS_QUERY: &str = include_str!("../queries/stimmkreis-parteiergebnis.sql");
+const STIMMKREIS_PARTEIERGEBNIS_DIFFERENZ_QUERY: &str = include_str!("../queries/stimmkreis-parteiergebnis-differenz.sql");
 const STIMMKREIS_SIEGERPARTEI_ERSTSTIMMER_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-erststimmen.sql");
 const STIMMKREIS_SIEGERPARTEI_ZWEITSTIMME_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-zweitstimmen.sql");
 const KNAPPSTE_SIEGER_QUERY: &str = include_str!("../queries/wahl-top-10-knappste-sieger.sql");
@@ -90,6 +91,27 @@ pub fn parteiergebnis(stimmkreis: u32, jahr: u32) -> content::Json<String> {
     let query = reg.render_template(STIMMKREIS_PARTEIERGEBNIS_QUERY, &json!(
         {
             "JAHR": jahr,
+            "STIMMKREIS": stimmkreis
+        })).expect("Could not template query :(");
+
+    let result: Vec<Result> = get_db_connection().query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+
+/// [Q3.4]
+/// Gibt die prozentuale und absolute Änderung an Stimmen für jede Partei in einem Stimmkreis zurück.
+/// Die Änderung bezieht sich von 2013 auf 2018.
+#[get("/parteiergebnisdifferenz/<stimmkreis>")]
+pub fn parteiergebnisdifferenz(stimmkreis: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { PARTEI: String, DIFF_ABSOLUT: i32, DIFF_PROZENT: f32 }
+
+    let reg = Handlebars::new();
+    let query = reg.render_template(STIMMKREIS_PARTEIERGEBNIS_DIFFERENZ_QUERY, &json!(
+        {
             "STIMMKREIS": stimmkreis
         })).expect("Could not template query :(");
 

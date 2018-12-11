@@ -60,6 +60,7 @@ fn main() {
         routes::wahlbeteiligung,
         routes::direktkandidatengewinner,
         routes::parteiergebnis,
+        routes::parteiergebnisdifferenz,
         routes::siegerparteierststimmen,
         routes::siegerparteizweitstimmen,
         routes::ueberhangmandate,
