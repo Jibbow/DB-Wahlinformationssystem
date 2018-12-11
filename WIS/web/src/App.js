@@ -4,6 +4,7 @@ import './App.css';
 import LandtagView from './views/LandtagView';
 import WahlkreisView from './views/WahlkreisView';
 import StimmkreisView from './views/StimmkreisView';
+import ParteiView from './views/ParteiView';
 
 class App extends Component {
   render() {
@@ -18,6 +19,9 @@ class App extends Component {
           </Tab>
           <Tab eventKey={3} title="Überblick Stimmkreise">
             <StimmkreisView/>
+          </Tab>
+          <Tab eventKey={3} title="Parteien">
+            <ParteiView/>
           </Tab>
         </Tabs>
       </div>
