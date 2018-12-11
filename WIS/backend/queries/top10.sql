@@ -2,15 +2,15 @@ with stimmenProStimmkreis2018 as (
   select stimmkreis, id, jahr, count(*)
   from ((select p.id, z.stimmkreis, z.jahr
   	from (	select *
-  		from zweitstimmekandidat
+  		from wis.zweitstimmekandidat
   		union all
   		select *
-  		from erststimme) z
-   	join kandidat k on z.kandidat = k.id and z.jahr = k.jahr
-  	join partei p on p.id = k.partei and p.jahr = k.jahr)
+  		from wis.erststimme) z
+   	join wis.kandidat k on z.kandidat = k.id and z.jahr = k.jahr
+  	join wis.partei p on p.id = k.partei and p.jahr = k.jahr)
   union all
   (select p.parteiid as id, p.stimmkreis, p.jahr
-   	from zweitstimmepartei p))
+   	from wis.zweitstimmepartei p))
 
   group by id, stimmkreis, jahr
   order by stimmkreis, id, jahr
@@ -19,9 +19,9 @@ with stimmenProStimmkreis2018 as (
 /* zählen der gesammten abgegebenen Stimmen  */
 gesamt2018 as (
 	select *
-	from 	(select count(*) as gesamterst from erststimme where jahr=2018),
-			(select count(*) as gesamtzwei from zweitstimmekandidat where jahr=2018),
-			(select count(*) as gesamtzweitpartei from zweitstimmepartei where jahr=2018)
+	from 	(select count(*) as gesamterst from wis.erststimme where jahr=2018),
+			(select count(*) as gesamtzwei from wis.zweitstimmekandidat where jahr=2018),
+			(select count(*) as gesamtzweitpartei from wis.zweitstimmepartei where jahr=2018)
     ), gesamtStimmen2018 as (
       select gesamterst + gesamtzwei + gesamtzweitpartei as summe
       from gesamt2018
@@ -34,18 +34,18 @@ stimmenProPartei2018 as (
   		(select p.id, z.stimmkreis
   		from
   			(	select *
-  				from zweitstimmekandidat
+  				from wis.zweitstimmekandidat
   				where jahr=2018
   				union all
   				select *
-  				from erststimme
+  				from wis.erststimme
   				where jahr=2018
   			) z
-   			join kandidat k on z.kandidat = k.id
-  			join partei p on p.id = k.partei )
+   			join wis.kandidat k on z.kandidat = k.id
+  			join wis.partei p on p.id = k.partei )
   		union all
   		(select p.parteiid as id, p.stimmkreis
-   		from zweitstimmepartei p
+   		from wis.zweitstimmepartei p
    		where jahr=2018))
   group by id
   order by id
@@ -62,8 +62,8 @@ fuenfProzent2018 as (
 /* anzahl der direktstimmen für Kandidaten über der 5% Hürde */
 , direktstimmen2018 as (
 	select k.id, k.nachname, es.stimmkreis, count(*) as anzStimmen, k.jahr
-	from partei p join kandidat k on p.id = k.partei and k.jahr = p.jahr
-		join erststimme es on es.kandidat = k.id and es.jahr = k.jahr
+	from wis.partei p join wis.kandidat k on p.id = k.partei and k.jahr = p.jahr
+		join wis.erststimme es on es.kandidat = k.id and es.jahr = k.jahr
 	where p.id in (select *
 					from fuenfProzent2018)
 	group by k.id, k.nachname, es.stimmkreis, k.jahr)
@@ -71,16 +71,16 @@ fuenfProzent2018 as (
 /* join der kandidaten und parteien, die die 5% hürde geschaffen haben */
 , kandidatPartei2018 as (
 	select p.id as partei, k.id as id, k.jahr
-	from kandidat k join partei p on k.partei = p.id
+	from wis.kandidat k join wis.partei p on k.partei = p.id
 	where p.id in (select * from fuenfprozent2018)
 		and k.jahr = p.jahr)
 
 /* anzahl der erststimmen in einem wahlkreis der partei */
 , parteiErstWk2018 as(
 	select wk.nr, kp.partei
-	from wahlkreis wk
-		join stimmkreis sk on wk.nr = sk.wahlkreis
-		join erststimme es on es.stimmkreis = sk.nr and sk.jahr = es.jahr
+	from wis.wahlkreis wk
+		join wis.stimmkreis sk on wk.nr = sk.wahlkreis
+		join wis.erststimme es on es.stimmkreis = sk.nr and sk.jahr = es.jahr
 		join kandidatPartei2018 kp on kp.id = es.kandidat and es.jahr = kp.jahr
 	where sk.jahr=2018)
 
@@ -88,9 +88,9 @@ fuenfProzent2018 as (
 /* anzahl der zweitstimmen in einem wahlkreis der Partei */
 , parteiZweitWk2018 as(
 	select wk.nr, kp.partei
-	from wahlkreis wk
-		join stimmkreis sk on wk.nr = sk.wahlkreis
-		join zweitstimmekandidat z on z.stimmkreis = sk.nr
+	from wis.wahlkreis wk
+		join wis.stimmkreis sk on wk.nr = sk.wahlkreis
+		join wis.zweitstimmekandidat z on z.stimmkreis = sk.nr
 		join kandidatPartei2018 kp on kp.id = z.kandidat
 	where kp.jahr=sk.jahr
 		and z.jahr=sk.jahr
@@ -99,10 +99,10 @@ fuenfProzent2018 as (
 /* anzahl der partei zweitstimmen in einem wahlkreis */
 , parteiZweitDWk2018 as (
 	select wk.nr, p.id as partei
-	from wahlkreis wk
-		join stimmkreis sk on wk.nr = sk.wahlkreis
-		join zweitstimmepartei z on z.stimmkreis = sk.nr
-		join partei p on p.id = z.parteiid
+	from wis.wahlkreis wk
+		join wis.stimmkreis sk on wk.nr = sk.wahlkreis
+		join wis.zweitstimmepartei z on z.stimmkreis = sk.nr
+		join wis.partei p on p.id = z.parteiid
 	where p.id in (select * from fuenfprozent2018)
 		and p.jahr=sk.jahr
 		and z.jahr=p.jahr)
@@ -124,7 +124,7 @@ stimmenwk2018 as (
 /* berechnung der max. Sitze in einem Wahlkreis (Rek gibt es in Hana nicht -.- */
 , adjSitze as (
 	select ws.*, wkcnt.counter + ws.sitzzahl as adjsitze
-	from wahlkreissitze ws, wkcnt)
+	from wis.wahlkreissitze ws, wis.wkcnt)
 /* Berechnung der Sitze der Parteien im Wahlkreis basierend auf unterschied. Anzahl an Sitzen */
 , anteilParteiWk2018 as (
 	select swk.nr, pwk.partei, swk.jahr, ads.adjsitze as sitzzahl, pwk.stimmen*1.0000/swk.gstimmen as anteil,
@@ -133,7 +133,7 @@ stimmenwk2018 as (
 		to_integer(ads.adjsitze * (pwk.stimmen*1.0000/swk.gstimmen)) as rest
 	from stimmenwk2018 swk
 		join parteiWk2018 pwk on swk.nr = pwk.nr
-		join wahlkreis wk on wk.nr = swk.nr
+		join wis.wahlkreis wk on wk.nr = swk.nr
 		join adjsitze ads on wk.nr = ads.wahlkreis and swk.jahr=ads.jahr)
 /* Berechnung der offenen PLätze für die Nachkommastelle */
 , currentSitze2018 as (
@@ -165,7 +165,7 @@ stimmenwk2018 as (
 , direktGewinner2018 as (
 	select k.partei, ds1.stimmkreis, ds1.jahr, ds1.id
 	from direktstimmen2018 ds1
-		join kandidat k on k.id = ds1.id and k.jahr = ds1.jahr
+		join wis.kandidat k on k.id = ds1.id and k.jahr = ds1.jahr
 	where not exists (select *
 					  from direktstimmen2018 ds2
 					  where ds2.jahr = ds1.jahr
@@ -174,7 +174,7 @@ stimmenwk2018 as (
 , direktMandateWk2018 as (
 	select sk.wahlkreis as wk, sk.jahr, dg.partei, count(*) as anzMandate
 	from direktGewinner2018 dg
-		join stimmkreis sk on sk.jahr = dg.jahr and dg.stimmkreis = sk.nr
+		join wis.stimmkreis sk on sk.jahr = dg.jahr and dg.stimmkreis = sk.nr
 	group by sk.wahlkreis, sk.jahr, dg.partei)
 , addSitzeWk2018Erw as (
 	select ask.*, dm.anzMandate
@@ -217,7 +217,7 @@ finalAnteilParteiWk2018 as (
 		to_integer(f.sitzzahl * (pwk.stimmen*1.0000/swk.gstimmen)) as rest
 	from stimmenwk2018 swk
 		join parteiWk2018 pwk on swk.nr = pwk.nr
-		join wahlkreis wk on wk.nr = swk.nr
+		join wis.wahlkreis wk on wk.nr = swk.nr
 		join finalWkSitze2018 f on wk.nr = f.wk and swk.jahr=f.jahr)
 , finalCurrentSitze2018 as (
 	select nr as wk, sitzzahl, sum(sitzefest), sitzzahl - sum(sitzefest) as tbd
@@ -245,29 +245,29 @@ finalAnteilParteiWk2018 as (
 	from finaladdSitzeHelper2018 ash)
 , finalA1 as (
 	select partei, sum(sitzeges) as sitze, p.name
-	from finaladdSitzeWK2018 f join partei p on f.partei = p.id
+	from finaladdSitzeWK2018 f join wis.partei p on f.partei = p.id
 	group by partei, p.name
 	order by partei
 ), /* Alle Kandidaten, die kein Direktmandat gewonnen haben*/
 listeOhneDirekte2018 as (
   select *
-  from kandidat k
+  from wis.kandidat k
   where k.id not in (select dg.id
                   from direktGewinner2018 dg)
   and jahr=2018
 ), /* Anz an Erst und Zweitstimmen Pro Kandidat zusammengenommen */
 stimmenZusammen2018 as (
 		select *
-		from Erststimme
+		from wis.Erststimme
 	union all
 		select *
-		from ZweitstimmeKandidat
+		from wis.ZweitstimmeKandidat
 ), /* Zählen der Einzelstimmen */ stimmenListe2018 as (
 	select distinct sk.wahlkreis, z.kandidat, count(*) as anzStimmen, sk.jahr, lod.partei
 	from listeOhneDirekte2018 lod
 		join stimmenZusammen2018 z on lod.id = z.kandidat and lod.jahr = z.jahr
-		join stimmkreis sk on sk.nr = z.stimmkreis  and sk.jahr = z.jahr
-		join wahlkreis w on w.nr = sk.wahlkreis
+		join wis.stimmkreis sk on sk.nr = z.stimmkreis  and sk.jahr = z.jahr
+		join wis.wahlkreis w on w.nr = sk.wahlkreis
 	group by sk.wahlkreis, z.kandidat, lod.partei, lod.id, sk.jahr
 ), /* Berechnung der Position auf der Liste por Partei und Wk */
 posListe2018 as (
@@ -308,8 +308,8 @@ mandatePerListe2018 as (
 		union all
 			select dg.id
 		    from direktGewinner2018 dg) m
-	    join kandidat k on k.id = m.kandidat and k.jahr = 2018
-	    join partei p on p.id = k.partei and p.jahr = k.jahr
+	    join wis.kandidat k on k.id = m.kandidat and k.jahr = 2018
+	    join wis.partei p on p.id = k.partei and p.jahr = k.jahr
 	    order by p.abkuerzung
 ), finalA5 as (
 	select wk, partei, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
@@ -317,7 +317,7 @@ mandatePerListe2018 as (
 	 							END as uemandate,
  							w.name
 	from moreSitzeWk2018 a
-		join wahlkreis w on a.wk = w.nr
+		join wis.wahlkreis w on a.wk = w.nr
 	where not exists
 		(select *
 		from moreSitzeWk2018 b
@@ -354,8 +354,8 @@ mandatePerListe2018 as (
 ), customSort2018 as (
 	select k.id, k.jahr, diff, vKandidat, k.partei
 	from vergleichDirekt2018 v
-	join kandidat k on k.id = v.id and k.jahr = v.jahr
-	join partei p on p.id = k.partei and p.jahr = k.jahr
+	join wis.kandidat k on k.id = v.id and k.jahr = v.jahr
+	join wis.partei p on p.id = k.partei and p.jahr = k.jahr
 	order by v.jahr, partei,  case when diff > 0 then 1
 					              when diff < 0 then 2
 					         end asc,
@@ -382,8 +382,8 @@ mandatePerListe2018 as (
 ,  finalA6 as (
 	select g.*, k.nachname, k.vorname, p.abkuerzung
 	from gewVerSort2018 g
-		join kandidat k on k.id = g.id and k.jahr = g.jahr
-		join partei p on p.id = k.partei and p.jahr = k.jahr
+		join wis.kandidat k on k.id = g.id and k.jahr = g.jahr
+		join wis.partei p on p.id = k.partei and p.jahr = k.jahr
 	where pos < 10
 	order by partei, pos
 )

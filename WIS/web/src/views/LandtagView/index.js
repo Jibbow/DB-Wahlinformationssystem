@@ -54,6 +54,10 @@ export default class LandtagView extends Component {
       landtagsmitglieder: {
           data: [],
           time: 0
+      },
+      top10: {
+          data: [],
+          time: 0
       }
     };
   }
@@ -182,7 +186,7 @@ export default class LandtagView extends Component {
                 });
                 this.forceUpdate();
             });
-            fetch('http://localhost:8000/top10/2018')
+            fetch('http://localhost:8000/knappstesieger/2018')
                 .then(response => response.json())
                 .then(data => {
                     let end = performance.now();
@@ -196,6 +200,7 @@ export default class LandtagView extends Component {
                             gegner: v.VKANDIDAT
                         }
                     });
+                    console.log(this.state.top10.data);
                     this.forceUpdate();
                 });
     }

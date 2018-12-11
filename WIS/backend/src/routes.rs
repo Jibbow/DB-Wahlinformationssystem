@@ -15,7 +15,7 @@ const STIMMKREIS_PARTEIERGEBNIS_QUERY: &str = include_str!("../queries/stimmkrei
 const STIMMKREIS_PARTEIERGEBNIS_DIFFERENZ_QUERY: &str = include_str!("../queries/stimmkreis-parteiergebnis-differenz.sql");
 const STIMMKREIS_SIEGERPARTEI_ERSTSTIMMER_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-erststimmen.sql");
 const STIMMKREIS_SIEGERPARTEI_ZWEITSTIMME_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-zweitstimmen.sql");
-const KNAPPSTE_SIEGER_QUERY: &str = include_str!("../queries/top-10.sql");
+const KNAPPSTE_SIEGER_QUERY: &str = include_str!("../queries/top10.sql");
 const KNAPPSTE_VERLIERER_QUERY: &str = include_str!("../queries/wahl-top-10-knappste-verlierer.sql");
 const PARTEIEN_QUERY: &str = include_str!("../queries/wahl-parteien.sql");
 
@@ -172,7 +172,7 @@ pub fn knappstesieger(jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { ID: u32, JAHR: u32, DIFF: u32, VKANDIDAT: u32, PARTEI: u32, POS: u32, NACHNAME: String, VORNAME: String, ABKUERZUNG: String }
+    struct Result { ID: u32, JAHR: u32, DIFF: i32, VKANDIDAT: u32, PARTEI: u32, POS: u32, NACHNAME: String, VORNAME: String, ABKUERZUNG: String }
 
     let result: Vec<Result> = get_db_connection().query(KNAPPSTE_SIEGER_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
