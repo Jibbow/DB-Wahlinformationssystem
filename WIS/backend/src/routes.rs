@@ -11,7 +11,7 @@ const SITZVERTEILUNG_QUERY: &str = include_str!("../queries/wahl-sitzverteilung.
 const LANDTAGSMITGLIEDER_QUERY: &str = include_str!("../queries/wahl-landtagsmitglieder.sql");
 const WAHLKREIS_UEBERHANGMANDATE_QUERY: &str = include_str!("../queries/wahlkreis-überhangmandate.sql");
 const STIMMKREIS_DIREKTKANDIDATENGEWINNER_QUERY: &str = include_str!("../queries/stimmkreis-direktkandidatengewinner.sql");
-const STIMMKREIS_PARTEISTATISTIK_QUERY: &str = include_str!("../queries/stimmkreis-parteistatistik.sql");
+const STIMMKREIS_PARTEIERGEBNIS_QUERY: &str = include_str!("../queries/stimmkreis-parteiergebnis.sql");
 const STIMMKREIS_SIEGERPARTEI_ERSTSTIMMER_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-erststimmen.sql");
 const STIMMKREIS_SIEGERPARTEI_ZWEITSTIMME_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-zweitstimmen.sql");
 const KNAPPSTE_SIEGER_QUERY: &str = include_str!("../queries/wahl-top-10-knappste-sieger.sql");
@@ -77,17 +77,23 @@ pub fn direktkandidatengewinner(stimmkreis: u32, jahr: u32) -> content::Json<Str
 }
 
 
-/// [Q3.3 + Q3.4]
-/// Gibt die prozentuale und absolute Anzahl an Stimmen für jede Partei
-/// und deren Entwicklung verglichen mit dem Jahr 2013 pro Stimmkreis an.
-#[get("/parteistatistik/<stimmkreis>/<jahr>")]
-pub fn parteistatistik(stimmkreis: u32, jahr: u32) -> content::Json<String> {
+/// [Q3.3]
+/// Gibt die prozentuale und absolute Anzahl an Stimmen für jede Partei in einem Stimmkreis zurück.
+#[get("/parteiergebnis/<stimmkreis>/<jahr>")]
+pub fn parteiergebnis(stimmkreis: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result {  }
+    struct Result { PARTEI: String, STIMMENABSOLUT: u32, STIMMENRELATIV: f32 }
 
-    let result: Vec<Result> = get_db_connection().query(STIMMKREIS_PARTEISTATISTIK_QUERY).unwrap().try_into().unwrap();
+    let reg = Handlebars::new();
+    let query = reg.render_template(STIMMKREIS_PARTEIERGEBNIS_QUERY, &json!(
+        {
+            "JAHR": jahr,
+            "STIMMKREIS": stimmkreis
+        })).expect("Could not template query :(");
+
+    let result: Vec<Result> = get_db_connection().query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
