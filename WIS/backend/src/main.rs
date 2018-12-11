@@ -55,11 +55,17 @@ fn main() {
         .unwrap();
     let app = rocket::custom(config);
     app.attach(cors::CORS()).mount("/", routes![
-        routes::test,
-        routes::stimmverteilung,
         routes::sitzverteilung,
         routes::landtagsmitglieder,
+        routes::wahlbeteiligung,
+        routes::direktkandidatengewinner,
+        routes::parteistatistik
+        routes::siegerparteierststimmen,
+        rotues::siegerparteizweitstimmen,
         routes::ueberhangmandate,
+        routes::knappstesieger,
+        routes::knappsteverlierer,
+        routes::stimmverteilunggesamt,
         ]).launch();
 }
 
