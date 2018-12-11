@@ -10,6 +10,12 @@ use self::handlebars::{Handlebars};
 const SITZVERTEILUNG_QUERY: &str = include_str!("../queries/wahl-sitzverteilung.sql");
 const LANDTAGSMITGLIEDER_QUERY: &str = include_str!("../queries/wahl-landtagsmitglieder.sql");
 const WAHLKREIS_UEBERHANGMANDATE_QUERY: &str = include_str!("../queries/wahlkreis-überhangmandate.sql");
+const STIMMKREIS_DIREKTKANDIDATENGEWINNER_QUERY: &str = include_str!("../queries/stimmkreis-direktkandidatengewinner.sql");
+const STIMMKREIS_PARTEISTATISTIK_QUERY: &str = include_str!("../queries/stimmkreis-parteistatistik.sql");
+const STIMMKREIS_SIEGERPARTEI_ERSTSTIMMER_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-erststimmen.sql");
+const STIMMKREIS_SIEGERPARTEI_ZWEITSTIMME_QUERY: &str = include_str!("../queries/stimmkreis-siegerpartei-zweitstimmen.sql");
+const KNAPPSTE_SIEGER: &str = include_str!("../queries/wahl-top-10-knappste-sieger.sql");
+const KNAPPSTE_VERLIERER: &str = include_str!("../queries/wahl-top-10-knappste-verlierer.sql");
 
 
 
@@ -45,13 +51,7 @@ pub fn landtagsmitglieder(jahr: u32) -> content::Json<String> {
 /// Gibt die Wahlbeteiligung für einen Stimmkreis zurück.
 #[get("/wahlbeteiligung/<stimmkreis>/<jahr>")]
 pub fn wahlbeteiligung(stimmkreis: u32, jahr: u32) -> content::Json<String> {
-    // define result from DB (names must match column names!)
-    #[derive(Serialize, Deserialize)]
-    #[allow(non_snake_case)]
-    struct Result { PARTEI: String, SITZE: u32 }
-
-    let result: Vec<Result> = get_db_connection().query(...).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json("not yet implemented".to_string())
 }
 
 
@@ -62,9 +62,9 @@ pub fn direktkandidatengewinner(stimmkreis: u32, jahr: u32) -> content::Json<Str
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { PARTEI: String, SITZE: u32 }
+    struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(...).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(STIMMKREIS_DIREKTKANDIDATENGEWINNER_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -77,9 +77,9 @@ pub fn parteistatistik(stimmkreis: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { PARTEI: String, SITZE: u32 }
+    struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(...).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(STIMMKREIS_PARTEISTATISTIK_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -91,9 +91,9 @@ pub fn siegerparteierststimmen(stimmkreis: u32, jahr: u32) -> content::Json<Stri
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { PARTEI: String, SITZE: u32 }
+    struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(...).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(STIMMKREIS_SIEGERPARTEI_ERSTSTIMMER_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -105,9 +105,9 @@ pub fn siegerparteizweitstimmen(stimmkreis: u32, jahr: u32) -> content::Json<Str
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { PARTEI: String, SITZE: u32 }
+    struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(...).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(STIMMKREIS_SIEGERPARTEI_ZWEITSTIMME_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -135,9 +135,9 @@ pub fn knappstesieger(jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { WAHLKREISID: String, PARTEI: String, UEBERHANGMANDATE: u32, WAHLKREIS: String }
+    struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(WAHLKREIS_UEBERHANGMANDATE_QUERY).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(KNAPPSTE_SIEGER).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -151,9 +151,9 @@ pub fn knappsteverlierer(jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { WAHLKREISID: String, PARTEI: String, UEBERHANGMANDATE: u32, WAHLKREIS: String }
+    struct Result {  }
 
-    let result: Vec<Result> = get_db_connection().query(WAHLKREIS_UEBERHANGMANDATE_QUERY).unwrap().try_into().unwrap();
+    let result: Vec<Result> = get_db_connection().query(KNAPPSTE_VERLIERER).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 

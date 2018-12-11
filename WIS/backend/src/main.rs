@@ -59,9 +59,9 @@ fn main() {
         routes::landtagsmitglieder,
         routes::wahlbeteiligung,
         routes::direktkandidatengewinner,
-        routes::parteistatistik
+        routes::parteistatistik,
         routes::siegerparteierststimmen,
-        rotues::siegerparteizweitstimmen,
+        routes::siegerparteizweitstimmen,
         routes::ueberhangmandate,
         routes::knappstesieger,
         routes::knappsteverlierer,
