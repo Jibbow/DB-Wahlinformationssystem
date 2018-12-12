@@ -5,6 +5,7 @@ import LandtagView from './views/LandtagView';
 import WahlkreisView from './views/WahlkreisView';
 import StimmkreisView from './views/StimmkreisView';
 import ParteiView from './views/ParteiView';
+import AnalysisView from './views/AnalysisView';
 
 class App extends Component {
   render() {
@@ -22,6 +23,9 @@ class App extends Component {
           </Tab>
           <Tab eventKey={4} title="Parteien">
             <ParteiView/>
+          </Tab>
+          <Tab eventKey={5} title="Analysen">
+            <AnalysisView/>
           </Tab>
         </Tabs>
       </div>

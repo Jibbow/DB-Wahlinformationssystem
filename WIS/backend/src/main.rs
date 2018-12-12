@@ -68,6 +68,8 @@ fn main() {
         routes::knappsteverlierer,
         routes::parteien,
         routes::stimmverteilunggesamt,
+        routes::analysen_csu_sterberate,
+        routes::analysen_fdp_einkommen,
         ]).launch();
 }
 

@@ -18,6 +18,8 @@ const STIMMKREIS_SIEGERPARTEI_ZWEITSTIMME_QUERY: &str = include_str!("../queries
 const KNAPPSTE_SIEGER_QUERY: &str = include_str!("../queries/top10.sql");
 const KNAPPSTE_VERLIERER_QUERY: &str = include_str!("../queries/wahl-top-10-knappste-verlierer.sql");
 const PARTEIEN_QUERY: &str = include_str!("../queries/wahl-parteien.sql");
+const ANALYSIS_CSU_AGE_QUERY: &str = include_str!("../queries/analysis-csu-age.sql");
+const ANALYSIS_FDP_INCOME_QUERY: &str = include_str!("../queries/analysis-fdp-income.sql");
 
 
 
@@ -206,6 +208,34 @@ pub fn parteien() -> content::Json<String> {
     let result: Vec<Result> = get_db_connection().query(PARTEIEN_QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
+
+
+/// Vergleicht die Sterberate mit der Prozentualen Anzahl der CSU-Wähler
+#[get("/analysen/csu-sterberate")]
+pub fn analysen_csu_sterberate() -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { PROZENT: f32, PARTEI: String, STERBERATE: f32 }
+
+    let result: Vec<Result> = get_db_connection().query(ANALYSIS_CSU_AGE_QUERY).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+
+/// Vergleicht das Durchschnittseinkommen mit der Prozentualen Anzahl der FDP-Wähler
+#[get("/analysen/fdp-einkommen")]
+pub fn analysen_fdp_einkommen() -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Result { PROZENT: f32, PARTEI: String, EINKOMMEN: u32 }
+
+    let result: Vec<Result> = get_db_connection().query(ANALYSIS_FDP_INCOME_QUERY).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+
 
 
 // MOCK!!!!!!!
