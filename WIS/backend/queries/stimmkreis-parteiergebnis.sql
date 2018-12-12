@@ -17,6 +17,11 @@ FROM (
 ) GROUP BY STIMMKREIS, JAHR, PARTEI),
 
 
+/*
+ * Errechnet für jede Partei die Gesamtzahl der Stimmen für einen Stimmkreis in einem Jahr.
+ * Dabei werden Erst- und Zweitstimmen für eine Partei addiert.
+ * JAHR, STIMMKREIS, PARTEI, STIMMEN
+ */
 GESAMTSTIMMENPARTEI AS (
 SELECT JAHR, STIMMKREIS, PARTEI, SUM(STIMMEN) AS STIMMEN
 FROM (
@@ -27,15 +32,29 @@ FROM (
     FROM AGGREGATPARTEISTIMMEN PS
 ) GROUP BY PARTEI, JAHR, STIMMKREIS),
 
+/*
+ * Errechnet die Gesamtzahl an abgegebenen Stimmen für einen Stimmkreis in einem Jahr.
+ * Dabei zählen sowohl Erst- als auch Zweitstimmen in das Ergebnis mit ein.
+ * JAHR, STIMMKREIS, STIMMEN
+ */
 STIMMKREISGESAMTSTIMMEN AS (
 SELECT JAHR, STIMMKREIS, SUM(STIMMEN) AS STIMMEN
 FROM GESAMTSTIMMENPARTEI
 GROUP BY JAHR, STIMMKREIS),
 
+/*
+ * Berechnet für jede Partei die absolute Anzahl an Stimmen und die Verteilung der Stimmen
+ * auf die einzelnen Parteien pro Stimmkreis in einem Wahljahr.
+ * JAHR, STIMMKREIS, PARTEI, STIMMENABSOLUT, STIMMENRELATIV
+ */
 STATISTIK AS (
 SELECT P.JAHR AS JAHR, P.STIMMKREIS AS STIMMKREIS, PARTEI, P.STIMMEN AS STIMMENABSOLUT, P.STIMMEN * 100 / GS.STIMMEN AS STIMMENRELATIV
 FROM GESAMTSTIMMENPARTEI P JOIN STIMMKREISGESAMTSTIMMEN GS ON P.JAHR=GS.JAHR AND P.STIMMKREIS=GS.STIMMKREIS)
 
+/*
+ * Gibt das Ergebnis von STATISTIK mit sinnvollen Feldern aus und ersetzt IDs durch Namen.
+ * PARTEI(Kürzel), STIMMENABSOLUT, STIMMENRELATIV
+ */
 SELECT P.ABKUERZUNG AS PARTEI, STIMMENABSOLUT, STIMMENRELATIV
 FROM STATISTIK S JOIN WIS.PARTEI P
 ON S.PARTEI=P.ID
