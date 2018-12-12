@@ -2,7 +2,6 @@ extern crate serde;
 extern crate serde_json;
 extern crate handlebars;
 
-use super::get_db_connection;
 use rocket::response::content;
 use self::handlebars::{Handlebars};
 
@@ -22,7 +21,9 @@ const ANALYSIS_CSU_AGE_QUERY: &str = include_str!("../queries/analysis-csu-age.s
 const ANALYSIS_FDP_INCOME_QUERY: &str = include_str!("../queries/analysis-fdp-income.sql");
 
 
-
+pub fn get_db_connection() -> r2d2::PooledConnection<hdbconnect::ConnectionManager> {
+    super::CONNECTION_POOL.get().unwrap()
+}
 
 /// [Q1]
 /// Gibt die Sitzverteilung aller Parteien im Landtag zurück.
