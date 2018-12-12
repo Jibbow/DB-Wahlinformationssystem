@@ -25,7 +25,7 @@ export default class ParteiView extends Component {
           </DropdownButton>
 
           <h2>Knappste Gewinner</h2>
-
+                siehe Landtagswahl-Tab ganz links
           <h2>Knappste Verlierer</h2>
         </div>
       </div>
