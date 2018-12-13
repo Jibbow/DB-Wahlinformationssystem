@@ -6,6 +6,7 @@ use self::handlebars::Handlebars;
 use rocket::response::content;
 use rocket::State;
 
+
 // load sql queries during compile time
 const SITZVERTEILUNG: &str = include_str!("../queries/sitzverteilung.sql");
 const LANDTAGSMITGLIEDER: &str = include_str!("../queries/landtagsmitglieder.sql");
@@ -20,6 +21,10 @@ const KNAPPSTE_VERLIERER: &str = include_str!("../queries/top-10-knappste-verlie
 const PARTEIEN: &str = include_str!("../queries/parteien.sql");
 const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
 const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysis-fdp-income.sql");
+
+
+
+
 
 /// [Q1]
 /// Gibt die Sitzverteilung aller Parteien im Landtag zurück.
