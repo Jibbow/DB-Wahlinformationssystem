@@ -38,13 +38,16 @@ const TEST_QUERY: &str = include_str!("../queries/test.sql");
 Create a new route ([documentation](https://github.com/SergioBenitez/Rocket)) in `routes.rs`:
 ```rust
 #[get("/test")]
-pub fn test() -> content::Json<String> {
+pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct Result { SITZZAHL: u32, NAME: String, NR: u32 }
+    struct QueryResult {
+        ...
+    }
 
-    let result: Vec<Result> = get_db_connection().query(TEST_QUERY).unwrap().try_into().unwrap();
+    let result: Vec<QueryResult> = db.get().unwrap()
+        .query(QUERY).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 ```
