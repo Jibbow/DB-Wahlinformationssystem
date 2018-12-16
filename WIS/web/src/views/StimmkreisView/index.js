@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Bar } from 'react-chartjs-2';
-import bayern_map from '../../assets/Bayern_Landtagswahlkreise_2018.svg';
+import BayernMap from '../../components/BayernMap';
 
 export default class StimmkreisView extends Component {
   constructor(props) {
@@ -47,19 +47,19 @@ export default class StimmkreisView extends Component {
 
   render() {
     return (
-      <div class="row">
-        <div class="col-xs-6">
-          <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
+      <div className="row">
+        <div className="col-xs-6">
+          <BayernMap onClick={x => console.log(x)}/>
         </div>
-        <div class="col-xs-6">
+        <div className="col-xs-6">
           <h2>Stimmkreis {this.state.stimmkreis}</h2>
           <h3>Gewählter Direktkandidat: {this.state.gewinner.VORNAME + ' ' + this.state.gewinner.NACHNAME + ' ' + this.state.gewinner.PARTEI}</h3>
-          {this.state.gewinner.time !== 0 && <small class="text-muted">Took {this.state.gewinner.time} milliseconds</small>}
+          {this.state.gewinner.time !== 0 && <small className="text-muted">Took {this.state.gewinner.time} milliseconds</small>}
           <h3>Verteilung der Stimmen</h3>
-          {this.state.parteiergebnis.time !== 0 && <small class="text-muted">Took {this.state.parteiergebnis.time} milliseconds</small>}
+          {this.state.parteiergebnis.time !== 0 && <small className="text-muted">Took {this.state.parteiergebnis.time} milliseconds</small>}
           <Bar width={400} data={this.state.parteiergebnis.data} options={this.state.parteiergebnis.options} />
           <h3>Prozentuale Änderung der Stimmen im Vergleich zu 2013</h3>
-          {this.state.parteiergebnisdifferenz.time !== 0 && <small class="text-muted">Took {this.state.parteiergebnisdifferenz.time} milliseconds</small>}
+          {this.state.parteiergebnisdifferenz.time !== 0 && <small className="text-muted">Took {this.state.parteiergebnisdifferenz.time} milliseconds</small>}
           <Bar width={400} data={this.state.parteiergebnisdifferenz.data} options={this.state.parteiergebnisdifferenz.options} />
         </div>
       </div>
