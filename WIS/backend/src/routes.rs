@@ -253,14 +253,7 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr
 /// Abstand gegenüber ihren Konkurrenten verloren haben.
 #[get("/knappsteverlierer/<jahr>")]
 pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
-    // define result from DB (names must match column names!)
-    #[derive(Serialize, Deserialize)]
-    #[allow(non_snake_case)]
-    struct QueryResult {}
-
-    let result: Vec<QueryResult> = db.get().unwrap()
-        .query(KNAPPSTE_VERLIERER).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json("not yet implemented".to_string())
 }
 
 /// Gibt einer Liste aller Parteien bei der Landtagswahl zurück.
