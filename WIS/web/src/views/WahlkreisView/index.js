@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import bayern_map from '../../assets/Bayern_Landtagswahlkreise_2018.svg';
+import BayernMap from '../../components/BayernMap';
 
 
 export default class WahlkreisView extends Component {
@@ -22,7 +22,7 @@ export default class WahlkreisView extends Component {
         return (
             <div class="row">
                 <div class="col-xs-6">
-                    <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
+                    <BayernMap mode={'wk'} onClick={x => console.log(x)}/>
                 </div>
                 <div class="col-xs-6">
                     <h2>Überhangmandate</h2>

@@ -11,6 +11,7 @@ export default class BayernMap extends Component {
   constructor(props) {
     super(props);
     this.setUpSVG = this.setUpSVG.bind(this);
+    this.mapcanvas = React.createRef(); // can't ref directly on SVG...
 
     this.state = {
       selectedElement: null,
@@ -18,11 +19,15 @@ export default class BayernMap extends Component {
   }
 
   render() {
-    return <BayernMapSVG id={'bayernmapsvg'} />;
+    return (
+      <div ref={this.mapcanvas}>
+        <BayernMapSVG />
+      </div>
+    );
   }
 
   componentDidMount() {
-    let map = document.getElementById('bayernmapsvg');
+    let map = this.mapcanvas.current.children[0];
     this.setUpSVG(map);
   }
 

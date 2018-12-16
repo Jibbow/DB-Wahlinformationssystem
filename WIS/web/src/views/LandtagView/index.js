@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { Button, Collapse } from 'react-bootstrap'
-import bayern_map from '../../assets/Bayern_Landtagswahlkreise_2018.svg';
+import BayernMap from '../../components/BayernMap';
 
 
 export default class LandtagView extends Component {
@@ -66,7 +66,7 @@ export default class LandtagView extends Component {
         return (
             <div class="row">
                 <div class="col-xs-6">
-                    <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
+                    <BayernMap mode={'none'} onClick={x => console.log(x)}/>
                 </div>
                 <div class="col-xs-6">
                     <h2>Sitzverteilung im Landtag</h2>

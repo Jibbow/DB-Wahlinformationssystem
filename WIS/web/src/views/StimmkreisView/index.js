@@ -49,7 +49,7 @@ export default class StimmkreisView extends Component {
     return (
       <div className="row">
         <div className="col-xs-6">
-          <BayernMap mode={'wk'} onClick={x => console.log(x)}/>
+          <BayernMap mode={'sk'} onClick={x => console.log(x)}/>
         </div>
         <div className="col-xs-6">
           <h2>Stimmkreis {this.state.stimmkreis}</h2>
