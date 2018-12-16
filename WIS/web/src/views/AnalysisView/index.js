@@ -10,7 +10,7 @@ export default class AnalysisView extends Component {
         data: {
           datasets: [
             {
-              data: [0,0],
+              data: [0, 0],
               backgroundColor: ['#3e95cd'],
             },
           ],
@@ -23,7 +23,7 @@ export default class AnalysisView extends Component {
         data: {
           datasets: [
             {
-              data: [0,0],
+              data: [0, 0],
               backgroundColor: ['#3e95cd'],
             },
           ],
@@ -54,11 +54,11 @@ export default class AnalysisView extends Component {
         let end = performance.now();
         this.state.fdp_einkommen.time = end - start;
         this.state.fdp_einkommen.data.datasets[0].data = data.map(v => {
-            return {
-              x: v.EINKOMMEN,
-              y: v.PROZENT,
-            };
-          });
+          return {
+            x: v.EINKOMMEN,
+            y: v.PROZENT,
+          };
+        });
         this.forceUpdate();
       });
     fetch('http://localhost:8000//analysen/csu-sterberate')
@@ -67,11 +67,11 @@ export default class AnalysisView extends Component {
         let end = performance.now();
         this.state.csu_sterberate.time = end - start;
         this.state.csu_sterberate.data.datasets[0].data = data.map(v => {
-            return {
-              x: v.STERBERATE,
-              y: v.PROZENT,
-            };
-          });
+          return {
+            x: v.STERBERATE,
+            y: v.PROZENT,
+          };
+        });
         this.forceUpdate();
       });
   }
