@@ -55,7 +55,7 @@ export default class StimmkreisView extends Component {
           {this.state.stimmkreis !== 0 && (
             <div>
               <h2>Stimmkreis {this.state.stimmkreis}</h2>
-              <h3>Gewählter Direktkandidat: {this.state.gewinner.VORNAME + ' ' + this.state.gewinner.NACHNAME + ' ' + this.state.gewinner.PARTEI}</h3>
+              <h3>Gewählter Direktkandidat: {this.state.gewinner.VORNAME + ' ' + this.state.gewinner.NACHNAME + ' (' + this.state.gewinner.PARTEI + ')'}</h3>
               {this.state.gewinner.time !== 0 && <small className="text-muted">Took {this.state.gewinner.time} milliseconds</small>}
               <h3>Verteilung der Stimmen</h3>
               {this.state.parteiergebnis.time !== 0 && <small className="text-muted">Took {this.state.parteiergebnis.time} milliseconds</small>}
@@ -64,7 +64,7 @@ export default class StimmkreisView extends Component {
               {this.state.parteiergebnisdifferenz.time !== 0 && <small className="text-muted">Took {this.state.parteiergebnisdifferenz.time} milliseconds</small>}
               <Bar width={400} data={this.state.parteiergebnisdifferenz.data} options={this.state.parteiergebnisdifferenz.options} />
             </div>
-          )}
+          ) || <p>Wählen Sie links auf der Karte einen Stimmkreis</p>}
         </div>
       </div>
     );
