@@ -157,10 +157,22 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
-    struct QueryResult {}
+    struct QueryResult {
+        PARTEI: String,
+        ANZAHLERSTSTIMMEN: u32,
+    }
+
+    let reg = Handlebars::new();
+    let query = reg.render_template(
+        SIEGERPARTEI_ERSTSTIMME,
+        &json!(
+        {
+            "JAHR": jahr,
+            "STIMMKREIS": stimmkreis
+        })).expect("Could not template query :(");
 
     let result: Vec<QueryResult> = db.get().unwrap()
-        .query(SIEGERPARTEI_ERSTSTIMME).unwrap().try_into().unwrap();
+        .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
