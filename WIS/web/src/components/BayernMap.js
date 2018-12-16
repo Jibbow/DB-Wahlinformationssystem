@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import { ReactComponent as BayernMapSVG } from '../assets/Bayern_Landtagswahlkreise_2018.svg';
 
+/**
+ * Required props:
+ *  - onClick: handler for handling click events on either Wahlkreise or Stimmkreise.
+ *    Has the ID of the Stimmkreis or Wahlkreis as an argument.
+ *  - mode: can either be 'wk' for selecting Wahlkreise or 'sk' for selecting Stimmkreise.
+ */
 export default class BayernMap extends Component {
   constructor(props) {
     super(props);
@@ -42,25 +48,28 @@ export default class BayernMap extends Component {
       this.state.selectedElement.setAttribute('fill', '#09b6bf');
 
       // trigger callback
-      this.props.onClick(this.state.selectedElement.getAttribute('sk'));
+      this.props.onClick(this.state.selectedElement.getAttribute(this.props.mode));
     };
     let svgMouseOverListener = e => {
-      if(e.target !== this.state.selectedElement) {
+      if (e.target !== this.state.selectedElement) {
         e.target.setAttribute('fill', '#93dee2');
       }
     };
     let svgMouseOutListener = e => {
-      if(e.target !== this.state.selectedElement) {
+      if (e.target !== this.state.selectedElement) {
         e.target.setAttribute('fill', '#ffffff');
       }
     };
 
     visitChildren(svg.children, x => {
-      if (x.getAttribute('sk')) {
+      if (x.getAttribute(this.props.mode)) {
         x.setAttribute('fill', '#ffffff'); // make it clickable
         x.onclick = svgClickListener;
         x.onmouseover = svgMouseOverListener;
         x.onmouseout = svgMouseOutListener;
+      } else {
+        // make everything else including labels 'invisible' for mouse events
+        x.style['pointer-events'] = 'none';
       }
     });
   }
