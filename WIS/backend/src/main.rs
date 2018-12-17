@@ -20,12 +20,7 @@ fn main() {
     dotenv::dotenv().ok();
 
     // start webserver
-    let config = rocket::config::Config::build(rocket::config::Environment::Production)
-        .address("0.0.0.0")
-        .port(8000)
-        .unwrap();
-    let app = rocket::custom(config);
-    app.attach(cors::CORS())
+    rocket::ignite().attach(cors::CORS())
         .manage(create_connection_pool())
         .mount(
             "/",
