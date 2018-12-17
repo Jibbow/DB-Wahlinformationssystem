@@ -4,13 +4,12 @@
 extern crate dotenv;
 extern crate hdbconnect;
 extern crate r2d2;
+extern crate serde_json;
 
 #[macro_use]
 extern crate rocket;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
-extern crate serde_json;
 
 mod cors;
 mod routes;
