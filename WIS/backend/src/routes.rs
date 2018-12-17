@@ -1,8 +1,6 @@
-extern crate handlebars;
 extern crate serde;
 extern crate serde_json;
 
-use self::handlebars::Handlebars;
 use rocket::response::content;
 use rocket::State;
 
@@ -82,14 +80,9 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         PARTEI: String,
     }
 
-    let reg = Handlebars::new();
-    let query = reg.render_template(
-        DIREKTKANDIDATENGEWINNER,
-        &json!(
-        {
-            "JAHR": jahr,
-            "STIMMKREIS": stimmkreis
-        })).expect("Could not template query :(");
+    let query = DIREKTKANDIDATENGEWINNER
+        .replace("{{JAHR}}", &jahr.to_string())
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
     let result: Vec<QueryResult> = db.get().unwrap()
         .query(&query).unwrap().try_into().unwrap();
@@ -109,14 +102,9 @@ pub fn parteiergebnis(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stim
         STIMMENRELATIV: f32,
     }
 
-    let reg = Handlebars::new();
-    let query = reg.render_template(
-        PARTEIERGEBNIS,
-        &json!(
-        {
-            "JAHR": jahr,
-            "STIMMKREIS": stimmkreis
-        })).expect("Could not template query :(");
+    let query = PARTEIERGEBNIS
+        .replace("{{JAHR}}", &jahr.to_string())
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
     let result: Vec<QueryResult> = db.get().unwrap()
         .query(&query).unwrap().try_into().unwrap();
@@ -137,13 +125,8 @@ pub fn parteiergebnisdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManage
         DIFF_PROZENT: f32,
     }
 
-    let reg = Handlebars::new();
-    let query = reg.render_template(
-        PARTEIERGEBNIS_DIFF,
-        &json!(
-        {
-            "STIMMKREIS": stimmkreis 
-        })).expect("Could not template query :(");
+    let query = PARTEIERGEBNIS_DIFF
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
     let result: Vec<QueryResult> = db.get().unwrap()
         .query(&query).unwrap().try_into().unwrap();
@@ -162,14 +145,9 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
         ANZAHLERSTSTIMMEN: u32,
     }
 
-    let reg = Handlebars::new();
-    let query = reg.render_template(
-        SIEGERPARTEI_ERSTSTIMME,
-        &json!(
-        {
-            "JAHR": jahr,
-            "STIMMKREIS": stimmkreis
-        })).expect("Could not template query :(");
+    let query = SIEGERPARTEI_ERSTSTIMME
+        .replace("{{JAHR}}", &jahr.to_string())
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
     let result: Vec<QueryResult> = db.get().unwrap()
         .query(&query).unwrap().try_into().unwrap();
@@ -188,14 +166,9 @@ pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         ANZAHLZWEITSTIMMEN: u32,
     }
 
-    let reg = Handlebars::new();
-    let query = reg.render_template(
-        SIEGERPARTEI_ZWEITSTIMME,
-        &json!(
-        {
-            "JAHR": jahr,
-            "STIMMKREIS": stimmkreis
-        })).expect("Could not template query :(");
+    let query = SIEGERPARTEI_ZWEITSTIMME
+        .replace("{{JAHR}}", &jahr.to_string())
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
     let result: Vec<QueryResult> = db.get().unwrap()
         .query(&query).unwrap().try_into().unwrap();
