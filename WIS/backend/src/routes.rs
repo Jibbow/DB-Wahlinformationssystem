@@ -36,7 +36,7 @@ pub fn sitzverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr
         SITZE: u32,
     }
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(SITZVERTEILUNG).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -54,7 +54,7 @@ pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, 
         PARTEI: String,
     }
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(LANDTAGSMITGLIEDER).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -84,7 +84,7 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         .replace("{{JAHR}}", &jahr.to_string())
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -106,7 +106,7 @@ pub fn parteiergebnis(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stim
         .replace("{{JAHR}}", &jahr.to_string())
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -128,7 +128,7 @@ pub fn parteiergebnisdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManage
     let query = PARTEIERGEBNIS_DIFF
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -149,7 +149,7 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
         .replace("{{JAHR}}", &jahr.to_string())
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -170,7 +170,7 @@ pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         .replace("{{JAHR}}", &jahr.to_string())
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -189,7 +189,7 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, ja
         WAHLKREIS: String,
     }
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(UEBERHANGMANDATE).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -215,7 +215,7 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr
         ABKUERZUNG: String,
     }
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(KNAPPSTE_SIEGER).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -242,7 +242,7 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
         FARBE: Option<String>,
     } //FIXME: ohne option !!!!!!!!
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(PARTEIEN).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -259,7 +259,7 @@ pub fn analysen_csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManage
         STERBERATE: f32,
     }
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(ANALYSIS_CSU_AGE).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
@@ -276,7 +276,7 @@ pub fn analysen_fdp_einkommen(db: State<r2d2::Pool<hdbconnect::ConnectionManager
         EINKOMMEN: u32,
     }
 
-    let result: Vec<QueryResult> = db.get().unwrap()
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(ANALYSIS_FDP_INCOME).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
