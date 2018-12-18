@@ -21,6 +21,7 @@ fn main() {
     // start webserver
     rocket::ignite().attach(cors::CORS())
         .manage(create_connection_pool())
+        .mount("/hello", routes![hello])
         .mount(
             "/",
             routes![
@@ -44,18 +45,25 @@ fn main() {
         .launch();
 }
 
+/// This route may be used for latency/performance testing or for health checks
+#[get("/")]
+pub fn hello() -> String {
+    "Hi!".to_string()
+}
+
 /// Creates a new connection pool to SAP HANA based on the configuration
 /// given by according environment variables.
 fn create_connection_pool() -> r2d2::Pool<hdbconnect::ConnectionManager> {
-    let database_url = std::env::var("DATABASE_URL").expect("Please provide DATABASE_URL env var");
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("Please provide DATABASE_URL env var");
     let database_port = std::env::var("DATABASE_PORT")
         .expect("Please provide DATABASE_PORT env var")
         .parse::<u16>()
         .expect("Unable to parse DATABASE_PORT");
-    let database_user =
-        std::env::var("DATABASE_USER").expect("Please provide DATABASE_USER env var");
-    let database_password =
-        std::env::var("DATABASE_PASSWORD").expect("Please provide DATABASE_PASSWORD env var");
+    let database_user = std::env::var("DATABASE_USER")
+        .expect("Please provide DATABASE_USER env var");
+    let database_password = std::env::var("DATABASE_PASSWORD")
+        .expect("Please provide DATABASE_PASSWORD env var");
 
     let db_connection_params = hdbconnect::ConnectParams::builder()
         .hostname(database_url)
