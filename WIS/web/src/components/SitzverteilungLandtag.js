@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { Table } from 'react-bootstrap';
+import { BeatLoader } from 'react-spinners';
 
 export default class SitzverteilungLandtag extends Component {
   constructor(props) {
@@ -19,7 +21,7 @@ export default class SitzverteilungLandtag extends Component {
     if (this.state.isLoaded) {
       return (
         <div>
-          <small class="text-muted">Took {this.state.time} milliseconds</small>
+          <small className="text-muted">Took {this.state.time} milliseconds</small>
           <Doughnut
             width={500}
             options={this.state.chartoptions}
@@ -33,7 +35,7 @@ export default class SitzverteilungLandtag extends Component {
               labels: this.state.sitzverteilung.map(v => v.PARTEI),
             }}
           />
-          <table class="table">
+          <Table striped={true}>
             <thead>
               <tr>
                 <th scope="col">Partei</th>
@@ -48,13 +50,15 @@ export default class SitzverteilungLandtag extends Component {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       );
     } else {
       return (
         <div>
-          <small class="text-muted">Waiting for results...</small>
+          <div className="spinner">
+            <BeatLoader color={'#93dee2'} />
+          </div>
         </div>
       );
     }

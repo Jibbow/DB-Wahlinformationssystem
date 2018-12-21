@@ -10,8 +10,8 @@ import AnalysisView from './views/AnalysisView';
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <Tabs defaultActiveKey={1} id="uncontrolled-tab-example">
+      <div className="app">
+        <Tabs mountOnEnter={true} defaultActiveKey={1} id="uncontrolled-tab-example">
           <Tab eventKey={1} title="Überblick Landtagswahl">
             <LandtagView/>
           </Tab>
