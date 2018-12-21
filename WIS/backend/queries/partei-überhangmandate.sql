@@ -300,10 +300,11 @@ finalAnteilParteiWk2018 as (
 	    join wis.partei p on p.id = k.partei and p.jahr = k.jahr
 	    order by p.abkuerzung
 ), finalA5 as (	
-	select wk as WAHLKREISID, p.abkuerzung as PARTEI, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
+	select wk as WAHLKREISID, p.id as PARTEI, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
 	     							  ELSE (anzmandate - sitzeges) 
 	 							END as UEBERHANGMANDATE, 
- 							w.name as WAHLKREIS
+ 							w.name as WAHLKREIS,
+							 a.jahr as JAHR
 	from moreSitzeWk2018 a
 		join wis.wahlkreis w on a.wk = w.nr
 		join wis.partei p on p.id=a.partei
@@ -316,5 +317,5 @@ finalAnteilParteiWk2018 as (
 		and b.sitzzahl < a.sitzzahl)
 	order by wk, p.abkuerzung)
 	
-select *
-from finalA5 f
+select UEBERHANGMANDATE
+from finalA5 f where wahlkreisid={{WAHLKREIS}} and partei={{PARTEI}} and jahr={{JAHR}}

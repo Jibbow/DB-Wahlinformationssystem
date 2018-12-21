@@ -108,7 +108,7 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q3.3]
@@ -143,7 +143,7 @@ pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManag
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
-        DIFF_ABSOLUT: i32,
+        DIFF_GESAMTSTIMMEN: i32,
         DIFF_PROZENT: f32,
     }
 
@@ -156,7 +156,7 @@ pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManag
 }
 
 /// [Q4 Teil 1]
-/// Gibt die Siegerparteien über die Erststimmen für einen Stimmkreis zurück.
+/// Gibt die Siegerpartei über die Erststimmen für einen Stimmkreis zurück.
 #[get("/siegerpartei/erststimmen/<stimmkreis>/<jahr>")]
 pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
@@ -173,11 +173,11 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q4 Teil 2]
-/// Gibt die Siegerparteien über die Zweitstimmen für einen Stimmkreis zurück.
+/// Gibt die Siegerpartei über die Zweitstimmen für einen Stimmkreis zurück.
 #[get("/siegerpartei/zweitstimmen/<stimmkreis>/<jahr>")]
 pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
@@ -194,11 +194,11 @@ pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManag
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q5]
-/// Gibt für jeden Wahlkreis die Überhangmandate pro Partei zurück.
+/// Gibt für einen Wahlkreis und eine Partei die Anzahl der Überhangmandate zurück.
 #[get("/ueberhangmandate/<wahlkreis>/<partei>/<jahr>")]
 pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wahlkreis: u32, partei: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
@@ -215,7 +215,7 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q6 Teil 1]
@@ -233,7 +233,7 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, part
         NACHNAME: String,
         PLATZIERUNG: u32,
         DIFFERENZ: i32,
-        // ?? VKANDIDAT: u32,
+        RIVALE: u32,
     }
 
     let query = KNAPPSTE_SIEGER
@@ -260,6 +260,7 @@ pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, p
         NACHNAME: String,
         PLATZIERUNG: u32,
         DIFFERENZ: i32,
+        RIVALE: u32,
     }
 
     let query = KNAPPSTE_VERLIERER
@@ -271,7 +272,7 @@ pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, p
     content::Json("not yet implemented".to_string()) // TODO
 }
 
-/// Gibt einer Liste aller Parteien bei der Landtagswahl zurück.
+/// Gibt eine Liste aller Parteien bei der Landtagswahl zurück.
 #[get("/parteien")]
 pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
     // define result from DB (names must match column names!)

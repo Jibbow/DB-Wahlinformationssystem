@@ -388,5 +388,5 @@ mandatePerListe2018 as (
 	order by partei, pos
 )
 
-select *
-from finalA6
+select ID, VORNAME, NACHNAME, POS AS PLATZIERUNG, DIFF AS DIFFERENZ, VKANDIDAT AS RIVALE
+from finalA6 where partei={{PARTEI}} and jahr={{JAHR}}

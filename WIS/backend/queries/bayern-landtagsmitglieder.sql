@@ -289,7 +289,7 @@ finalAnteilParteiWk2018 as (
 	from posListeCase2018 p
 	where p.pos <= p.sitzeges - p.anzmandate)
 , finalA2 as (	
-	select VORNAME, NACHNAME, abkuerzung as PARTEI
+	select k.ID, VORNAME, NACHNAME, abkuerzung as PARTEI
 	from (
 			select m.kandidat
 			from mandatePerListe2018 m
