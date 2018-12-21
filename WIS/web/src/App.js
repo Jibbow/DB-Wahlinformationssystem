@@ -6,11 +6,14 @@ import WahlkreisView from './views/WahlkreisView';
 import StimmkreisView from './views/StimmkreisView';
 import ParteiView from './views/ParteiView';
 import AnalysisView from './views/AnalysisView';
+import { VoteButton } from './views/VoteView';
 
 class App extends Component {
   render() {
     return (
       <div className="app">
+        <VoteButton/>
+
         <Tabs mountOnEnter={true} defaultActiveKey={1} id="uncontrolled-tab-example">
           <Tab eventKey={1} title="Überblick Landtagswahl">
             <LandtagView/>
