@@ -13,6 +13,9 @@ export default class SitzverteilungLandtag extends Component {
       chartoptions: {
         rotation: 1 * Math.PI,
         circumference: 1 * Math.PI,
+        legend: {
+          position: 'right',
+        },
       },
     };
   }
@@ -22,19 +25,21 @@ export default class SitzverteilungLandtag extends Component {
       return (
         <div>
           <small className="text-muted">Took {this.state.time} milliseconds</small>
-          <Doughnut
-            width={500}
-            options={this.state.chartoptions}
-            data={{
-              datasets: [
-                {
-                  data: this.state.sitzverteilung.map(v => v.SITZE),
-                  backgroundColor: this.state.sitzverteilung.map(v => '#3e95cd'),
-                },
-              ],
-              labels: this.state.sitzverteilung.map(v => v.PARTEI),
-            }}
-          />
+          <div className="chart">
+            <Doughnut
+              className="chart"
+              options={this.state.chartoptions}
+              data={{
+                datasets: [
+                  {
+                    data: this.state.sitzverteilung.map(v => v.SITZE),
+                    backgroundColor: this.state.sitzverteilung.map(v => '#3e95cd'),
+                  },
+                ],
+                labels: this.state.sitzverteilung.map(v => v.PARTEI),
+              }}
+            />
+          </div>
           <Table striped={true}>
             <thead>
               <tr>
