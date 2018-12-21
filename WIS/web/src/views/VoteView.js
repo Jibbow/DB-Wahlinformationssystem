@@ -15,7 +15,7 @@ export class VoteButton extends Component {
 
   render() {
     return (
-      <div>
+      <div className={this.props.className}>
         <Button bsSize="large" bsStyle="primary" onClick={this.handleShow}>
           Meine Stimme abgeben
         </Button>
