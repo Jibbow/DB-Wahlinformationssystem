@@ -14,6 +14,8 @@ extern crate serde_derive;
 mod cors;
 mod routes;
 
+
+
 fn main() {
     // get configuration for database connection from environment or .env file
     dotenv::dotenv().ok();
@@ -29,8 +31,8 @@ fn main() {
                 routes::landtagsmitglieder,
                 routes::wahlbeteiligung,
                 routes::direktkandidatengewinner,
-                routes::parteiergebnis,
-                routes::parteiergebnisdifferenz,
+                routes::stimmverteilung,
+                routes::stimmverteilungdifferenz,
                 routes::siegerparteierststimmen,
                 routes::siegerparteizweitstimmen,
                 routes::ueberhangmandate,
@@ -45,11 +47,13 @@ fn main() {
         .launch();
 }
 
+
 /// This route may be used for latency/performance testing or for health checks
 #[get("/")]
 pub fn hello() -> String {
     "Hi!".to_string()
 }
+
 
 /// Creates a new connection pool to SAP HANA based on the configuration
 /// given by according environment variables.
