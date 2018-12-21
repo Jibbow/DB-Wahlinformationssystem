@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { Button, Collapse } from 'react-bootstrap';
-import BayernMap from '../../components/BayernMap';
-import Sitzverteilung from './Sitzverteilung';
+import BayernMap from '../components/BayernMap';
+import SitzverteilungLandtag from '../components/SitzverteilungLandtag';
 
 export default class LandtagView extends Component {
   constructor(props) {
@@ -46,7 +46,7 @@ export default class LandtagView extends Component {
         </div>
         <div class="col-xs-6">
           <h2>Sitzverteilung im Landtag</h2>
-          <Sitzverteilung/>
+          <SitzverteilungLandtag/>
           
 
           <h2>Ergebnisse der Parteien im Vergleich</h2>

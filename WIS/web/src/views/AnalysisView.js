@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Scatter } from 'react-chartjs-2';
-import bayern_map from '../../assets/Bayern_Landtagswahlkreise_2018.svg';
+import bayern_map from '../assets/Bayern_Landtagswahlkreise_2018.svg';
 
 export default class AnalysisView extends Component {
   constructor(props) {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import BayernMap from '../../components/BayernMap';
+import BayernMap from '../components/BayernMap';
 
 export default class WahlkreisView extends Component {
   constructor(props) {

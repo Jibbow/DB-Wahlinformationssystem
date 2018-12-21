@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Bar } from 'react-chartjs-2';
-import BayernMap from '../../components/BayernMap';
+import BayernMap from '../components/BayernMap';
 
 export default class StimmkreisView extends Component {
   constructor(props) {

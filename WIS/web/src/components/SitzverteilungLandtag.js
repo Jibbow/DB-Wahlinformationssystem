@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 
-export default class Sitzverteilung extends Component {
+export default class SitzverteilungLandtag extends Component {
   constructor(props) {
     super(props);
     this.state = {

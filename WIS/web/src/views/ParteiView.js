@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
-import bayern_map from '../../assets/Bayern_Landtagswahlkreise_2018.svg';
+import bayern_map from '../assets/Bayern_Landtagswahlkreise_2018.svg';
 
 export default class ParteiView extends Component {
   constructor(props) {
