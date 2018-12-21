@@ -289,7 +289,7 @@ finalAnteilParteiWk2018 as (
 	from posListeCase2018 p
 	where p.pos <= p.sitzeges - p.anzmandate)
 , finalA2 as (	
-	select VORNAME, NACHNAME, abkuerzung as PARTEI
+	select k.ID, VORNAME, NACHNAME, abkuerzung as PARTEI
 	from (
 			select m.kandidat
 			from mandatePerListe2018 m
@@ -300,13 +300,12 @@ finalAnteilParteiWk2018 as (
 	    join wis.partei p on p.id = k.partei and p.jahr = k.jahr
 	    order by p.abkuerzung
 ), finalA5 as (	
-	select wk as WAHLKREISID, p.abkuerzung as PARTEI, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
+	select wk, partei, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
 	     							  ELSE (anzmandate - sitzeges) 
-	 							END as UEBERHANGMANDATE, 
- 							w.name as WAHLKREIS
+	 							END as uemandate, 
+ 							w.name
 	from moreSitzeWk2018 a
 		join wis.wahlkreis w on a.wk = w.nr
-		join wis.partei p on p.id=a.partei
 	where not exists 
 		(select *
 		from moreSitzeWk2018 b
@@ -314,7 +313,7 @@ finalAnteilParteiWk2018 as (
 		and a.partei = b.partei
 		and a.jahr = b.jahr
 		and b.sitzzahl < a.sitzzahl)
-	order by wk, p.abkuerzung)
+	order by wk, partei)
 	
 select *
-from finalA5 f
+from finalA2 f

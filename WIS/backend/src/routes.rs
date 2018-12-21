@@ -6,17 +6,19 @@ use rocket::State;
 
 
 // load sql queries during compile time
-const SITZVERTEILUNG: &str = include_str!("../queries/sitzverteilung.sql");
-const LANDTAGSMITGLIEDER: &str = include_str!("../queries/landtagsmitglieder.sql");
-const UEBERHANGMANDATE: &str = include_str!("../queries/wk-überhangmandate.sql");
+const SITZVERTEILUNG: &str = include_str!("../queries/bayern-sitzverteilung.sql");
+const LANDTAGSMITGLIEDER: &str = include_str!("../queries/bayern-landtagsmitglieder.sql");
+const STIMMVERTEILUNG_GESAMT: &str = include_str!("../queries/bayern-stimmverteilung-gesamt.sql");
+const PARTEIEN: &str = include_str!("../queries/bayern-parteien.sql");
+const UEBERHANGMANDATE: &str = include_str!("../queries/partei-überhangmandate.sql");
+const KNAPPSTE_SIEGER: &str = include_str!("../queries/partei-top10.sql");
+const KNAPPSTE_VERLIERER: &str = include_str!("../queries/partei-top-10-knappste-verlierer.sql");
+const WAHLBETEILIGUNG: &str = include_str!("../queries/sk-wahlbeteiligung.sql");
 const DIREKTKANDIDATENGEWINNER: &str = include_str!("../queries/sk-direktkandidatengewinner.sql");
-const PARTEIERGEBNIS: &str = include_str!("../queries/sk-parteiergebnis.sql");
-const PARTEIERGEBNIS_DIFF: &str = include_str!("../queries/sk-parteiergebnis-diff.sql");
+const STIMMVERTEILUNG: &str = include_str!("../queries/sk-stimmverteilung.sql");
+const STIMMVERTEILUNG_DIFF: &str = include_str!("../queries/sk-stimmverteilung-diff.sql");
 const SIEGERPARTEI_ERSTSTIMME: &str = include_str!("../queries/sk-siegerpartei-erststimme.sql");
 const SIEGERPARTEI_ZWEITSTIMME: &str = include_str!("../queries/sk-siegerpartei-zweitstimme.sql");
-const KNAPPSTE_SIEGER: &str = include_str!("../queries/top10.sql");
-const KNAPPSTE_VERLIERER: &str = include_str!("../queries/top-10-knappste-verlierer.sql");
-const PARTEIEN: &str = include_str!("../queries/parteien.sql");
 const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
 const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysis-fdp-income.sql");
 
@@ -36,8 +38,11 @@ pub fn sitzverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr
         SITZE: u32,
     }
 
+    let query = SITZVERTEILUNG
+        .replace("{{JAHR}}", &jahr.to_string());
+
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(SITZVERTEILUNG).unwrap().try_into().unwrap();
+        .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -49,13 +54,17 @@ pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, 
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct QueryResult {
+        ID: u32,
         VORNAME: String,
         NACHNAME: String,
         PARTEI: String,
     }
 
+    let query = LANDTAGSMITGLIEDER
+        .replace("{{JAHR}}", &jahr.to_string());
+
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(LANDTAGSMITGLIEDER).unwrap().try_into().unwrap();
+        .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -63,7 +72,20 @@ pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, 
 /// Gibt die Wahlbeteiligung für einen Stimmkreis zurück.
 #[get("/wahlbeteiligung/<stimmkreis>/<jahr>")]
 pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
-    content::Json("not yet implemented".to_string())
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        WAHLBETEILIGUNG: f32,
+    }
+
+    let query = WAHLBETEILIGUNG
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json("not yet implemented".to_string()) // TODO
 }
 
 /// [Q3.2]
@@ -81,30 +103,30 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
     }
 
     let query = DIREKTKANDIDATENGEWINNER
-        .replace("{{JAHR}}", &jahr.to_string())
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q3.3]
 /// Gibt die prozentuale und absolute Anzahl an Stimmen für jede Partei in einem Stimmkreis zurück.
-#[get("/parteiergebnis/<stimmkreis>/<jahr>")]
-pub fn parteiergebnis(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+#[get("/stimmverteilung/<stimmkreis>/<jahr>")]
+pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
-        STIMMENABSOLUT: u32,
-        STIMMENRELATIV: f32,
+        GESAMTSTIMMEN: u32,
+        PROZENT: f32,
     }
 
-    let query = PARTEIERGEBNIS
-        .replace("{{JAHR}}", &jahr.to_string())
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
+    let query = STIMMVERTEILUNG
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
@@ -114,18 +136,18 @@ pub fn parteiergebnis(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stim
 /// [Q3.4]
 /// Gibt die prozentuale und absolute Änderung an Stimmen für jede Partei in einem Stimmkreis zurück.
 /// Die Änderung bezieht sich von 2013 auf 2018.
-#[get("/parteiergebnisdifferenz/<stimmkreis>")]
-pub fn parteiergebnisdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32) -> content::Json<String> {
+#[get("/stimmverteilungdifferenz/<stimmkreis>")]
+pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
-        DIFF_ABSOLUT: i32,
+        DIFF_GESAMTSTIMMEN: i32,
         DIFF_PROZENT: f32,
     }
 
-    let query = PARTEIERGEBNIS_DIFF
+    let query = STIMMVERTEILUNG_DIFF
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
@@ -134,7 +156,7 @@ pub fn parteiergebnisdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManage
 }
 
 /// [Q4 Teil 1]
-/// Gibt die Siegerparteien über die Erststimmen für einen Stimmkreis zurück.
+/// Gibt die Siegerpartei über die Erststimmen für einen Stimmkreis zurück.
 #[get("/siegerpartei/erststimmen/<stimmkreis>/<jahr>")]
 pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
@@ -146,16 +168,16 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
     }
 
     let query = SIEGERPARTEI_ERSTSTIMME
-        .replace("{{JAHR}}", &jahr.to_string())
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q4 Teil 2]
-/// Gibt die Siegerparteien über die Zweitstimmen für einen Stimmkreis zurück.
+/// Gibt die Siegerpartei über die Zweitstimmen für einen Stimmkreis zurück.
 #[get("/siegerpartei/zweitstimmen/<stimmkreis>/<jahr>")]
 pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
@@ -167,56 +189,59 @@ pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManag
     }
 
     let query = SIEGERPARTEI_ZWEITSTIMME
-        .replace("{{JAHR}}", &jahr.to_string())
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q5]
-/// Gibt für jeden Wahlkreis die Überhangmandate pro Partei zurück.
-#[get("/ueberhangmandate/<jahr>")]
-pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+/// Gibt für einen Wahlkreis und eine Partei die Anzahl der Überhangmandate zurück.
+#[get("/ueberhangmandate/<wahlkreis>/<partei>/<jahr>")]
+pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wahlkreis: u32, partei: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct QueryResult {
-        WAHLKREISID: String,
-        PARTEI: String,
         UEBERHANGMANDATE: u32,
-        WAHLKREIS: String,
     }
 
+    let query = UEBERHANGMANDATE
+        .replace("{{WAHLKREIS}}", &wahlkreis.to_string())
+        .replace("{{PARTEI}}", &partei.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
+
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(UEBERHANGMANDATE).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q6 Teil 1]
 /// Gibt die Top-10 Liste der knappsten Sieger mit ihren Stimmkreisen aller Parteien dar.
 /// Die knappsten Sieger sind die gewählten Erstkandidaten, welche mit dem geringsten
 /// Vorsprung gegenüber ihren Konkurrenten gewonnen haben.
-#[get("/knappstesieger/<jahr>")]
-pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+#[get("/knappstesieger/<partei>/<jahr>")]
+pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: u32, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct QueryResult {
         ID: u32,
-        JAHR: u32,
-        DIFF: i32,
-        VKANDIDAT: u32,
-        PARTEI: u32,
-        POS: u32,
-        NACHNAME: String,
         VORNAME: String,
-        ABKUERZUNG: String,
+        NACHNAME: String,
+        PLATZIERUNG: u32,
+        DIFFERENZ: i32,
+        RIVALE: u32,
     }
 
+    let query = KNAPPSTE_SIEGER
+        .replace("{{PARTEI}}", &partei.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
+
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(KNAPPSTE_SIEGER).unwrap().try_into().unwrap();
+        .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -224,12 +249,30 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr
 /// /// Gibt die Top-10 Liste der knappsten Verlierer mit ihren Stimmkreisen aller Parteien dar.
 /// Die knappsten Verlierer sind die Erstkandidaten, welche mit dem geringsten
 /// Abstand gegenüber ihren Konkurrenten verloren haben.
-#[get("/knappsteverlierer/<jahr>")]
-pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
-    content::Json("not yet implemented".to_string())
+#[get("/knappsteverlierer/<partei>/<jahr>")]
+pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: u32, jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        ID: u32,
+        VORNAME: String,
+        NACHNAME: String,
+        PLATZIERUNG: u32,
+        DIFFERENZ: i32,
+        RIVALE: u32,
+    }
+
+    let query = KNAPPSTE_VERLIERER
+        .replace("{{PARTEI}}", &partei.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json("not yet implemented".to_string()) // TODO
 }
 
-/// Gibt einer Liste aller Parteien bei der Landtagswahl zurück.
+/// Gibt eine Liste aller Parteien bei der Landtagswahl zurück.
 #[get("/parteien")]
 pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
     // define result from DB (names must match column names!)
@@ -240,10 +283,30 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
         NAME: String,
         ABKUERZUNG: String,
         FARBE: Option<String>,
-    } //FIXME: ohne option !!!!!!!!
+    } //FIXME: ohne Option<...> !!!
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(PARTEIEN).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+/// Gibt die prozentuale Verteilung aller Stimmen im Freistaat Bayern auf die Parteien zurück.
+#[get("/stimmverteilunggesamt/<jahr>")]
+pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        PARTEI: String,
+        GESAMTSTIMMEN: u32,
+        PROZENT: f32,
+    }
+
+    let query = STIMMVERTEILUNG_GESAMT
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -278,53 +341,5 @@ pub fn analysen_fdp_einkommen(db: State<r2d2::Pool<hdbconnect::ConnectionManager
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(ANALYSIS_FDP_INCOME).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
-}
-
-// MOCK!!!!!!!
-#[get("/stimmverteilunggesamt/<jahr>")]
-pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
-    // define result from DB (names must match column names!)
-    #[derive(Serialize, Deserialize)]
-    #[allow(non_snake_case)]
-    struct QueryResult {
-        PARTEI: String,
-        PROZENT: f32,
-    }
-
-    let result: Vec<QueryResult> = vec![
-        QueryResult {
-            PARTEI: "CSU".to_string(),
-            PROZENT: 37.2,
-        },
-        QueryResult {
-            PARTEI: "GRÜNE".to_string(),
-            PROZENT: 17.6,
-        },
-        QueryResult {
-            PARTEI: "FW".to_string(),
-            PROZENT: 11.6,
-        },
-        QueryResult {
-            PARTEI: "AfD".to_string(),
-            PROZENT: 10.2,
-        },
-        QueryResult {
-            PARTEI: "SPD".to_string(),
-            PROZENT: 9.7,
-        },
-        QueryResult {
-            PARTEI: "FDP".to_string(),
-            PROZENT: 5.1,
-        },
-        QueryResult {
-            PARTEI: "Linke".to_string(),
-            PROZENT: 3.2,
-        },
-        QueryResult {
-            PARTEI: "Sonstige".to_string(),
-            PROZENT: 5.4,
-        },
-    ];
     content::Json(serde_json::to_string(&result).unwrap())
 }

@@ -68,6 +68,7 @@ fuenfProzent2018 as (
 					from fuenfProzent2018)
 	group by k.id, k.nachname, es.stimmkreis, k.jahr)
 
+/* join der kandidaten und parteien, die die 5% hürde geschaffen haben */
 , kandidatPartei2018 as (
 	select p.id as partei, k.id as id, k.jahr
 	from wis.kandidat k join wis.partei p on k.partei = p.id
@@ -106,7 +107,7 @@ fuenfProzent2018 as (
 		and p.jahr=sk.jahr
 		and z.jahr=p.jahr)
 
-
+/* union der stimmen in einem wahlkreis */
 , parteiWk2018 as(
 	select nr, partei, count(*) as stimmen
 	from (	select * from parteiErstWk2018
@@ -115,13 +116,16 @@ fuenfProzent2018 as (
 		union all
 			select * from parteiZweitDWk2018)
 	group by nr, partei ),
+/* berechnung der gesamtstimmen in einem wahlkreis */
 stimmenwk2018 as (
 	select nr, sum(stimmen) as gstimmen, 2018 as jahr
 	from parteiWK2018
 	group by nr)
+/* berechnung der max. Sitze in einem Wahlkreis (Rek gibt es in Hana nicht -.- */
 , adjSitze as (
 	select ws.*, wkcnt.counter + ws.sitzzahl as adjsitze
 	from wis.wahlkreissitze ws, wis.wkcnt)
+/* Berechnung der Sitze der Parteien im Wahlkreis basierend auf unterschied. Anzahl an Sitzen */
 , anteilParteiWk2018 as (
 	select swk.nr, pwk.partei, swk.jahr, ads.adjsitze as sitzzahl, pwk.stimmen*1.0000/swk.gstimmen as anteil,
 	to_integer(ads.adjsitze * (pwk.stimmen*1.0000/swk.gstimmen)) as sitzefest,
@@ -131,10 +135,12 @@ stimmenwk2018 as (
 		join parteiWk2018 pwk on swk.nr = pwk.nr
 		join wis.wahlkreis wk on wk.nr = swk.nr
 		join adjsitze ads on wk.nr = ads.wahlkreis and swk.jahr=ads.jahr)
+/* Berechnung der offenen PLätze für die Nachkommastelle */
 , currentSitze2018 as (
 	select nr as wk, sitzzahl, sum(sitzefest), sitzzahl - sum(sitzefest) as tbd
 	from anteilParteiWk2018
 	group by nr, sitzzahl)
+/* Berechnung der Position der Nachkommastelle */
 , addSitzeHelper2018 as (
 		select apk1.nr as wk, apk1.partei, apk1.rest, apk1.sitzefest, cs.tbd, apk1.jahr, cs.sitzzahl,
 			(select count(*) + 1
@@ -146,7 +152,8 @@ stimmenwk2018 as (
 		from anteilParteiWk2018 apk1
 			join currentSitze2018 cs on apk1.nr = cs.wk
 				and cs.sitzzahl = apk1.sitzzahl
-), addSitzeWK2018 as (
+) /* Sitz dank Nachkommastelle oder nicht */
+, addSitzeWK2018 as (
 	select wk, partei, jahr, sitzefest, sitzzahl,
 	CASE WHEN position <= tbd  THEN 1
      								ELSE 0
@@ -202,7 +209,7 @@ stimmenwk2018 as (
 ),
 
 
-/* finale Klakulation..... */
+/* finale Kalkulation, wie oben dieses Mal wissen wir die Anzahl an Sitzen, die zur Verfügung stehen */
 finalAnteilParteiWk2018 as (
 	select swk.nr, pwk.partei, swk.jahr, f.sitzzahl as sitzzahl, pwk.stimmen*1.0000/swk.gstimmen as anteil,
 	to_integer(f.sitzzahl * (pwk.stimmen*1.0000/swk.gstimmen)) as sitzefest,
@@ -241,26 +248,29 @@ finalAnteilParteiWk2018 as (
 	from finaladdSitzeWK2018 f join wis.partei p on f.partei = p.id
 	group by partei, p.name
 	order by partei
-), listeOhneDirekte2018 as (
+), /* Alle Kandidaten, die kein Direktmandat gewonnen haben*/
+listeOhneDirekte2018 as (
   select *
   from wis.kandidat k
   where k.id not in (select dg.id
                   from direktGewinner2018 dg)
   and jahr=2018
-), stimmenZusammen2018 as (
+), /* Anz an Erst und Zweitstimmen Pro Kandidat zusammengenommen */
+stimmenZusammen2018 as (
 		select *
 		from wis.Erststimme
 	union all
 		select *
 		from wis.ZweitstimmeKandidat
-), stimmenListe2018 as (
+), /* Zählen der Einzelstimmen */ stimmenListe2018 as (
 	select distinct sk.wahlkreis, z.kandidat, count(*) as anzStimmen, sk.jahr, lod.partei
-	from listeOhneDirekte2018 lod 
+	from listeOhneDirekte2018 lod
 		join stimmenZusammen2018 z on lod.id = z.kandidat and lod.jahr = z.jahr
 		join wis.stimmkreis sk on sk.nr = z.stimmkreis  and sk.jahr = z.jahr
 		join wis.wahlkreis w on w.nr = sk.wahlkreis
 	group by sk.wahlkreis, z.kandidat, lod.partei, lod.id, sk.jahr
-), posListe2018 as (
+), /* Berechnung der Position auf der Liste por Partei und Wk */
+posListe2018 as (
 	select *, (select count(*)
 				from stimmenListe2018 sl2
 				where sl1.anzStimmen < sl2.anzStimmen
@@ -268,28 +278,30 @@ finalAnteilParteiWk2018 as (
 				and sl2.wahlkreis = sl1.wahlkreis
 				and sl2.partei = sl1.partei) + 1 as pos
 	from stimmenListe2018 sl1
-), posListeCase2018 as (
-	select distinct wahlkreis, p.partei, pos, kandidat,  
+),/* left Outer Join mit den DirektMandaten*/
+posListeCase2018 as (
+	select distinct wahlkreis, p.partei, pos, kandidat,
 		CASE WHEN anzMandate is null  THEN 0
 	     							  ELSE anzMandate
 	 							END as anzMandate,
 	 				f.sitzeges
-	from posListe2018 p 
-		join finaladdSitzeWK2018 f 
-			on p.partei = f.partei 
+	from posListe2018 p
+		join finaladdSitzeWK2018 f
+			on p.partei = f.partei
 			and p.jahr = f.jahr
 			and p.partei = f.partei
-			and f.wk = p.wahlkreis 
+			and f.wk = p.wahlkreis
 		left outer join direktMandateWk2018 dm
 			on f.partei = dm.partei
 			and f.jahr = dm.jahr
 			and f.wk = dm.wk)
-, mandatePerListe2018 as (
+, /* Wieviele Mandate über die Liste */
+mandatePerListe2018 as (
 	select *
 	from posListeCase2018 p
 	where p.pos <= p.sitzeges - p.anzmandate)
-, finalA2 as (	
-	select VORNAME, NACHNAME, abkuerzung as PARTEI
+, finalA2 as (
+	select vorname, nachname, abkuerzung
 	from (
 			select m.kandidat
 			from mandatePerListe2018 m
@@ -299,14 +311,14 @@ finalAnteilParteiWk2018 as (
 	    join wis.kandidat k on k.id = m.kandidat and k.jahr = 2018
 	    join wis.partei p on p.id = k.partei and p.jahr = k.jahr
 	    order by p.abkuerzung
-), finalA5 as (	
+), finalA5 as (
 	select wk, partei, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
-	     							  ELSE (anzmandate - sitzeges) 
-	 							END as uemandate, 
+	     							  ELSE (anzmandate - sitzeges)
+	 							END as uemandate,
  							w.name
 	from moreSitzeWk2018 a
 		join wis.wahlkreis w on a.wk = w.nr
-	where not exists 
+	where not exists
 		(select *
 		from moreSitzeWk2018 b
 		where a.wk = b.wk
@@ -314,6 +326,67 @@ finalAnteilParteiWk2018 as (
 		and a.jahr = b.jahr
 		and b.sitzzahl < a.sitzzahl)
 	order by wk, partei)
-	
-select *
-from finalA2 f
+, vergleichDirektstimmen2018 as (
+	select ds1.*,
+			ds3.anzStimmen as stimmen2,
+			ds3.id as vKandidat,
+			(select count(*)
+				from direktstimmen2018 ds2
+				where ds1.stimmkreis = ds2.stimmkreis
+				and ds1.jahr = ds2.jahr
+				and ds1.anzstimmen < ds2.anzstimmen) + 1 as posD1,
+			(select count(*)
+			 from direktstimmen2018 ds4
+			 where ds4.stimmkreis = ds3.stimmkreis
+			 and ds3.jahr = ds4.jahr
+			 and ds3.anzstimmen < ds4.anzstimmen) + 1 as posD2
+	from direktstimmen2018 ds1
+		join direktstimmen2018 ds3
+			on ds1.stimmkreis = ds3.stimmkreis
+			and ds1.jahr = ds3.jahr
+	order by ds1.stimmkreis, posD1)
+, vergleichDirekt2018 as (
+	select *, CASE WHEN (posD1 = 1 and posD2 = 2)  THEN anzstimmen - stimmen2
+		     	   when (posD1 <> 1 and posD2 = 1 ) then anzstimmen - stimmen2
+		     	   ELSE -9999999
+		 	END as diff
+	from vergleichDirektstimmen2018 v
+), customSort2018 as (
+	select k.id, k.jahr, diff, vKandidat, k.partei
+	from vergleichDirekt2018 v
+	join wis.kandidat k on k.id = v.id and k.jahr = v.jahr
+	join wis.partei p on p.id = k.partei and p.jahr = k.jahr
+	order by v.jahr, partei,  case when diff > 0 then 1
+					              when diff < 0 then 2
+					         end asc,
+					         case when diff > 0 then diff
+					         		else  			-diff
+					         end asc
+), gewVerSort2018 as (
+	select *,
+			case 	when c1.diff >= 0 then (select count(*)
+												from customSort2018 c2
+												where c2.diff >= 0
+												and c2.diff < c1.diff
+												and c2.partei = c1.partei
+												and c2.jahr = c1.jahr)
+			    	when diff < 0 then (select count (*)
+											from customSort2018 c3
+											where c3.partei = c1.partei
+												and c3.jahr = c1.jahr
+												and (c3.diff >= 0
+												or (c3.diff < 0
+													and c3.diff > c1.diff)))
+			 end as pos
+	from customSort2018 c1)
+,  finalA6 as (
+	select g.*, k.nachname, k.vorname, p.abkuerzung
+	from gewVerSort2018 g
+		join wis.kandidat k on k.id = g.id and k.jahr = g.jahr
+		join wis.partei p on p.id = k.partei and p.jahr = k.jahr
+	where pos < 10
+	order by partei, pos
+)
+
+select ID, VORNAME, NACHNAME, POS AS PLATZIERUNG, DIFF AS DIFFERENZ, VKANDIDAT AS RIVALE
+from finalA6 where partei={{PARTEI}} and jahr={{JAHR}}
