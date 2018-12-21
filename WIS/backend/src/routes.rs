@@ -120,8 +120,8 @@ pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
-        STIMMENABSOLUT: u32,
-        STIMMENRELATIV: f32,
+        GESAMTSTIMMEN: u32,
+        PROZENT: f32,
     }
 
     let query = STIMMVERTEILUNG
@@ -289,6 +289,26 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
+/// Gibt die prozentuale Verteilung aller Stimmen im Freistaat Bayern auf die Parteien zurück.
+#[get("/stimmverteilunggesamt/<jahr>")]
+pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        PARTEI: String,
+        GESAMTSTIMMEN: u32,
+        PROZENT: f32,
+    }
+
+    let query = STIMMVERTEILUNG_GESAMT
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
 /// Vergleicht die Sterberate mit der Prozentualen Anzahl der CSU-Wähler
 #[get("/analysen/csu-sterberate")]
 pub fn analysen_csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
@@ -320,24 +340,5 @@ pub fn analysen_fdp_einkommen(db: State<r2d2::Pool<hdbconnect::ConnectionManager
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(ANALYSIS_FDP_INCOME).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
-}
-
-// MOCK!!!!!!!
-#[get("/stimmverteilunggesamt/<jahr>")]
-pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
-    // define result from DB (names must match column names!)
-    #[derive(Serialize, Deserialize)]
-    #[allow(non_snake_case)]
-    struct QueryResult {
-        PARTEI: String,
-        PROZENT: f32,
-    }
-
-    let query = STIMMVERTEILUNG_GESAMT
-        .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
