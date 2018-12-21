@@ -2,27 +2,12 @@ import React, { Component } from 'react';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { Button, Collapse } from 'react-bootstrap';
 import BayernMap from '../../components/BayernMap';
+import Sitzverteilung from './Sitzverteilung';
 
 export default class LandtagView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      sitzverteilung: {
-        data: {
-          datasets: [
-            {
-              data: [0],
-              backgroundColor: ['#3e95cd'],
-            },
-          ],
-          labels: ['...'],
-        },
-        options: {
-          rotation: 1 * Math.PI,
-          circumference: 1 * Math.PI,
-        },
-        time: 0,
-      },
       stimmverteilung: {
         data: {
           datasets: [
@@ -61,32 +46,11 @@ export default class LandtagView extends Component {
         </div>
         <div class="col-xs-6">
           <h2>Sitzverteilung im Landtag</h2>
-          {this.state.sitzverteilung.time !== 0 && <small class="text-muted">Took {this.state.sitzverteilung.time} milliseconds</small>}
-          <Doughnut width={600} data={this.state.sitzverteilung.data} options={this.state.sitzverteilung.options} />
-          <h4>Für die Landtagswahl ergab sich folgende Verteilung der Sitze an die Parteien:</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">Partei</th>
-                <th scope="col">Sitze</th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.state.sitzverteilung.data.labels
-                .map((v, i) => {
-                  return { partei: v, sitze: this.state.sitzverteilung.data.datasets[0].data[i] };
-                })
-                .map(t => (
-                  <tr>
-                    <td>{t.partei}</td>
-                    <td>{t.sitze}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          <Sitzverteilung/>
+          
 
           <h2>Ergebnisse der Parteien im Vergleich</h2>
-          <Bar width={600} data={this.state.stimmverteilung.data} options={this.state.sitzverteilung.options} />
+          <Bar width={600} data={this.state.stimmverteilung.data} options={this.state.stimmverteilung.options} />
 
           <h2>Mitglieder im Landtag</h2>
           <Button onClick={() => this.setState({ open: !this.state.open })}>Mitglieder im Landtag {(!this.state.open && 'anzeigen') || 'verbergen'}</Button>
@@ -151,15 +115,6 @@ export default class LandtagView extends Component {
         this.state.stimmverteilung.time = end - start;
         this.state.stimmverteilung.data.labels = data.map(v => v.PARTEI);
         this.state.stimmverteilung.data.datasets[0].data = data.map(v => v.PROZENT);
-        this.forceUpdate();
-      });
-    fetch('http://localhost:8000/sitzverteilung/2018')
-      .then(response => response.json())
-      .then(data => {
-        let end = performance.now();
-        this.state.sitzverteilung.time = end - start;
-        this.state.sitzverteilung.data.labels = data.map(v => v.PARTEI);
-        this.state.sitzverteilung.data.datasets[0].data = data.map(v => v.SITZE);
         this.forceUpdate();
       });
     fetch('http://localhost:8000/landtagsmitglieder/2018')
