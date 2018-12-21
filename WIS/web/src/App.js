@@ -12,7 +12,7 @@ class App extends Component {
   render() {
     return (
       <div className="app">
-        <VoteButton/>
+        <VoteButton className="vote-button"/>
 
         <Tabs mountOnEnter={true} defaultActiveKey={1} id="uncontrolled-tab-example">
           <Tab eventKey={1} title="Überblick Landtagswahl">

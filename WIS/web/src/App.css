@@ -2,12 +2,15 @@
   margin-top: 40px;
   margin-left: 10px;
   margin-right: 10px;
-  text-align: center;
 }
 
 .spinner {
   height: 100px;
   padding-top: 50px;
   padding-bottom: 50px;
+  text-align: center;
+}
+
+.vote-button {
   text-align: center;
 }
