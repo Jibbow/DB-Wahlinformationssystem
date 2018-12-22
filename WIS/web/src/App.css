@@ -1,21 +1,30 @@
 .app {
-  padding-top: 40px;
+  padding-top: 60px;
   padding-left: 15px;
   padding-right: 15px;
-  background-image: url("./assets/bayern-background.png");
+  background-image: url('./assets/bayern-background.png');
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-position: right top; 
+  background-position: right top;
+}
+
+.header {
+  border-width: 0px;
+  background-image: url('./assets/bayern-background.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: right top;
+}
+
+.vote-button {
+  margin: 2px;
+  margin-right: 50px;
 }
 
 .spinner {
   height: 100px;
   padding-top: 50px;
   padding-bottom: 50px;
-  text-align: center;
-}
-
-.vote-button {
   text-align: center;
 }
 
