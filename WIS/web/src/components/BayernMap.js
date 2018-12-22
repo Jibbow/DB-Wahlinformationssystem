@@ -20,7 +20,7 @@ export default class BayernMap extends Component {
 
   render() {
     return (
-      <div ref={this.mapcanvas}>
+      <div ref={this.mapcanvas} className="bayern-map">
         <BayernMapSVG />
       </div>
     );

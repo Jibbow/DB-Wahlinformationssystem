@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
+import TwoColumnTabLayout from '../components/TwoColumnTabLayout';
 import bayern_map from '../assets/Bayern_Landtagswahlkreise_2018.svg';
 
 export default class ParteiView extends Component {
@@ -13,11 +14,9 @@ export default class ParteiView extends Component {
 
   render() {
     return (
-      <div class="row">
-        <div class="col-xs-6">
-          <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
-        </div>
-        <div class="col-xs-6">
+      <TwoColumnTabLayout>
+        <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
+        <div>
           <DropdownButton title={'Wähle eine Partei'} id={'dropdown-parteien'} onSelect={(key, event) => this.setState({ selectedParteiId: key })}>
             {this.state.parteien.map(p => (
               <MenuItem key={p.ID} eventKey={p.ID}>
@@ -29,7 +28,7 @@ export default class ParteiView extends Component {
           siehe Landtagswahl-Tab ganz links
           <h2>Knappste Verlierer</h2>
         </div>
-      </div>
+      </TwoColumnTabLayout>
     );
   }
 

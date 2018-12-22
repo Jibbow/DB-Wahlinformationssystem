@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Bar } from 'react-chartjs-2';
+import TwoColumnTabLayout from '../components/TwoColumnTabLayout';
 import BayernMap from '../components/BayernMap';
 import Stimmverteilung from '../components/Stimmverteilung';
 
@@ -20,11 +21,9 @@ export default class StimmkreisView extends Component {
 
   render() {
     return (
-      <div className="row">
-        <div className="col-xs-6">
-          <BayernMap mode={'sk'} onClick={x => this.setState({ stimmkreis: x })} />
-        </div>
-        <div className="col-xs-6">
+      <TwoColumnTabLayout>
+        <BayernMap mode={'sk'} onClick={x => this.setState({ stimmkreis: x })} />
+        <div>
           {this.state.stimmkreis !== 0 && (
             <div>
               <h2>Stimmkreis {this.state.stimmkreis}</h2>
@@ -35,7 +34,7 @@ export default class StimmkreisView extends Component {
             </div>
           ) || <p>Wählen Sie links auf der Karte einen Stimmkreis</p>}
         </div>
-      </div>
+      </TwoColumnTabLayout>
     );
   }
 

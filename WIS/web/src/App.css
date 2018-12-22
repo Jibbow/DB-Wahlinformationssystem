@@ -1,11 +1,15 @@
 .app {
   padding-top: 80px;
-  padding-left: 15px;
-  padding-right: 15px;
-  background-image: url('./assets/bayern-background.png');
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: right top;
+  padding-bottom: 50px;
+  min-height: 540px;
+}
+@media (min-width: 768px) {
+  .app {
+    background-image: url('./assets/bayern-background.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: right top;
+  }
 }
 
 /*
@@ -34,11 +38,32 @@
 }
 
 /*
+ * Two Column Tab Layout
+ */
+.two-column-tab-content>* {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+@media (min-width: 768px) {
+  .two-column-tab-content>*:first-child {
+    width: 50%;
+    overflow: hidden;
+    position: fixed;
+  }
+  .two-column-tab-content>*:last-child {
+    width: 50%;
+    margin-left:auto;
+    margin-right:0;
+  }
+}
+
+/*
  * Custom Styles
  */
-.vote-button {
-  margin: 2px;
-  margin-right: 50px;
+.bayern-map,
+.bayern-map * {
+  width: 100%;
+  height: auto;
 }
 
 .spinner {
@@ -48,9 +73,11 @@
   text-align: center;
 }
 
-.chart {
-  margin-left: 80px;
-  margin-right: 80px;
+@media (min-width: 1200px) {
+  .chart {
+    margin-left: 80px;
+    margin-right: 80px;
+  }
 }
 
 #personalausweis {
