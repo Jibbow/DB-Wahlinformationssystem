@@ -15,9 +15,6 @@ class App extends Component {
         <Tab.Container defaultActiveKey={1}>
           <div>
             <Navbar fixedTop fluid className="header">
-              <Nav pullRight>
-                <VoteButton />
-              </Nav>
               <Navbar.Header>
                 <Navbar.Toggle />
               </Navbar.Header>
@@ -29,6 +26,9 @@ class App extends Component {
                   <NavItem eventKey={4}>Parteien</NavItem>
                   <NavItem eventKey={5}>Analysen</NavItem>
                 </Nav>
+                <Navbar.Form pullRight>
+                  <VoteButton />
+                </Navbar.Form>
               </Navbar.Collapse>
             </Navbar>
 

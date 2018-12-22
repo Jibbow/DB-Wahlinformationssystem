@@ -1,5 +1,5 @@
 .app {
-  padding-top: 60px;
+  padding-top: 80px;
   padding-left: 15px;
   padding-right: 15px;
   background-image: url('./assets/bayern-background.png');
@@ -7,13 +7,29 @@
   background-attachment: fixed;
   background-position: right top;
 }
-
-.header {
-  border-width: 0px;
-  background-image: url('./assets/bayern-background.png');
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: right top;
+/*
+ * Change height of Bootstrap Navbar
+ */
+.navbar {
+  min-height: 66px;
+}
+.navbar-brand {
+  padding: 0 15px;
+  height: 66px;
+  line-height: 66px;
+}
+.navbar-toggle {
+  /* (66px - button height 34px) / 2 = 16px */
+  margin-top: 16px;
+  padding: 9px 10px !important;
+}
+@media (min-width: 768px) {
+  .navbar-nav > li > a {
+    /* (66px - line-height of 27px) / 2 = 19.5px */
+    padding-top: 19.5px;
+    padding-bottom: 19.5px;
+    line-height: 27px;
+  }
 }
 
 .vote-button {
