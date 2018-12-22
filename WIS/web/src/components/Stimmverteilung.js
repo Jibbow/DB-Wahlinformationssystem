@@ -8,6 +8,8 @@ import { BeatLoader } from 'react-spinners';
 export default class Stimmverteilung extends Component {
   constructor(props) {
     super(props);
+    this.updateData = this.updateData.bind(this);
+
     this.state = {
       time: 0,
       isLoaded2013: false,
@@ -21,6 +23,13 @@ export default class Stimmverteilung extends Component {
             boxWidth: 0,
             fontSize: 18,
           },
+        },
+        scales: {
+          xAxes: [
+            {
+              categoryPercentage: 0.5,
+            },
+          ],
         },
       },
     };
@@ -65,8 +74,9 @@ export default class Stimmverteilung extends Component {
     }
   }
 
-  componentDidMount() {
+  updateData() {
     let start = performance.now();
+
     fetch(`http://localhost:8000/stimmverteilung/${this.props.stimmkreis || ''}/2013`)
       .then(response => response.json())
       .then(data => {
@@ -83,5 +93,15 @@ export default class Stimmverteilung extends Component {
         this.setState({ stimmverteilung2018: this.props.filter ? data.filter(v => this.props.filter(v)) : data });
         this.setState({ isLoaded2018: true });
       });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.stimmkreis !== prevProps.stimmkreis) {
+      this.updateData();
+    }
+  }
+
+  componentDidMount() {
+    this.updateData();
   }
 }
