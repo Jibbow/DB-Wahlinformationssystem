@@ -77,7 +77,7 @@ export default class Stimmverteilung extends Component {
   updateData() {
     let start = performance.now();
 
-    fetch(`http://localhost:8000/stimmverteilung/${this.props.stimmkreis || ''}/2013`)
+    fetch(`http://localhost:8000/stimmverteilung/${(this.props.stimmkreis >= 109 && this.props.stimmkreis < 200)? this.props.stimmkreis - 1 : this.props.stimmkreis || ''}/2013`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();

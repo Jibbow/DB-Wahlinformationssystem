@@ -7,6 +7,7 @@
   background-attachment: fixed;
   background-position: right top;
 }
+
 /*
  * Change height of Bootstrap Navbar
  */
@@ -32,6 +33,9 @@
   }
 }
 
+/*
+ * Custom Styles
+ */
 .vote-button {
   margin: 2px;
   margin-right: 50px;
