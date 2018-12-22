@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { Button, Collapse } from 'react-bootstrap';
-import TwoColumnTabLayout from '../components/TwoColumnTabLayout';
 import BayernMap from '../components/BayernMap';
 import SitzverteilungLandtag from '../components/SitzverteilungLandtag';
 import Stimmverteilung from '../components/Stimmverteilung';
@@ -38,7 +37,7 @@ export default class LandtagView extends Component {
 
   render() {
     return (
-      <TwoColumnTabLayout>
+      <div className="two-column-tab-content">
         <BayernMap mode={'none'} onClick={x => console.log(x)} />
         <div>
           <h2>Sitzverteilung im Landtag</h2>
@@ -72,7 +71,7 @@ export default class LandtagView extends Component {
             </div>
           </Collapse>
         </div>
-      </TwoColumnTabLayout>
+      </div>
     );
   }
 

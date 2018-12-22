@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import TwoColumnTabLayout from '../components/TwoColumnTabLayout';
 import BayernMap from '../components/BayernMap';
 
 export default class WahlkreisView extends Component {
@@ -20,7 +19,7 @@ export default class WahlkreisView extends Component {
 
   render() {
     return (
-      <TwoColumnTabLayout>
+      <div className="two-column-tab-content">
         <BayernMap mode={'wk'} onClick={x => console.log(x)} />
         <div>
           <h2>Überhangmandate</h2>
@@ -48,7 +47,7 @@ export default class WahlkreisView extends Component {
             </div>
           ))}
         </div>
-      </TwoColumnTabLayout>
+      </div>
     );
   }
 
