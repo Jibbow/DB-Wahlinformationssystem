@@ -3,6 +3,7 @@ import { Doughnut, Bar } from 'react-chartjs-2';
 import { Button, Collapse } from 'react-bootstrap';
 import BayernMap from '../components/BayernMap';
 import SitzverteilungLandtag from '../components/SitzverteilungLandtag';
+import Stimmverteilung from '../components/Stimmverteilung';
 
 export default class LandtagView extends Component {
   constructor(props) {
@@ -31,10 +32,6 @@ export default class LandtagView extends Component {
         data: [],
         time: 0,
       },
-      top10: {
-        data: [],
-        time: 0,
-      },
     };
   }
 
@@ -50,8 +47,8 @@ export default class LandtagView extends Component {
           
 
           <h2>Ergebnisse der Parteien im Vergleich</h2>
-          <Bar width={600} data={this.state.stimmverteilung.data} options={this.state.stimmverteilung.options} />
-
+          <Stimmverteilung filter={v => v.PROZENT >= 5.0}/>
+          
           <h2>Mitglieder im Landtag</h2>
           <Button onClick={() => this.setState({ open: !this.state.open })}>Mitglieder im Landtag {(!this.state.open && 'anzeigen') || 'verbergen'}</Button>
           <div>{this.state.landtagsmitglieder.time !== 0 && <small class="text-muted">Took {this.state.landtagsmitglieder.time} milliseconds</small>}</div>
@@ -75,32 +72,6 @@ export default class LandtagView extends Component {
               </table>
             </div>
           </Collapse>
-
-          <h2>Knappste Sieger in den Stimmkreisen</h2>
-          <div>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Partei</th>
-                  <th scope="col">Unterschied</th>
-                  <th scope="col">Pos</th>
-                  <th scope="col">GegnerID</th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.top10.data.map(v => (
-                  <tr>
-                    <td>{v.name}</td>
-                    <td>{v.partei}</td>
-                    <td>{v.diff}</td>
-                    <td>{v.pos}</td>
-                    <td>{v.gegner}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
     );
@@ -108,7 +79,7 @@ export default class LandtagView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000/stimmverteilunggesamt/2018')
+    /*fetch('http://localhost:8000/stimmverteilung/2018')
       .then(response => response.json())
       .then(data => {
         let end = performance.now();
@@ -116,7 +87,7 @@ export default class LandtagView extends Component {
         this.state.stimmverteilung.data.labels = data.map(v => v.PARTEI);
         this.state.stimmverteilung.data.datasets[0].data = data.map(v => v.PROZENT);
         this.forceUpdate();
-      });
+      });*/
     fetch('http://localhost:8000/landtagsmitglieder/2018')
       .then(response => response.json())
       .then(data => {
@@ -128,23 +99,6 @@ export default class LandtagView extends Component {
             partei: v.PARTEI,
           };
         });
-        this.forceUpdate();
-      });
-    fetch('http://localhost:8000/knappstesieger/2018')
-      .then(response => response.json())
-      .then(data => {
-        let end = performance.now();
-        this.state.top10.time = end - start;
-        this.state.top10.data = data.map(v => {
-          return {
-            name: v.VORNAME + ' ' + v.NACHNAME,
-            partei: v.ABKUERZUNG,
-            diff: v.DIFF,
-            pos: v.POS,
-            gegner: v.VKANDIDAT,
-          };
-        });
-        console.log(this.state.top10.data);
         this.forceUpdate();
       });
   }

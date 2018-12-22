@@ -291,7 +291,8 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
 }
 
 /// Gibt die prozentuale Verteilung aller Stimmen im Freistaat Bayern auf die Parteien zurück.
-#[get("/stimmverteilunggesamt/<jahr>")]
+/// Gleiche Route wie für einen einzelnen Stimmkreis, aber das Argument für den Stimmkreis wird weggelassen.
+#[get("/stimmverteilung/<jahr>")]
 pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]

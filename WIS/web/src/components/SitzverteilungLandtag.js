@@ -33,14 +33,14 @@ export default class SitzverteilungLandtag extends Component {
                 datasets: [
                   {
                     data: this.state.sitzverteilung.map(v => v.SITZE),
-                    backgroundColor: this.state.sitzverteilung.map(v => '#3e95cd'),
+                    backgroundColor: this.state.sitzverteilung.map(v => v.FARBE),
                   },
                 ],
                 labels: this.state.sitzverteilung.map(v => v.PARTEI),
               }}
             />
           </div>
-          <Table striped={true}>
+          <Table>
             <thead>
               <tr>
                 <th scope="col">Partei</th>
@@ -71,7 +71,7 @@ export default class SitzverteilungLandtag extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000/sitzverteilung/2018')
+    fetch(`http://localhost:8000/sitzverteilung/2018`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();
