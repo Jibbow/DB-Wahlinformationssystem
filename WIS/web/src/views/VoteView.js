@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock, Popover, OverlayTrigger } from 'react-bootstrap';
 
 export class VoteButton extends Component {
   constructor(props, context) {
@@ -10,7 +10,15 @@ export class VoteButton extends Component {
 
     this.state = {
       show: false,
+      ausweisnummer: '',
     };
+  }
+
+  validateAusweisnummer() {
+    const length = this.state.ausweisnummer.length;
+    if (length === 9) return 'success';
+    else if (length > 0) return 'warning';
+    return null;
   }
 
   render() {
@@ -24,7 +32,25 @@ export class VoteButton extends Component {
           <Modal.Header closeButton>
             <Modal.Title>Meine Stimme abgeben</Modal.Title>
           </Modal.Header>
-          <Modal.Body>Hi</Modal.Body>
+          <Modal.Body>
+            <OverlayTrigger
+              placement="right"
+              trigger={["focus"]}
+              overlay={
+                <Popover id="popover-trigger-hover-focus" title="Personalausweisnummer">
+                  <img id="personalausweis" src={require('../assets/personalausweis.jpg')} alt="Personalausweis" />
+                </Popover>
+              }>
+              <FormGroup controlId="formPersonalausweisnummer" validationState={this.validateAusweisnummer()}>
+                <ControlLabel>Geben Sie bitte hier ihre Personalausweisnummer ein:</ControlLabel>
+                <FormControl type="text" value={this.state.ausweisnummer} placeholder="z.B. T22000129" onChange={e => this.setState({ ausweisnummer: e.target.value })} />
+                <FormControl.Feedback />
+                <HelpBlock>
+                  <p>Die Personalausweisnummer befindet sich oben rechts auf Ihrem Ausweisdokument</p>
+                </HelpBlock>
+              </FormGroup>
+            </OverlayTrigger>
+          </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.handleClose}>Wahl durchführen</Button>
           </Modal.Footer>
