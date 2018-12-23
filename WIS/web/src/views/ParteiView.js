@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import bayern_map from '../assets/Bayern_Landtagswahlkreise_2018.svg';
+import WikipediaInfo from '../components/WikipediaInfo';
 
 export default class ParteiView extends Component {
   constructor(props) {
@@ -23,6 +24,7 @@ export default class ParteiView extends Component {
               </MenuItem>
             ))}
           </DropdownButton>
+          <WikipediaInfo title="CSU"/>
           <h2>Knappste Gewinner</h2>
           siehe Landtagswahl-Tab ganz links
           <h2>Knappste Verlierer</h2>

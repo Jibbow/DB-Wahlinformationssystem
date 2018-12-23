@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Bar } from 'react-chartjs-2';
 import BayernMap from '../components/BayernMap';
 import Stimmverteilung from '../components/Stimmverteilung';
+import StimmkreisInfo from '../components/StimmkreisInfo';
 
 export default class StimmkreisView extends Component {
   constructor(props) {
@@ -23,6 +24,7 @@ export default class StimmkreisView extends Component {
       <div className="two-column-tab-content">
         <BayernMap mode={'sk'} onClick={x => this.setState({ stimmkreis: x })} />
         <div>
+          <StimmkreisInfo/>
           {(this.state.stimmkreis !== 0 && (
             <div>
               <h2>Stimmkreis {this.state.stimmkreis}</h2>
