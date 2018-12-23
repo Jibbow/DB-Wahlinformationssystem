@@ -25,6 +25,7 @@ export default class SitzverteilungLandtag extends Component {
       return (
         <div>
           <small className="text-muted">Took {this.state.time} milliseconds</small>
+          <h4>Gesamtzahl an Sitzen: {this.state.sitzverteilung.reduce((acc, c) => acc + c.SITZE, 0)}</h4>
           <div className="chart">
             <Doughnut
               className="chart"
