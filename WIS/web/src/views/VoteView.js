@@ -35,7 +35,7 @@ export class VoteButton extends Component {
           <Modal.Body>
             <OverlayTrigger
               placement="bottom"
-              trigger={["focus"]}
+              trigger={['focus']}
               overlay={
                 <Popover id="popover-trigger-hover-focus" title="Personalausweisnummer">
                   <img id="personalausweis" src={require('../assets/personalausweis.jpg')} alt="Personalausweisnummer" />

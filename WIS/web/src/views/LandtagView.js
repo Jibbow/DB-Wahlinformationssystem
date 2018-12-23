@@ -9,25 +9,6 @@ export default class LandtagView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      stimmverteilung: {
-        data: {
-          datasets: [
-            {
-              label: '2018',
-              data: [20.5, 13.2, 5.0],
-              backgroundColor: ['#3e95cd'],
-            },
-            {
-              label: '2013',
-              data: [],
-              backgroundColor: ['#3e95cd'],
-            },
-          ],
-          labels: ['...', '...', '...'],
-        },
-        options: {},
-        time: 0,
-      },
       landtagsmitglieder: {
         data: [],
         time: 0,
@@ -43,7 +24,6 @@ export default class LandtagView extends Component {
           <h2>Sitzverteilung im Landtag</h2>
           <SitzverteilungLandtag/>
           
-
           <h2>Ergebnisse der Parteien im Vergleich</h2>
           <Stimmverteilung filter={v => v.PROZENT >= 5.0}/>
           
@@ -77,15 +57,6 @@ export default class LandtagView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    /*fetch('http://localhost:8000/stimmverteilung/2018')
-      .then(response => response.json())
-      .then(data => {
-        let end = performance.now();
-        this.state.stimmverteilung.time = end - start;
-        this.state.stimmverteilung.data.labels = data.map(v => v.PARTEI);
-        this.state.stimmverteilung.data.datasets[0].data = data.map(v => v.PROZENT);
-        this.forceUpdate();
-      });*/
     fetch('http://localhost:8000/landtagsmitglieder/2018')
       .then(response => response.json())
       .then(data => {

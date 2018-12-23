@@ -23,15 +23,15 @@ export default class StimmkreisView extends Component {
       <div className="two-column-tab-content">
         <BayernMap mode={'sk'} onClick={x => this.setState({ stimmkreis: x })} />
         <div>
-          {this.state.stimmkreis !== 0 && (
+          {(this.state.stimmkreis !== 0 && (
             <div>
               <h2>Stimmkreis {this.state.stimmkreis}</h2>
               <h3>Gewählter Direktkandidat: {this.state.gewinner.VORNAME + ' ' + this.state.gewinner.NACHNAME + ' (' + this.state.gewinner.PARTEI + ')'}</h3>
               {this.state.gewinner.time !== 0 && <small className="text-muted">Took {this.state.gewinner.time} milliseconds</small>}
               <h3>Verteilung der Stimmen</h3>
-              <Stimmverteilung stimmkreis={this.state.stimmkreis} filter={v => v.PROZENT >= 5.0}/>
+              <Stimmverteilung stimmkreis={this.state.stimmkreis} filter={v => v.PROZENT >= 5.0} />
             </div>
-          ) || <p>Wählen Sie links auf der Karte einen Stimmkreis</p>}
+          )) || <p>Wählen Sie links auf der Karte einen Stimmkreis</p>}
         </div>
       </div>
     );
