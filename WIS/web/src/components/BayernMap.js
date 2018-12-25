@@ -53,7 +53,7 @@ export default class BayernMap extends Component {
       this.state.selectedElement.setAttribute('fill', '#09b6bf');
 
       // trigger callback
-      this.props.onClick(this.state.selectedElement.getAttribute(this.props.mode));
+      this.props.onClick(parseInt(this.state.selectedElement.getAttribute(this.props.mode)));
     };
     let svgMouseOverListener = e => {
       if (e.target !== this.state.selectedElement) {
