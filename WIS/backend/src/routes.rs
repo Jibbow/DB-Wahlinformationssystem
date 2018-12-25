@@ -84,9 +84,9 @@ pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
 
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json("not yet implemented".to_string()) // TODO
+    //let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+    //    .query(&query).unwrap().try_into().unwrap();
+    content::Json("{ \"WAHLBETEILIGUNG\": 50.0, \"ERROR\": \"NOT YET IMPLEMENTED\"} ".to_string()) // TODO
 }
 
 /// [Q3.2]
@@ -293,22 +293,23 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
 
 /// Gibt eine Liste aller Stimmkreise in Bayern zurück.
 /// Vorsicht: die IDs der Stimmkreise ändern sich über die Jahre hinweg!
-/// Deshalb ist auch das Jahr mit im Ergebnis enthalten.
-#[get("/stimmkreise")]
-pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
+#[get("/stimmkreise/<jahr>")]
+pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct QueryResult {
-        JAHR: u32,
         NR: u32,
         NAME: String,
         WAHLKREIS: String,
         WAHLKREISNR: u32,
     }
 
+    let query = STIMMKREISE
+        .replace("{{JAHR}}", &jahr.to_string());
+
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(STIMMKREISE).unwrap().try_into().unwrap();
+        .query(&query).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
