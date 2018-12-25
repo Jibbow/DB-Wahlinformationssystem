@@ -9,7 +9,6 @@ use rocket::State;
 const SITZVERTEILUNG: &str = include_str!("../queries/bayern-sitzverteilung.sql");
 const LANDTAGSMITGLIEDER: &str = include_str!("../queries/bayern-landtagsmitglieder.sql");
 const STIMMVERTEILUNG_GESAMT: &str = include_str!("../queries/bayern-stimmverteilung-gesamt.sql");
-const PARTEIEN: &str = include_str!("../queries/bayern-parteien.sql");
 const UEBERHANGMANDATE: &str = include_str!("../queries/partei-überhangmandate.sql");
 const KNAPPSTE_SIEGER: &str = include_str!("../queries/partei-top10.sql");
 const KNAPPSTE_VERLIERER: &str = include_str!("../queries/partei-top-10-knappste-verlierer.sql");
@@ -21,6 +20,8 @@ const SIEGERPARTEI_ERSTSTIMME: &str = include_str!("../queries/sk-siegerpartei-e
 const SIEGERPARTEI_ZWEITSTIMME: &str = include_str!("../queries/sk-siegerpartei-zweitstimme.sql");
 const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
 const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysis-fdp-income.sql");
+const PARTEIEN: &str = include_str!("../queries/tabelle-parteien.sql");
+const STIMMKREISE: &str = include_str!("../queries/tabelle-stimmkreise.sql");
 
 
 
@@ -287,6 +288,27 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(PARTEIEN).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+/// Gibt eine Liste aller Stimmkreise in Bayern zurück.
+/// Vorsicht: die IDs der Stimmkreise ändern sich über die Jahre hinweg!
+/// Deshalb ist auch das Jahr mit im Ergebnis enthalten.
+#[get("/stimmkreise")]
+pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        JAHR: u32,
+        NR: u32,
+        NAME: String,
+        WAHLKREIS: String,
+        WAHLKREISNR: u32,
+    }
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(STIMMKREISE).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
