@@ -1,6 +1,8 @@
 import pyhdb
 import csv
+import zipfile
 import os
+import shutil
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -73,15 +75,21 @@ def load_csv_file(connection, filepath, table):
         cursor.executemany('INSERT INTO %s VALUES (%s)' % (table, v_str), data)
     cursor.execute('SELECT COUNT(*) FROM %s' % table)
     number = cursor.fetchone()
-    print('...done! (now %i entries in %s)' % (number[0], table))
+    print('...done! (now %i entries in %s)\n' % (number[0], table))
     cursor.close()
 
 
 
 def load_data(connection):
-    load_csv_file(connection, './2018/Wahlkreise.csv', 'WIS.WAHLKREIS')
-    load_csv_file(connection, './2018/Stimmkreise.csv', 'WIS.STIMMKREIS')
-    load_csv_file(connection, './2018/Parteien.csv', 'WIS.PARTEI')
+    load_csv_file(connection, './tmp/db/WAHLKREIS.csv', 'WIS.WAHLKREIS')
+    load_csv_file(connection, './tmp/db/STIMMKREIS.csv', 'WIS.STIMMKREIS')
+    load_csv_file(connection, './tmp/db/PARTEI.csv', 'WIS.PARTEI')
+    load_csv_file(connection, './tmp/db/KANDIDAT.csv', 'WIS.KANDIDAT')
+    load_csv_file(connection, './tmp/db/WAHLKREISLISTE.csv', 'WIS.WAHLKREISLISTE')
+    load_csv_file(connection, './tmp/db/STIMMKREISLISTE.csv', 'WIS.STIMMKREISLISTE')
+    load_csv_file(connection, './tmp/db/ERSTSTIMME.csv', 'WIS.ERSTSTIMME')
+    load_csv_file(connection, './tmp/db/ZWEITSTIMMEPARTEI.csv', 'WIS.ZWEITSTIMMEPARTEI')
+    load_csv_file(connection, './tmp/db/ZWEITSTIMMEKANDIDAT.csv', 'WIS.ZWEITSTIMMEKANDIDAT')
 
 
 
@@ -89,10 +97,13 @@ def load_data(connection):
 clean_up_db(connection)
 setup_schema(connection)
 print('\n########################\n')
+
+with zipfile.ZipFile('db.zip', 'r') as zip_ref:
+    zip_ref.extractall('./tmp/')
 load_data(connection)
 
 # cleanup
+shutil.rmtree('./tmp/')
 connection.commit()
 connection.close()
 print('Closed connection to SAP HANA.')
-
