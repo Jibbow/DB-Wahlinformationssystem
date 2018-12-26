@@ -1,6 +1,7 @@
 import pyhdb
 import os
 import sys
+import csv
 import argparse
 from dotenv import load_dotenv
 
@@ -39,8 +40,9 @@ cursor.execute(query)
 
 # print result to stdout
 result = cursor.fetchall()
-for r in result:
-    print(r)
+csvwriter = csv.writer(sys.stdout)
+csvwriter.writerows(result)
+    
 
 cursor.close()
 connection.commit()
