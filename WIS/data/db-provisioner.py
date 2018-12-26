@@ -66,8 +66,11 @@ def load_csv_file(connection, filepath, table):
         firstrow = next(csvreader, None) # skip header
         v_str = ','.join(['?' for _ in range(0, len(firstrow))]) # get number of fields
 
+        data = []
         for row in csvreader:
-            cursor.execute('INSERT INTO %s VALUES (%s)' % (table, v_str), row)
+            data.append(row)
+        print('Loaded file into memory. Start uploading...')
+        cursor.executemany('INSERT INTO %s VALUES (%s)' % (table, v_str), data)
     cursor.execute('SELECT COUNT(*) FROM %s' % table)
     number = cursor.fetchone()
     print('...done! (now %i entries in %s)' % (number[0], table))
