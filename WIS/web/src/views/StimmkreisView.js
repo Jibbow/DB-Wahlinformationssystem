@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Bar } from 'react-chartjs-2';
 import BayernMap from '../components/BayernMap';
 import Stimmverteilung from '../components/Stimmverteilung';
+import StimmentwicklungStimmkreis from '../components/StimmentwicklungStimmkreis';
+import StimmenAbsolut from '../components/StimmenAbsolut';
 
 export default class StimmkreisView extends Component {
   constructor(props) {
@@ -43,44 +45,30 @@ export default class StimmkreisView extends Component {
                 </div>
               )}
               <div>
-                <h3>Gewählter Direktkandidat: {this.state.gewinner.person.VORNAME + ' ' + this.state.gewinner.person.NACHNAME + ' (' + this.state.gewinner.person.PARTEI + ')'}</h3>
+                <h4>Gewählter Direktkandidat: {this.state.gewinner.person.VORNAME + ' ' + this.state.gewinner.person.NACHNAME + ' (' + this.state.gewinner.person.PARTEI + ')'}</h4>
                 {this.state.gewinner.time !== 0 && <small className="text-muted">Took {this.state.gewinner.time} milliseconds</small>}
               </div>
               <div>
-                <h3>Wahlbeteiligung: {this.state.wahlbeteiligung.value} % [TODO: backend]</h3>
+                <h4>Siegerpartei nach Erststimmen: {this.state.siegerparteierststimmen.partei}</h4>
+                {this.state.siegerparteierststimmen.time !== 0 && <small className="text-muted">Took {this.state.siegerparteierststimmen.time} milliseconds</small>}
+                <h4>Siegerpartei nach Zweitstimmen: {this.state.siegerparteizweitstimmen.partei}</h4>
+                {this.state.siegerparteizweitstimmen.time !== 0 && <small className="text-muted">Took {this.state.siegerparteizweitstimmen.time} milliseconds</small>}
+              </div>
+              <div>
+                <h4>Wahlbeteiligung: {this.state.wahlbeteiligung.value} % [TODO: backend]</h4>
                 {this.state.wahlbeteiligung.time !== 0 && <small className="text-muted">Took {this.state.wahlbeteiligung.time} milliseconds</small>}
               </div>
               <div>
                 <h3>Verteilung der Stimmen</h3>
-                <Stimmverteilung stimmkreis={this.state.stimmkreis} filter={v => v.PROZENT >= 5.0} />
+                <Stimmverteilung stimmkreis={this.state.stimmkreis} /*filter={v => v.PROZENT >= 5.0}*/ />
               </div>
               <div>
                 <h3>Entwicklung der Stimmen im Vergleich zu 2013</h3>
-                [TODO]
+                <StimmentwicklungStimmkreis stimmkreis={this.state.stimmkreis} />
               </div>
               <div>
                 <h3>Anzahl an Stimmen für jede Partei</h3>
-                [TODO]
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Partei</th>
-                      <th scope="col">Anzahl an Gesamtstimmen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>CSU</td>
-                      <td>3495</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div>
-                <h3>Siegerpartei nach Erststimmen: {this.state.siegerparteierststimmen.partei}</h3>
-                {this.state.siegerparteierststimmen.time !== 0 && <small className="text-muted">Took {this.state.siegerparteierststimmen.time} milliseconds</small>}
-                <h3>Siegerpartei nach Zweitstimmen: {this.state.siegerparteizweitstimmen.partei}</h3>
-                {this.state.siegerparteizweitstimmen.time !== 0 && <small className="text-muted">Took {this.state.siegerparteizweitstimmen.time} milliseconds</small>}
+                <StimmenAbsolut stimmkreis={this.state.stimmkreis} />
               </div>
             </div>
           )) || <p>Wählen Sie links auf der Karte einen Stimmkreis</p>}
