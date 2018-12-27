@@ -1,15 +1,10 @@
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
-
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
 
 public class LinechartGenerator extends ApplicationFrame {
 

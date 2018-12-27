@@ -1,15 +1,5 @@
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 
 
@@ -47,10 +37,9 @@ public class Terminal implements Runnable {
         for (int i = 0; i < noRequests; i++) {
             String url = workloadMix[workloadPointer];
 
-            //String url = "http://localhost:8000/sitzverteilung/2018";
             try {
                 long startTime = System.currentTimeMillis();
-                InputStream response = new URL(url).openStream();
+                new URL(url).openStream();
                 int duration = (int) (System.currentTimeMillis() - startTime);
                 workloadPerformance[workloadPointer] = duration;
             } catch (IOException e) {
