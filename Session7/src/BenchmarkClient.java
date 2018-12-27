@@ -43,7 +43,7 @@ public class BenchmarkClient {
         //Q3.2
         for (int i = 6; i < noRequests; i = i + 16) {
             queryNames[i] = "Query3.2";
-            workloadMix[i] = "http://localhost:8000/wahlbeteiligung/1/2018";
+            workloadMix[i] = "http://localhost:8000/direktkandidatengewinner/122/2018";
         }
 
         //Q3.3
@@ -76,15 +76,15 @@ public class BenchmarkClient {
             workloadMix[i] = "http://localhost:8000/ueberhangmandate/7/1301/2018";
         }
 
-        //Q6.1
+        //Q6
         for (int i = 7; i < noRequests; i = i + 10) {
-            queryNames[i] = "Query6.1";
+            queryNames[i] = "Query6";
             workloadMix[i] = "http://localhost:8000/knappstesieger/1301/2018";
         }
 
-        //Q6.2
+        //Q6
         for (int i = 9; i < noRequests; i = i + 10) {
-            queryNames[i] = "Query6.2";
+            queryNames[i] = "Query6";
             workloadMix[i] = "http://localhost:8000/knappstesieger/1/2018";
         }
 
@@ -146,10 +146,8 @@ public class BenchmarkClient {
         int counter042 = 0;
         int sum05 = 0;
         int counter05 = 0;
-        int sum061 = 0;
-        int counter061 = 0;
-        int sum062 = 0;
-        int counter062 = 0;
+        int sum06 = 0;
+        int counter06 = 0;
 
         for (int i = 0; i < noClients; i++) {
             for (int j = 0; j < noRequests; j = j + 4) {
@@ -189,10 +187,10 @@ public class BenchmarkClient {
                 counter05++;
             }
             for (int j = 7; j < noRequests; j = j + 10) {
-                sum061 += workloadPerformance[i][j];
-                counter061++;
-                sum062 += workloadPerformance[i][j + 2];
-                counter062++;
+                sum06 += workloadPerformance[i][j];
+                counter06++;
+                sum06 += workloadPerformance[i][j + 2];
+                counter06++;
             }
         }
         averagePerformances[0] = sum01 / counter01;
@@ -204,15 +202,14 @@ public class BenchmarkClient {
         averagePerformances[6] = sum041 / counter041;
         averagePerformances[7] = sum042 / counter042;
         averagePerformances[8] = sum05 / counter05;
-        averagePerformances[9] = sum061 / counter061;
-        averagePerformances[10] = sum062 / counter062;
+        averagePerformances[9] = sum06 / counter06;
 
         return averagePerformances;
     }
 
     private static void setOverallPerformance (int n, int t) {
         int [] averagePerformances = averagePerformances();
-        for (int i = 0; i < 11; i++) {
+        for (int i = 0; i < 10; i++) {
             overallPerformance[i][n][t] = averagePerformances[i];
         }
     }
@@ -248,13 +245,13 @@ public class BenchmarkClient {
         xValuesTime[6] = 7;
         xValuesTime[7] = 8;
 
-        for (int i = 0; i < 11; i ++) {
+        for (int i = 0; i < 10; i ++) {
             chartName = "LineChart: Query" + queryNames[i] + " bei konstantem n";
             LinechartGenerator linechartGenerator = new LinechartGenerator(xValuesTime, overallPerformance[i][0], xNameTime, yName, chartName);
             linechartGenerator.createChart();
         }
 
-        for (int i = 0; i < 11; i ++) {
+        for (int i = 0; i < 10; i ++) {
             chartName = "LineChart: Query" + queryNames[i] + " bei konstantem t";
             int[] yValues = new int[8];
             for (int j = 0; j < 8; j++) {
@@ -274,7 +271,7 @@ public class BenchmarkClient {
 
         setWorkloadMix();
 
-        overallPerformance = new int [11][8][8];
+        overallPerformance = new int [10][8][8];
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
