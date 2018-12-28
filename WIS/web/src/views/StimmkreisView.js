@@ -42,6 +42,7 @@ export default class StimmkreisView extends Component {
                   <h1>{this.state.stimmkreise.find(s => s.NR === this.state.stimmkreis).NAME}</h1>
                   <p>Stimmkreis: {this.state.stimmkreise.find(s => s.NR === this.state.stimmkreis).NR}</p>
                   <p>Wahlkreis: {this.state.stimmkreise.find(s => s.NR === this.state.stimmkreis).WAHLKREIS}</p>
+                  <p>Wahlberechtigte: {this.state.stimmkreise.find(s => s.NR === this.state.stimmkreis).STIMMBERECHTIGTE}</p>
                 </div>
               )}
               <div>
@@ -55,7 +56,7 @@ export default class StimmkreisView extends Component {
                 {this.state.siegerparteizweitstimmen.time !== 0 && <small className="text-muted">Took {this.state.siegerparteizweitstimmen.time} milliseconds</small>}
               </div>
               <div>
-                <h4>Wahlbeteiligung: {this.state.wahlbeteiligung.value} % [TODO: backend]</h4>
+                <h4>Wahlbeteiligung: {this.state.wahlbeteiligung.value} %</h4>
                 {this.state.wahlbeteiligung.time !== 0 && <small className="text-muted">Took {this.state.wahlbeteiligung.time} milliseconds</small>}
               </div>
               <div>

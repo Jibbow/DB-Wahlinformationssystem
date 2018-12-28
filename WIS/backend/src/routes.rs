@@ -84,9 +84,9 @@ pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
 
-    //let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-    //    .query(&query).unwrap().try_into().unwrap();
-    content::Json("{ \"WAHLBETEILIGUNG\": 50.0, \"ERROR\": \"NOT YET IMPLEMENTED\"} ".to_string()) // TODO
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
 /// [Q3.2]
@@ -301,6 +301,7 @@ pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u
     struct QueryResult {
         NR: u32,
         NAME: String,
+        STIMMBERECHTIGTE: u32,
         WAHLKREIS: String,
         WAHLKREISNR: u32,
     }
