@@ -55,7 +55,6 @@ def setup_schemas(connection):
                     except Exception as e:
                         print(e.args)
             cursor.close()
-    print('...done\n')
 
 
 
@@ -73,7 +72,6 @@ def setup_stored_procs(connection):
                 except Exception as e:
                     print(e.args)
             cursor.close()
-    print('...done\n')
 
 
 
@@ -93,18 +91,17 @@ def load_data(connection):
                     csv_file  = io.TextIOWrapper(csv_binary_file)
                     tablename = os.path.splitext(filename)[0].split('__')[1]
                     load_csv_file(connection, csv_file, tablename)
-    print('...done\n')
 
 
 
 ## Load Schema definitions
 setup_schemas(connection)
 
-## Create Stored Procedures
-setup_stored_procs(connection)
-
 ## Load Data
 load_data(connection)
+
+## Create Stored Procedures
+setup_stored_procs(connection)
 
 
 connection.commit()
