@@ -1,17 +1,17 @@
+CREATE PROCEDURE WIS.GET_WAHLBETEILIGUNG (IN _perform_on_aggregates BOOLEAN, IN _jahr INT, IN _stimmkreis INT,
+OUT _out TABLE (
+    WAHLBETEILIGUNG FLOAT)) 
+LANGUAGE SQLSCRIPT
+SQL SECURITY INVOKER
+READS SQL DATA WITH RESULT VIEW PROC_WAHLBETEILIGUNG AS
+BEGIN
+
 /*
  * Gibt die Wahlbeteiligung für einen Stimmkreis für ein Jahr zurück.
  * Die Wahlbeteiligung ist dabei nicht trivial auszurechnen, da man nicht
  * genau weiß, ob eine Person beide Stimmzettel, oder nur eine Erst- oder Zweitstimme
  * abgegeben hat. Als Annäherung nehmen wir hier den MAX Wert der jeweiligen Anzahl.
  */
-CREATE PROCEDURE WIS.GET_WAHLBETEILIGUNG (IN _perform_on_aggregates BOOLEAN, IN _jahr INT, IN _stimmkreis INT,
-OUT _out TABLE (
-    WAHLBETEILIGUNG N_DOUBLE)) 
-LANGUAGE SQLSCRIPT
-SQL SECURITY INVOKER
-READS SQL DATA WITH RESULT VIEW PROC_WAHLBETEILIGUNG AS
-BEGIN
-
 _out = 
 
 WITH ANZAHLERSTSTIMMEN AS (
