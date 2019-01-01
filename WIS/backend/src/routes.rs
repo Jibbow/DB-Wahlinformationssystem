@@ -12,9 +12,6 @@ const STIMMVERTEILUNG_GESAMT: &str = include_str!("../queries/bayern-stimmvertei
 const UEBERHANGMANDATE: &str = include_str!("../queries/partei-überhangmandate.sql");
 const KNAPPSTE_SIEGER: &str = include_str!("../queries/partei-top10.sql");
 const KNAPPSTE_VERLIERER: &str = include_str!("../queries/partei-top-10-knappste-verlierer.sql");
-const DIREKTKANDIDATENGEWINNER: &str = include_str!("../queries/sk-direktkandidatengewinner.sql");
-const SIEGERPARTEI_ERSTSTIMME: &str = include_str!("../queries/sk-siegerpartei-erststimme.sql");
-const SIEGERPARTEI_ZWEITSTIMME: &str = include_str!("../queries/sk-siegerpartei-zweitstimme.sql");
 const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
 const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysis-fdp-income.sql");
 
@@ -99,12 +96,12 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         PARTEI: String,
     }
 
-    let query = DIREKTKANDIDATENGEWINNER
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
-
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
+        .query(&format!("SELECT * FROM WIS.PROC_DIREKTKANDIDATENGEWINNER 
+                        (PLACEHOLDER.\"$$_jahr$$\" => '{}', 
+                        PLACEHOLDER.\"$$_stimmkreis$$\" => '{}', 
+                        PLACEHOLDER.\"$$_perform_on_aggregates$$\" => '{}')",
+                    jahr, stimmkreis, true))
     content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
@@ -118,7 +115,7 @@ pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
     struct QueryResult {
         PARTEI: String,
         GESAMTSTIMMEN: u32,
-        PROZENT: f64,
+        PROZENT: f32,
     }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
@@ -166,12 +163,13 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
         ANZAHLERSTSTIMMEN: u32,
     }
 
-    let query = SIEGERPARTEI_ERSTSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
-
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
+        .query(&format!("SELECT * FROM WIS.PROC_SIEGERPARTEI_ERSTSTIMMEN 
+                        (PLACEHOLDER.\"$$_jahr$$\" => '{}', 
+                        PLACEHOLDER.\"$$_stimmkreis$$\" => '{}', 
+                        PLACEHOLDER.\"$$_perform_on_aggregates$$\" => '{}')", 
+                    jahr, stimmkreis, true))
+        .unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
@@ -187,12 +185,13 @@ pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         ANZAHLZWEITSTIMMEN: u32,
     }
 
-    let query = SIEGERPARTEI_ZWEITSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
-
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
+        .query(&format!("SELECT * FROM WIS.SIEGERPARTEI_ZWEITSTIMMEN 
+                        (PLACEHOLDER.\"$$_jahr$$\" => '{}', 
+                        PLACEHOLDER.\"$$_stimmkreis$$\" => '{}', 
+                        PLACEHOLDER.\"$$_perform_on_aggregates$$\" => '{}')", 
+                    jahr, stimmkreis, true))
+        .unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result[0]).unwrap())
 }
 
