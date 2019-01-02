@@ -268,8 +268,8 @@ pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, p
         .replace("{{PARTEI}}", &partei.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
 
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
+    //let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+    //    .query(&query).unwrap().try_into().unwrap();
     content::Json("not yet implemented".to_string()) // TODO
 }
 
@@ -344,7 +344,7 @@ pub fn analysen_csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManage
     struct QueryResult {
         PROZENT: f32,
         PARTEI: String,
-        STERBERATE: f32,
+        STERBERATE: f64,
     }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
