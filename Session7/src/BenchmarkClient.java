@@ -126,7 +126,7 @@ public class BenchmarkClient {
     }
 
     private static int [] averagePerformances () {
-        int [] averagePerformances = new int [11];
+        int [] averagePerformances = new int [10];
 
         int sum01 = 0;
         int counter01 = 0;
@@ -226,8 +226,8 @@ public class BenchmarkClient {
         String xNameTime = "Wartezeit t in s";
         String yName = "Dauer";
 
-        int [] xValuesClients = new int [8];
-        int [] xValuesTime = new int [8];
+        int [] xValuesClients = new int [7];
+        int [] xValuesTime = new int [7];
         xValuesClients[0] = 1;
         xValuesClients[1] = 2;
         xValuesClients[2] = 4;
@@ -235,7 +235,6 @@ public class BenchmarkClient {
         xValuesClients[4] = 16;
         xValuesClients[5] = 32;
         xValuesClients[6] = 64;
-        xValuesClients[7] = 128;
         xValuesTime[0] = 1;
         xValuesTime[1] = 2;
         xValuesTime[2] = 3;
@@ -243,7 +242,6 @@ public class BenchmarkClient {
         xValuesTime[4] = 5;
         xValuesTime[5] = 6;
         xValuesTime[6] = 7;
-        xValuesTime[7] = 8;
 
         for (int i = 0; i < 10; i ++) {
             chartName = "LineChart: Query" + queryNames[i] + " bei konstantem n";
@@ -253,8 +251,8 @@ public class BenchmarkClient {
 
         for (int i = 0; i < 10; i ++) {
             chartName = "LineChart: Query" + queryNames[i] + " bei konstantem t";
-            int[] yValues = new int[8];
-            for (int j = 0; j < 8; j++) {
+            int[] yValues = new int[7];
+            for (int j = 0; j < 7; j++) {
                 yValues[j] = overallPerformance[i][j][0];
             }
             LinechartGenerator linechartGenerator = new LinechartGenerator(xValuesClients, yValues, xNameClients, yName, chartName);
@@ -271,10 +269,10 @@ public class BenchmarkClient {
 
         setWorkloadMix();
 
-        overallPerformance = new int [10][8][8];
+        overallPerformance = new int [10][7][7];
 
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 7; j++) {
                 noClients = (int) Math.pow(2, i);
                 meanWaitTime = 1000 * (j + 1);
                 workloadPerformance = new Integer[noClients][noRequests];
