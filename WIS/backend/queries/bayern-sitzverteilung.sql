@@ -1,21 +1,4 @@
- WITH STIMMENPROSTIMMKREIS2018 AS (SELECT STIMMKREIS,ID,JAHR,Count(*)
-           FROM ((SELECT P.ID,Z.STIMMKREIS,Z.JAHR
-                    FROM (SELECT *
-                            FROM WIS.ZWEITSTIMMEKANDIDAT
-                          UNION ALL
-                          SELECT *
-                            FROM WIS.ERSTSTIMME) Z
-                         JOIN WIS.KANDIDAT K
-                           ON Z.KANDIDAT = K.ID
-                              AND Z.JAHR = K.JAHR
-                         JOIN WIS.PARTEI P
-                           ON P.ID = K.PARTEI
-                              AND P.JAHR = K.JAHR)
-                 UNION ALL
-                 (SELECT P.PARTEIID AS id,P.STIMMKREIS,P.JAHR
-                    FROM WIS.ZWEITSTIMMEPARTEI P))
-          GROUP BY ID,STIMMKREIS,JAHR
-          ORDER BY STIMMKREIS,ID,JAHR),
+ WITH 
      /* zählen der gesammten abgegebenen Stimmen  */
      GESAMT2018 AS (SELECT *
            FROM (SELECT Count(*) AS gesamterst
@@ -42,7 +25,7 @@
                          JOIN WIS.PARTEI P
                            ON P.ID = K.PARTEI)
                  UNION ALL
-                 (SELECT P.PARTEIID AS id,P.STIMMKREIS
+                 (SELECT P.PARTEI AS id,P.STIMMKREIS
                     FROM WIS.ZWEITSTIMMEPARTEI P
                    WHERE JAHR = 2018))
           GROUP BY ID
@@ -57,59 +40,53 @@
            FROM WIS.PARTEI P
                 JOIN WIS.KANDIDAT K
                   ON P.ID = K.PARTEI
-                     AND K.JAHR = P.JAHR
                 JOIN WIS.ERSTSTIMME ES
                   ON ES.KANDIDAT = K.ID
                      AND ES.JAHR = K.JAHR
-          WHERE P.ID IN (SELECT *
+          WHERE K.JAHR=2018 AND P.ID IN (SELECT *
                            FROM FUENFPROZENT2018)
           GROUP BY K.ID,K.NACHNAME,ES.STIMMKREIS,K.JAHR),
      KANDIDATPARTEI2018 AS (SELECT P.ID AS partei,K.ID AS id,K.JAHR
            FROM WIS.KANDIDAT K
                 JOIN WIS.PARTEI P
                   ON K.PARTEI = P.ID
-          WHERE P.ID IN (SELECT *
-                           FROM FUENFPROZENT2018)
-                AND K.JAHR = P.JAHR)
+          WHERE K.JAHR=2018 AND P.ID IN (SELECT *
+                           FROM FUENFPROZENT2018))
 /* anzahl der erststimmen in einem wahlkreis der partei */
 ,
      PARTEIERSTWK2018 AS (SELECT WK.NR,KP.PARTEI
            FROM WIS.WAHLKREIS WK
                 JOIN WIS.STIMMKREIS SK
-                  ON WK.NR = SK.WAHLKREIS
+                  ON WK.NR = SK.WAHLKREIS AND WK.JAHR=WK.JAHR
                 JOIN WIS.ERSTSTIMME ES
                   ON ES.STIMMKREIS = SK.NR
                      AND SK.JAHR = ES.JAHR
                 JOIN KANDIDATPARTEI2018 KP
                   ON KP.ID = ES.KANDIDAT
                      AND ES.JAHR = KP.JAHR
-          WHERE SK.JAHR = 2018)
+          WHERE WK.JAHR = 2018)
 /* anzahl der zweitstimmen in einem wahlkreis der Partei */
 ,
      PARTEIZWEITWK2018 AS (SELECT WK.NR,KP.PARTEI
            FROM WIS.WAHLKREIS WK
                 JOIN WIS.STIMMKREIS SK
-                  ON WK.NR = SK.WAHLKREIS
+                  ON WK.NR = SK.WAHLKREIS AND WK.JAHR=SK.JAHR
                 JOIN WIS.ZWEITSTIMMEKANDIDAT Z
-                  ON Z.STIMMKREIS = SK.NR
+                  ON Z.STIMMKREIS = SK.NR AND SK.JAHR=Z.JAHR
                 JOIN KANDIDATPARTEI2018 KP
-                  ON KP.ID = Z.KANDIDAT
-          WHERE KP.JAHR = SK.JAHR
-                AND Z.JAHR = SK.JAHR)
+                  ON KP.ID = Z.KANDIDAT AND KP.JAHR=Z.JAHR)
 /* anzahl der partei zweitstimmen in einem wahlkreis */
 ,
      PARTEIZWEITDWK2018 AS (SELECT WK.NR,P.ID AS partei
            FROM WIS.WAHLKREIS WK
                 JOIN WIS.STIMMKREIS SK
-                  ON WK.NR = SK.WAHLKREIS
+                  ON WK.NR = SK.WAHLKREIS AND WK.JAHR=SK.JAHR
                 JOIN WIS.ZWEITSTIMMEPARTEI Z
-                  ON Z.STIMMKREIS = SK.NR
+                  ON Z.STIMMKREIS = SK.NR AND Z.JAHR=SK.JAHR
                 JOIN WIS.PARTEI P
-                  ON P.ID = Z.PARTEIID
-          WHERE P.ID IN (SELECT *
-                           FROM FUENFPROZENT2018)
-                AND P.JAHR = SK.JAHR
-                AND Z.JAHR = P.JAHR)
+                  ON P.ID = Z.PARTEI
+          WHERE Z.JAHR=2018 AND P.ID IN (SELECT *
+                           FROM FUENFPROZENT2018))
 /* dont question the /2 ... fix it
 TODO: fix the /2
 */
@@ -130,7 +107,7 @@ TODO: fix the /2
           GROUP BY NR),
      ADJSITZE
      AS (SELECT WS.*,WKCNT.COUNTER + WS.SITZZAHL AS adjsitze
-           FROM WIS.WAHLKREISSITZE WS,WIS.WKCNT),
+           FROM (select nr as wahlkreis, sitzzahl, jahr from wis.wahlkreis) WS,WIS.WKCNT),
      ANTEILPARTEIWK2018 AS (SELECT SWK.NR,PWK.PARTEI,SWK.JAHR,ADS.ADJSITZE AS sitzzahl,
                    PWK.STIMMEN * 1.0000 / SWK.GSTIMMEN AS anteil,
                 TO_INTEGER(ADS.ADJSITZE *
@@ -146,11 +123,11 @@ TODO: fix the /2
                 JOIN PARTEIWK2018 PWK
                   ON SWK.NR = PWK.NR
                 JOIN WIS.WAHLKREIS WK
-                  ON WK.NR = SWK.NR
+                  ON WK.NR = SWK.NR AND WK.JAHR=SWK.JAHR
                 JOIN ADJSITZE ADS
                   ON WK.NR = ADS.WAHLKREIS
                      AND SWK.JAHR = ADS.JAHR),
-     CURRENTSITZE2018 AS (SELECT NR AS wk,SITZZAHL,Sum(SITZEFEST),
+     CURRENTSITZE2018 AS (SELECT NR AS wk,SITZZAHL,
                 SITZZAHL - Sum(SITZEFEST) AS tbd
            FROM ANTEILPARTEIWK2018
           GROUP BY NR,SITZZAHL),
@@ -190,12 +167,6 @@ TODO: fix the /2
                   ON SK.JAHR = DG.JAHR
                      AND DG.STIMMKREIS = SK.NR
           GROUP BY SK.WAHLKREIS,SK.JAHR,DG.PARTEI),
-     ADDSITZEWK2018ERW AS (SELECT ASK.*,DM.ANZMANDATE
-           FROM ADDSITZEWK2018 ASK
-                LEFT OUTER JOIN DIREKTMANDATEWK2018 DM
-                             ON ASK.PARTEI = DM.PARTEI
-                                AND ASK.JAHR = DM.JAHR
-                                AND ASK.WK = DM.WK),
      MORESITZEWK2018 AS (SELECT DISTINCT ADS.*,CASE
                                  WHEN DM.ANZMANDATE IS NULL THEN 0
                                  ELSE DM.ANZMANDATE
@@ -233,7 +204,7 @@ TODO: fix the /2
                 JOIN PARTEIWK2018 PWK
                   ON SWK.NR = PWK.NR
                 JOIN WIS.WAHLKREIS WK
-                  ON WK.NR = SWK.NR
+                  ON WK.NR = SWK.NR AND WK.JAHR=SWK.JAHR
                 JOIN FINALWKSITZE2018 F
                   ON WK.NR = F.WK
                      AND SWK.JAHR = F.JAHR),
