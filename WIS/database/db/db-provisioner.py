@@ -76,14 +76,14 @@ def setup_stored_procs(connection):
     print('...done\n')
 
 
-def setup_triggers(connection):
-    print('\n##### Setting up Triggers...\n')
-    for file in os.listdir(os.fsencode('./triggers')):
+def setup_views(connection):
+    print('\n##### Setting up Views...\n')
+    for file in os.listdir(os.fsencode('./views')):
         filename = os.fsdecode(file)
         if filename.endswith('.sql'):
-            print('-> applying trigger definition file: ' + filename)
+            print('-> applying view definition file: ' + filename)
             cursor = connection.cursor()
-            with open('./triggers/' + filename) as sql_file:
+            with open('./views/' + filename) as sql_file:
                 sql = sql_file.read()
                 try:
                     cursor.execute(sql)
@@ -119,8 +119,8 @@ setup_schemas(connection)
 ## Create Stored Procedures
 setup_stored_procs(connection)
 
-## Create Triggers
-setup_triggers(connection)
+## Create Views
+setup_views(connection)
 
 ## Load Data
 load_data(connection)
