@@ -7,9 +7,9 @@ with stimmenProStimmkreis2018 as (
   		select *
   		from wis.erststimme) z
    	join wis.kandidat k on z.kandidat = k.id and z.jahr = k.jahr
-  	join wis.partei p on p.id = k.partei and p.jahr = k.jahr)
+  	join wis.partei p on p.id = k.partei)
   union all
-  (select p.parteiid as id, p.stimmkreis, p.jahr
+  (select p.partei as id, p.stimmkreis, p.jahr
    	from wis.zweitstimmepartei p))
 
   group by id, stimmkreis, jahr
@@ -44,7 +44,7 @@ stimmenProPartei2018 as (
    			join wis.kandidat k on z.kandidat = k.id
   			join wis.partei p on p.id = k.partei )
   		union all
-  		(select p.parteiid as id, p.stimmkreis
+  		(select p.partei as id, p.stimmkreis
    		from wis.zweitstimmepartei p
    		where jahr=2018))
   group by id, stimmkreis
@@ -56,12 +56,12 @@ stimmenProPartei2018 as (
 								group by stimmkreis) * 100) as  decimal(16,2)) as gesProzent
 	from stimmenProPartei2018 s2)
 , analyseGehaltFDP as (
-	select a.gesprozent as PROZENT, p.abkuerzung AS PARTEI, g.indikator AS EINKOMMEN
+	select a.gesprozent as PROZENT, p.abkuerzung AS PARTEI, g.gehalt AS GEHALT
 	from anteilProSk a 
 		join wis.partei p on a.id = p.id
-		join wis.mapsklk m on a.stimmkreis = m.sk
-		join wis.gehalt g on g.plz = m.lkplz
-	where p.id = 1305)
+		join wis.mapsklk m on a.stimmkreis = m.stimmkreis
+		join wis.statistik_gehalt g on g.landkreis_plz = m.landkreis_plz
+	where p.id = 5)
 	
 select *
 from analyseGehaltFDP 

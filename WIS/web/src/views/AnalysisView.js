@@ -19,7 +19,7 @@ export default class AnalysisView extends Component {
         options: {},
         time: 0,
       },
-      fdp_einkommen: {
+      fdp_gehalt: {
         data: {
           datasets: [
             {
@@ -38,8 +38,8 @@ export default class AnalysisView extends Component {
   render() {
     return (
       <div class="panel">
-        <h2>FDP-Wähler - Einkommen</h2>
-        <Scatter width={600} data={this.state.fdp_einkommen.data} options={this.state.fdp_einkommen.options} />
+        <h2>FDP-Wähler - Durchschnittliches Gehalt</h2>
+        <Scatter width={600} data={this.state.fdp_gehalt.data} options={this.state.fdp_gehalt.options} />
         <h2>CSU-Wähler - Sterberate</h2>
         <Scatter width={600} data={this.state.csu_sterberate.data} options={this.state.csu_sterberate.options} />
       </div>
@@ -48,14 +48,14 @@ export default class AnalysisView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000//analysen/fdp-einkommen')
+    fetch('http://localhost:8000//analysen/fdp-gehalt')
       .then(response => response.json())
       .then(data => {
         let end = performance.now();
-        this.state.fdp_einkommen.time = end - start;
-        this.state.fdp_einkommen.data.datasets[0].data = data.map(v => {
+        this.state.fdp_gehalt.time = end - start;
+        this.state.fdp_gehalt.data.datasets[0].data = data.map(v => {
           return {
-            x: v.EINKOMMEN,
+            x: v.GEHALT,
             y: v.PROZENT,
           };
         });

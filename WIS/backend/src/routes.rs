@@ -283,8 +283,8 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
         ID: u32,
         NAME: String,
         ABKUERZUNG: String,
-        FARBE: Option<String>,
-    } //FIXME: ohne Option<...> !!!
+        FARBE: String,
+    }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(PARTEIEN).unwrap().try_into().unwrap();
@@ -352,16 +352,16 @@ pub fn analysen_csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManage
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
-/// Vergleicht das Durchschnittseinkommen mit der Prozentualen Anzahl der FDP-Wähler
-#[get("/analysen/fdp-einkommen")]
-pub fn analysen_fdp_einkommen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
+/// Vergleicht das Durchschnittsgehalt mit der Prozentualen Anzahl der FDP-Wähler
+#[get("/analysen/fdp-gehalt")]
+pub fn analysen_fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct QueryResult {
         PROZENT: f32,
         PARTEI: String,
-        EINKOMMEN: u32,
+        GEHALT: u32,
     }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
