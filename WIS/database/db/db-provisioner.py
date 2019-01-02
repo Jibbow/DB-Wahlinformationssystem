@@ -76,6 +76,22 @@ def setup_stored_procs(connection):
     print('...done\n')
 
 
+def setup_triggers(connection):
+    print('\n##### Setting up Triggers...\n')
+    for file in os.listdir(os.fsencode('./triggers')):
+        filename = os.fsdecode(file)
+        if filename.endswith('.sql'):
+            print('-> applying trigger definition file: ' + filename)
+            cursor = connection.cursor()
+            with open('./triggers/' + filename) as sql_file:
+                sql = sql_file.read()
+                try:
+                    cursor.execute(sql)
+                except Exception as e:
+                    print(e.args)
+            cursor.close()
+    print('...done\n')
+
 
 def load_data(connection):
     print('\n##### Loading data into database...\n')
@@ -102,6 +118,9 @@ setup_schemas(connection)
 
 ## Create Stored Procedures
 setup_stored_procs(connection)
+
+## Create Triggers
+setup_triggers(connection)
 
 ## Load Data
 load_data(connection)
