@@ -226,22 +226,20 @@ public class BenchmarkClient {
         String xNameTime = "Wartezeit t in s";
         String yName = "Dauer";
 
-        int [] xValuesClients = new int [7];
-        int [] xValuesTime = new int [7];
+        int [] xValuesClients = new int [6];
+        int [] xValuesTime = new int [6];
         xValuesClients[0] = 1;
         xValuesClients[1] = 2;
         xValuesClients[2] = 4;
         xValuesClients[3] = 8;
         xValuesClients[4] = 16;
         xValuesClients[5] = 32;
-        xValuesClients[6] = 64;
-        xValuesTime[0] = 1;
-        xValuesTime[1] = 2;
-        xValuesTime[2] = 3;
-        xValuesTime[3] = 4;
-        xValuesTime[4] = 5;
-        xValuesTime[5] = 6;
-        xValuesTime[6] = 7;
+        xValuesTime[0] = 2;
+        xValuesTime[1] = 3;
+        xValuesTime[2] = 4;
+        xValuesTime[3] = 5;
+        xValuesTime[4] = 6;
+        xValuesTime[5] = 7;
 
         for (int i = 0; i < 10; i ++) {
             chartName = "LineChart: Query" + queryNames[i] + " bei konstantem n";
@@ -251,8 +249,8 @@ public class BenchmarkClient {
 
         for (int i = 0; i < 10; i ++) {
             chartName = "LineChart: Query" + queryNames[i] + " bei konstantem t";
-            int[] yValues = new int[7];
-            for (int j = 0; j < 7; j++) {
+            int[] yValues = new int[6];
+            for (int j = 0; j < 6; j++) {
                 yValues[j] = overallPerformance[i][j][0];
             }
             LinechartGenerator linechartGenerator = new LinechartGenerator(xValuesClients, yValues, xNameClients, yName, chartName);
@@ -269,12 +267,12 @@ public class BenchmarkClient {
 
         setWorkloadMix();
 
-        overallPerformance = new int [10][7][7];
+        overallPerformance = new int [10][6][6];
 
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 7; j++) {
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
                 noClients = (int) Math.pow(2, i);
-                meanWaitTime = 1000 * (j + 1);
+                meanWaitTime = 1000 * (j + 2);
                 workloadPerformance = new Integer[noClients][noRequests];
 
                 handleThreads();
