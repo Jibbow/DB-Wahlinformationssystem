@@ -297,21 +297,7 @@ finalA1 as (SELECT P.NAME AS PARTEI, SUM(SITZEGES) AS SITZE
 	    join wis.kandidat k on k.id = m.kandidat and k.jahr = 2018
 	    join wis.partei p on p.id = k.partei
 	    order by p.abkuerzung
-), finalA5 as (	
-	select wk, partei, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
-	     							  ELSE (anzmandate - sitzeges) 
-	 							END as uemandate, 
- 							w.name
-	from moreSitzeWk2018 a
-		join wis.wahlkreis w on a.wk = w.nr
-	where not exists 
-		(select *
-		from moreSitzeWk2018 b
-		where a.wk = b.wk
-		and a.partei = b.partei
-		and a.jahr = b.jahr
-		and b.sitzzahl < a.sitzzahl)
-	order by wk, partei)
+)
 	
 select *
 from finalA2 f
