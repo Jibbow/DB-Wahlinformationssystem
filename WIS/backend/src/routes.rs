@@ -368,3 +368,28 @@ pub fn analysen_fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
         .query(ANALYSIS_FDP_INCOME).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
+
+
+
+
+
+
+#[derive(Deserialize)]
+pub enum Zweitstimme {
+    Partei(u32),
+    Kandidat(u32),
+}
+#[derive(Deserialize)]
+pub struct Stimmabgabe {
+    token: String,
+    erststimme: Option<u32>,
+    zweitstimme: Option<Zweitstimme>,
+}
+
+/// Mit dieser Anfrage kann man eine Stimme abgeben, die dann im Wahlsystem gespeichert wird,
+/// falls sie gültig ist und das Token (=Ausweisnummer) noch nicht für die jeweilige Stimme
+/// eingesetzt wurde.
+#[post("/abstimmen", data = "<stimme>")]
+pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>) -> content::Json<String> {
+    content::Json("not yet done".to_string())
+}

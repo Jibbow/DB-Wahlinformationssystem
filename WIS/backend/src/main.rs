@@ -43,6 +43,7 @@ fn main() {
                 routes::stimmverteilunggesamt,
                 routes::analysen_csu_sterberate,
                 routes::analysen_fdp_gehalt,
+                routes::abstimmen,
             ],
         )
         .launch();
