@@ -7,9 +7,9 @@ with stimmenProStimmkreis2018 as (
   		select *
   		from wis.erststimme) z
    	join wis.kandidat k on z.kandidat = k.id and z.jahr = k.jahr
-  	join wis.partei p on p.id = k.partei and p.jahr = k.jahr)
+  	join wis.partei p on p.id = k.partei)
   union all
-  (select p.parteiid as id, p.stimmkreis, p.jahr
+  (select p.partei as id, p.stimmkreis, p.jahr
    	from wis.zweitstimmepartei p))
 
   group by id, stimmkreis, jahr
@@ -44,7 +44,7 @@ stimmenProPartei2018 as (
    			join wis.kandidat k on z.kandidat = k.id
   			join wis.partei p on p.id = k.partei )
   		union all
-  		(select p.parteiid as id, p.stimmkreis
+  		(select p.partei as id, p.stimmkreis
    		from wis.zweitstimmepartei p
    		where jahr=2018))
   group by id, stimmkreis
@@ -57,12 +57,12 @@ stimmenProPartei2018 as (
 	from stimmenProPartei2018 s2)
 ,
 analyseSterbeCSU as (
-	select a.gesprozent as PROZENT, p.abkuerzung as PARTEI, s.indikator as STERBERATE
+	select a.gesprozent as PROZENT, p.abkuerzung as PARTEI, s.sterberate as STERBERATE
 	from anteilProSk a 
 		join wis.partei p on a.id = p.id
-		join wis.mapsklk m on a.stimmkreis = m.sk
-		join wis.sterberate s on s.plz = m.lkplz
-	where p.id = 1301)
+		join wis.mapsklk m on a.stimmkreis = m.stimmkreis
+		join wis.statistik_sterberate s on s.landkreis_plz = m.landkreis_plz
+	where p.id = 1)
 	
 select *
 from analyseSterbeCSU 

@@ -83,3 +83,15 @@
 #personalausweis {
   width: 220px;
 }
+
+.checkbox-aggregate {
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-aggregate > .react-toggle {
+  margin: 8px;
+}

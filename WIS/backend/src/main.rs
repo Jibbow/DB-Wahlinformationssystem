@@ -42,7 +42,7 @@ fn main() {
                 routes::stimmkreise,
                 routes::stimmverteilunggesamt,
                 routes::analysen_csu_sterberate,
-                routes::analysen_fdp_einkommen,
+                routes::analysen_fdp_gehalt,
             ],
         )
         .launch();
