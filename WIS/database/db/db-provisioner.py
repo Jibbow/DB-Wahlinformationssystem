@@ -40,7 +40,7 @@ def load_csv_file(connection, file, table):
 
 def setup_schemas(connection):
     print('\n##### Setting up schemas...\n')
-    for file in os.listdir(os.fsencode('./schemas')):
+    for file in sorted(os.listdir(os.fsencode('./schemas'))):
         filename = os.fsdecode(file)
         if filename.endswith('.sql'):
             print('-> applying schema definition file: ' + filename)
@@ -61,7 +61,7 @@ def setup_schemas(connection):
 
 def setup_stored_procs(connection):
     print('\n##### Setting up stored procedures...\n')
-    for file in os.listdir(os.fsencode('./stored_procs')):
+    for file in sorted(os.listdir(os.fsencode('./stored_procs'))):
         filename = os.fsdecode(file)
         if filename.endswith('.sql'):
             print('-> applying stored procedure file: ' + filename)
@@ -78,7 +78,7 @@ def setup_stored_procs(connection):
 
 def setup_views(connection):
     print('\n##### Setting up Views...\n')
-    for file in os.listdir(os.fsencode('./views')):
+    for file in sorted(os.listdir(os.fsencode('./views'))):
         filename = os.fsdecode(file)
         if filename.endswith('.sql'):
             print('-> applying view definition file: ' + filename)
@@ -95,7 +95,7 @@ def setup_views(connection):
 
 def load_data(connection):
     print('\n##### Loading data into database...\n')
-    for file in os.listdir(os.fsencode('./data')):
+    for file in sorted(os.listdir(os.fsencode('./data'))):
         filename = os.fsdecode(file)
         if filename.endswith('.csv'):
             print('-> loading file: ' + filename)
