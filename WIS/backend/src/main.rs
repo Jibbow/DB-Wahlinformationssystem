@@ -41,6 +41,8 @@ fn main() {
                 routes::parteien,
                 routes::stimmkreise,
                 routes::stimmverteilunggesamt,
+                routes::wahlzettel_erststimme,
+                routes::wahlzettel_zweitstimme,
                 routes::analysen_csu_sterberate,
                 routes::analysen_fdp_gehalt,
             ],

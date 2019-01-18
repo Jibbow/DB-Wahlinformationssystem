@@ -22,6 +22,8 @@ const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
 const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysis-fdp-income.sql");
 const PARTEIEN: &str = include_str!("../queries/tabelle-parteien.sql");
 const STIMMKREISE: &str = include_str!("../queries/tabelle-stimmkreise.sql");
+const STIMMZETTEL_ERSTSTIMME: &str = include_str!("../queries/wahl-stimmzettel-erststimme.sql");
+const STIMMZETTEL_ZWEITSTIMME: &str = include_str!("../queries/wahl-stimmzettel-zweitstimme.sql");
 
 
 
@@ -328,6 +330,50 @@ pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
     }
 
     let query = STIMMVERTEILUNG_GESAMT
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+#[get("/wahlzettel/erststimme/<stimmkreis>/<jahr>")]
+pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        PARTEI: String,
+        PARTEI_ABKUERZUNG: String,
+        KANDIDAT_VORNAME: String,
+        KANDIDAT_NACHNAME: String,
+        LISTENPOSITION: String,
+    }
+
+    let query = STIMMZETTEL_ERSTSTIMME
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+#[get("/wahlzettel/zweitstimme/<stimmkreis>/<jahr>")]
+pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        PARTEI: String,
+        PARTEI_ABKUERZUNG: String,
+        KANDIDAT_VORNAME: String,
+        KANDIDAT_NACHNAME: String,
+        LISTENPOSITION: String,
+    }
+
+    let query = STIMMZETTEL_ZWEITSTIMME
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
