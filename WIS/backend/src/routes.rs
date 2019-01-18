@@ -439,32 +439,50 @@ pub struct Stimmabgabe {
 pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>) -> String {
     // validate token
     let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
-    if validator.is_match(&stimme.token) {
+    if !validator.is_match(&stimme.token) {
         return "Format des Tokens ist ungültig.".to_string();
     }
 
     let mut db_connection = db.get().expect("failed to connect to DB");
 
-    if let Some(erststimme) = stimme.erststimme {
-        let query = "UPDATE WIS.WAHLTOKEN SET ERSTSTIMMEABGEGEBEN = 1 WHERE TOKEN={{TOKEN}}".replace("{{TOKEN}}", &stimme.token);
+    if let Some(kandidat) = stimme.erststimme {
+        let query = "UPDATE WIS.WAHLTOKEN SET ERSTSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ERSTSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
+        dbg![&query];
         let altered_rows = db_connection.dml(&query).unwrap();
         if altered_rows != 1 {
             return "Token ungültig oder Erststimme bereits abgegeben! Es wurde keine Stimme abgegeben.".to_string();
         }
 
-        db_connection.exec("INSERT INTO WIS.ERSTSTIMME VALUES ({{KANDIDAT}}, STIMMKREIS, 2018)").unwrap();
+        let query = "INSERT INTO WIS.ERSTSTIMME (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
+            .replace("{{KANDIDAT}}", &kandidat.to_string())
+            .replace("{{TOKEN}}", &stimme.token);
+        dbg![&query];
+        db_connection.exec(&query);
     }
 
     if let Some(ref zweitstimme) = stimme.zweitstimme {
-        let query = "UPDATE WIS.WAHLTOKEN SET ZWEITSTIMMEABGEGEBEN = 1 WHERE TOKEN={{TOKEN}}".replace("{{TOKEN}}", &stimme.token);
+        let query = "UPDATE WIS.WAHLTOKEN SET ZWEITSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ZWEITSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
+        dbg![&query];
         let altered_rows = db_connection.dml(&query).unwrap();
         if altered_rows != 1 {
             return "Token ungültig oder Zweitstimme bereits abgegeben! Es wurde keine Zweitstimme abgegeben.".to_string();
         }
 
         match zweitstimme {
-            Zweitstimme::kandidat(k) => db_connection.exec("INSERT INTO WIS.ZWEITSTIMMEKANDIDAT VALUES ({{KANDIDAT}}, STIMMKREIS, 2018)").unwrap(),
-            Zweitstimme::partei(p) => db_connection.exec("INSERT INTO WIS.ZWEITSTIMMEPARTEI VALUES ({{KANDIDAT}}, STIMMKREIS, 2018)").unwrap(),
+            Zweitstimme::kandidat(k) => {
+                let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
+                    .replace("{{KANDIDAT}}", &k.to_string())
+                    .replace("{{TOKEN}}", &stimme.token);
+                dbg![&query];
+                db_connection.exec(&query);
+            }
+            Zweitstimme::partei(p) => {
+                let query = "INSERT INTO WIS.ZWEITSTIMMEPARTEI (SELECT {{PARTEI}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
+                    .replace("{{PARTEI}}", &p.to_string())
+                    .replace("{{TOKEN}}", &stimme.token);
+                dbg![&query];
+                db_connection.exec(&query);
+            }
         }
     }
     "Stimme abgegeben".to_string()
