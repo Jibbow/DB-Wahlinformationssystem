@@ -45,6 +45,7 @@ fn main() {
                 routes::wahlzettel_zweitstimme,
                 routes::analysen_csu_sterberate,
                 routes::analysen_fdp_gehalt,
+                routes::abstimmen,
             ],
         )
         .launch();
