@@ -1,5 +1,6 @@
 extern crate serde;
 extern crate serde_json;
+extern crate regex;
 
 use rocket::response::content;
 use rocket::State;
@@ -22,6 +23,8 @@ const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
 const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysis-fdp-income.sql");
 const PARTEIEN: &str = include_str!("../queries/tabelle-parteien.sql");
 const STIMMKREISE: &str = include_str!("../queries/tabelle-stimmkreise.sql");
+const STIMMZETTEL_ERSTSTIMME: &str = include_str!("../queries/wahl-stimmzettel-erststimme.sql");
+const STIMMZETTEL_ZWEITSTIMME: &str = include_str!("../queries/wahl-stimmzettel-zweitstimme.sql");
 
 
 
@@ -335,6 +338,50 @@ pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
+#[get("/wahlzettel/erststimme/<stimmkreis>/<jahr>")]
+pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        PARTEI: String,
+        PARTEI_ABKUERZUNG: String,
+        KANDIDAT_VORNAME: String,
+        KANDIDAT_NACHNAME: String,
+        LISTENPOSITION: String,
+    }
+
+    let query = STIMMZETTEL_ERSTSTIMME
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
+#[get("/wahlzettel/zweitstimme/<stimmkreis>/<jahr>")]
+pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+    // define result from DB (names must match column names!)
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct QueryResult {
+        PARTEI: String,
+        PARTEI_ABKUERZUNG: String,
+        KANDIDAT_VORNAME: String,
+        KANDIDAT_NACHNAME: String,
+        LISTENPOSITION: String,
+    }
+
+    let query = STIMMZETTEL_ZWEITSTIMME
+        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+        .replace("{{JAHR}}", &jahr.to_string());
+
+    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
+        .query(&query).unwrap().try_into().unwrap();
+    content::Json(serde_json::to_string(&result).unwrap())
+}
+
 /// Vergleicht die Sterberate mit der Prozentualen Anzahl der CSU-Wähler
 #[get("/analysen/csu-sterberate")]
 pub fn analysen_csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
@@ -367,4 +414,76 @@ pub fn analysen_fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(ANALYSIS_FDP_INCOME).unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
+}
+
+
+
+
+#[derive(Deserialize)]
+#[allow(non_camel_case_types)]
+pub enum Zweitstimme {
+    partei(u32),
+    kandidat(u32),
+}
+#[derive(Deserialize)]
+pub struct Stimmabgabe {
+    token: String,
+    erststimme: Option<u32>,
+    zweitstimme: Option<Zweitstimme>,
+}
+
+/// Mit dieser Anfrage kann man eine Stimme abgeben, die dann im Wahlsystem gespeichert wird,
+/// falls sie gültig ist und das Token (=Ausweisnummer) noch nicht für die jeweilige Stimme
+/// eingesetzt wurde.
+#[post("/abstimmen", data = "<stimme>")]
+pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>) -> String {
+    // validate token
+    let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
+    if !validator.is_match(&stimme.token) {
+        return "Format des Tokens ist ungültig.".to_string();
+    }
+
+    let mut db_connection = db.get().expect("failed to connect to DB");
+
+    if let Some(kandidat) = stimme.erststimme {
+        let query = "UPDATE WIS.WAHLTOKEN SET ERSTSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ERSTSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
+        dbg![&query];
+        let altered_rows = db_connection.dml(&query).unwrap();
+        if altered_rows != 1 {
+            return "Token ungültig oder Erststimme bereits abgegeben! Es wurde keine Stimme abgegeben.".to_string();
+        }
+
+        let query = "INSERT INTO WIS.ERSTSTIMME (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
+            .replace("{{KANDIDAT}}", &kandidat.to_string())
+            .replace("{{TOKEN}}", &stimme.token);
+        dbg![&query];
+        db_connection.exec(&query);
+    }
+
+    if let Some(ref zweitstimme) = stimme.zweitstimme {
+        let query = "UPDATE WIS.WAHLTOKEN SET ZWEITSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ZWEITSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
+        dbg![&query];
+        let altered_rows = db_connection.dml(&query).unwrap();
+        if altered_rows != 1 {
+            return "Token ungültig oder Zweitstimme bereits abgegeben! Es wurde keine Zweitstimme abgegeben.".to_string();
+        }
+
+        match zweitstimme {
+            Zweitstimme::kandidat(k) => {
+                let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
+                    .replace("{{KANDIDAT}}", &k.to_string())
+                    .replace("{{TOKEN}}", &stimme.token);
+                dbg![&query];
+                db_connection.exec(&query);
+            }
+            Zweitstimme::partei(p) => {
+                let query = "INSERT INTO WIS.ZWEITSTIMMEPARTEI (SELECT {{PARTEI}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
+                    .replace("{{PARTEI}}", &p.to_string())
+                    .replace("{{TOKEN}}", &stimme.token);
+                dbg![&query];
+                db_connection.exec(&query);
+            }
+        }
+    }
+    "Stimme abgegeben".to_string()
 }
