@@ -210,6 +210,8 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
     #[allow(non_snake_case)]
     struct QueryResult {
         UEBERHANGMANDATE: u32,
+        WAHLKREIS: String,
+        PARTEI: String
     }
 
     let query = UEBERHANGMANDATE

@@ -1,4 +1,4 @@
- WITH 
+ WITH
      /* zählen der gesammten abgegebenen Stimmen  */
      GESAMT2018 AS (SELECT *
            FROM (SELECT Count(*) AS gesamterst
@@ -253,7 +253,7 @@ finalA1 as (SELECT P.NAME AS PARTEI, SUM(SITZEGES) AS SITZE
 		from wis.ZweitstimmeKandidat
 ), stimmenListe2018 as (
 	select distinct sk.wahlkreis, z.kandidat, count(*) as anzStimmen, sk.jahr, lod.partei
-	from listeOhneDirekte2018 lod 
+	from listeOhneDirekte2018 lod
 		join stimmenZusammen2018 z on lod.id = z.kandidat and lod.jahr = z.jahr
 		join wis.stimmkreis sk on sk.nr = z.stimmkreis  and sk.jahr = z.jahr
 		join wis.wahlkreis w on w.nr = sk.wahlkreis
@@ -267,17 +267,17 @@ finalA1 as (SELECT P.NAME AS PARTEI, SUM(SITZEGES) AS SITZE
 				and sl2.partei = sl1.partei) + 1 as pos
 	from stimmenListe2018 sl1
 ), posListeCase2018 as (
-	select distinct wahlkreis, p.partei, pos, kandidat,  
+	select distinct wahlkreis, p.partei, pos, kandidat,
 		CASE WHEN anzMandate is null  THEN 0
 	     							  ELSE anzMandate
 	 							END as anzMandate,
 	 				f.sitzeges
-	from posListe2018 p 
-		join finaladdSitzeWK2018 f 
-			on p.partei = f.partei 
+	from posListe2018 p
+		join finaladdSitzeWK2018 f
+			on p.partei = f.partei
 			and p.jahr = f.jahr
 			and p.partei = f.partei
-			and f.wk = p.wahlkreis 
+			and f.wk = p.wahlkreis
 		left outer join direktMandateWk2018 dm
 			on f.partei = dm.partei
 			and f.jahr = dm.jahr
@@ -286,16 +286,16 @@ finalA1 as (SELECT P.NAME AS PARTEI, SUM(SITZEGES) AS SITZE
 	select *
 	from posListeCase2018 p
 	where p.pos <= p.sitzeges - p.anzmandate)
-, finalA5 as (	
+, finalA5 as (
 	select wk as WAHLKREISID, p.id as PARTEI, CASE WHEN (anzmandate - sitzeges)  <= 0  THEN 0
-	     							  ELSE (anzmandate - sitzeges) 
-	 							END as UEBERHANGMANDATE, 
+	     							  ELSE (anzmandate - sitzeges)
+	 							END as UEBERHANGMANDATE,
  							w.name as WAHLKREIS,
 							 a.jahr as JAHR
 	from moreSitzeWk2018 a
 		join wis.wahlkreis w on a.wk = w.nr and w.jahr=a.jahr
 		join wis.partei p on p.id=a.partei
-	where not exists 
+	where not exists
 		(select *
 		from moreSitzeWk2018 b
 		where a.wk = b.wk
@@ -303,6 +303,8 @@ finalA1 as (SELECT P.NAME AS PARTEI, SUM(SITZEGES) AS SITZE
 		and a.jahr = b.jahr
 		and b.sitzzahl < a.sitzzahl)
 	order by wk, p.abkuerzung)
-	
-select UEBERHANGMANDATE
-from finalA5 f where wahlkreisid={{WAHLKREIS}} and partei={{PARTEI}} and jahr={{JAHR}}
+
+select UEBERHANGMANDATE, WAHLKREIS, abkuerzung as partei
+from finalA5 f
+    join WIS.partei p on P.id = f.partei
+where wahlkreisid={{WAHLKREIS}} and partei={{PARTEI}} and jahr={{JAHR}}

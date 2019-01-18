@@ -5,6 +5,7 @@ export default class WahlkreisView extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      parteien: [],
       ueberhangmandate: {
         Oberbayern: [],
         Niederbayern: [],
@@ -24,9 +25,9 @@ export default class WahlkreisView extends Component {
         <div>
           <h2>Überhangmandate</h2>
           {Object.keys(this.state.ueberhangmandate).map(k => (
-            <div>
-              <h3>{k}</h3>
-              <table class="table">
+            <div  key={k + "div"}>
+              <h3  id={k + "headers"}>{k}</h3>
+              <table class="table"  id={k.partei + "table"}>
                 <thead>
                   <tr>
                     <th scope="col">Partei</th>
@@ -37,9 +38,9 @@ export default class WahlkreisView extends Component {
                   {Object.keys(this.state.ueberhangmandate[k])
                     .map(k2 => this.state.ueberhangmandate[k][k2])
                     .map(v => (
-                      <tr>
-                        <td>{v.partei}</td>
-                        <td>{v.ueberhangmandate}</td>
+                      <tr key={v.partei}>
+                        <td id={v.partei + "p"}>{v.partei}</td>
+                        <td id={v.partei + "ueber"}>{v.ueberhangmandate}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -53,18 +54,31 @@ export default class WahlkreisView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000/ueberhangmandate/2018')
+    fetch('http://localhost:8000/parteien')
       .then(response => response.json())
       .then(data => {
-        let end = performance.now();
-        this.state.ueberhangmandate.time = end - start;
-        data.forEach(v =>
-          this.state.ueberhangmandate[v.WAHLKREIS].push({
-            partei: v.PARTEI,
-            ueberhangmandate: v.UEBERHANGMANDATE,
-          })
-        );
-        this.forceUpdate();
-      });
+        this.state.parteien = data;
+      })
+      .then(() => {
+        for (const x of Array(7).keys()) {
+          for (const p in this.state.parteien) {
+            const url = "http://localhost:8000/ueberhangmandate/" + (x + 1)
+                        + "/" +  p + "/2018";
+            fetch(url)
+              .then(response => {
+                return response.json()}
+              )
+              .then(data => {
+                const man = this.state.ueberhangmandate;
+                const arr = man[data.WAHLKREIS];
+                arr.push({
+                  partei: data.PARTEI,
+                  ueberhangmandate: data.UEBERHANGMANDATE
+                })
+                this.forceUpdate();
+              })
+          }
+        }
+      })
   }
 }
