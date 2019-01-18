@@ -1,5 +1,6 @@
 extern crate serde;
 extern crate serde_json;
+extern crate regex;
 
 use rocket::response::content;
 use rocket::State;
@@ -418,12 +419,11 @@ pub fn analysen_fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
 
 
 
-
-
 #[derive(Deserialize)]
+#[allow(non_camel_case_types)]
 pub enum Zweitstimme {
-    Partei(u32),
-    Kandidat(u32),
+    partei(u32),
+    kandidat(u32),
 }
 #[derive(Deserialize)]
 pub struct Stimmabgabe {
@@ -436,6 +436,36 @@ pub struct Stimmabgabe {
 /// falls sie gültig ist und das Token (=Ausweisnummer) noch nicht für die jeweilige Stimme
 /// eingesetzt wurde.
 #[post("/abstimmen", data = "<stimme>")]
-pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>) -> content::Json<String> {
-    content::Json("not yet done".to_string())
+pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>) -> String {
+    // validate token
+    let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
+    if validator.is_match(&stimme.token) {
+        return "Format des Tokens ist ungültig.".to_string();
+    }
+
+    let mut db_connection = db.get().expect("failed to connect to DB");
+
+    if let Some(erststimme) = stimme.erststimme {
+        let query = "UPDATE WIS.WAHLTOKEN SET ERSTSTIMMEABGEGEBEN = 1 WHERE TOKEN={{TOKEN}}".replace("{{TOKEN}}", &stimme.token);
+        let altered_rows = db_connection.dml(&query).unwrap();
+        if altered_rows != 1 {
+            return "Token ungültig oder Erststimme bereits abgegeben! Es wurde keine Stimme abgegeben.".to_string();
+        }
+
+        db_connection.exec("INSERT INTO WIS.ERSTSTIMME VALUES ({{KANDIDAT}}, STIMMKREIS, 2018)").unwrap();
+    }
+
+    if let Some(ref zweitstimme) = stimme.zweitstimme {
+        let query = "UPDATE WIS.WAHLTOKEN SET ZWEITSTIMMEABGEGEBEN = 1 WHERE TOKEN={{TOKEN}}".replace("{{TOKEN}}", &stimme.token);
+        let altered_rows = db_connection.dml(&query).unwrap();
+        if altered_rows != 1 {
+            return "Token ungültig oder Zweitstimme bereits abgegeben! Es wurde keine Zweitstimme abgegeben.".to_string();
+        }
+
+        match zweitstimme {
+            Zweitstimme::kandidat(k) => db_connection.exec("INSERT INTO WIS.ZWEITSTIMMEKANDIDAT VALUES ({{KANDIDAT}}, STIMMKREIS, 2018)").unwrap(),
+            Zweitstimme::partei(p) => db_connection.exec("INSERT INTO WIS.ZWEITSTIMMEPARTEI VALUES ({{KANDIDAT}}, STIMMKREIS, 2018)").unwrap(),
+        }
+    }
+    "Stimme abgegeben".to_string()
 }
