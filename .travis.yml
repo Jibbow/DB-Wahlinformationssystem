@@ -10,6 +10,8 @@ jobs:
     language: node_js
     before_install:
     - cd WIS/web
+    script:
+    - npm build
 
   - stage: build
     name: "Build Backend"
