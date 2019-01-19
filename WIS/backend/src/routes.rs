@@ -6,26 +6,24 @@ use rocket::State;
 
 
 // load sql queries during compile time
-const SITZVERTEILUNG: &str = include_str!("../queries/bayern-sitzverteilung.sql");
-const LANDTAGSMITGLIEDER: &str = include_str!("../queries/bayern-landtagsmitglieder.sql");
-const STIMMVERTEILUNG_GESAMT: &str = include_str!("../queries/bayern-stimmverteilung-gesamt.sql");
+const SITZVERTEILUNG: &str = include_str!("../queries/bayern/sitzverteilung.sql");
+const LANDTAGSMITGLIEDER: &str = include_str!("../queries/bayern/landtagsmitglieder.sql");
+const STIMMVERTEILUNG_GESAMT: &str = include_str!("../queries/bayern/stimmverteilung.sql");
 const UEBERHANGMANDATE: &str = include_str!("../queries/partei-überhangmandate.sql");
 const KNAPPSTE_SIEGER: &str = include_str!("../queries/partei-top10.sql");
 const KNAPPSTE_VERLIERER: &str = include_str!("../queries/partei-top-10-knappste-verlierer.sql");
-const WAHLBETEILIGUNG: &str = include_str!("../queries/sk-wahlbeteiligung.sql");
-const WAHLBETEILIGUNG_AGG: &str = include_str!("../queries/agg-sk-wahlbeteiligung.sql");
-const DIREKTKANDIDATENGEWINNER: &str = include_str!("../queries/sk-direktkandidatengewinner.sql");
-const DIREKTKANDIDATENGEWINNER_AGG: &str = include_str!("../queries/agg-sk-direktkandidatengewinner.sql");
-const STIMMVERTEILUNG: &str = include_str!("../queries/sk-stimmverteilung.sql");
-const STIMMVERTEILUNG_AGG: &str = include_str!("../queries/agg-sk-stimmverteilung.sql");
-const STIMMVERTEILUNG_DIFF: &str = include_str!("../queries/sk-stimmverteilung-diff.sql");
-const STIMMVERTEILUNG_DIFF_AGG: &str = include_str!("../queries/agg-sk-stimmverteilung-diff.sql");
-const SIEGERPARTEI_ERSTSTIMME: &str = include_str!("../queries/sk-siegerpartei-erststimme.sql");
-const SIEGERPARTEI_ZWEITSTIMME: &str = include_str!("../queries/sk-siegerpartei-zweitstimme.sql");
-const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
-const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysis-fdp-income.sql");
-const PARTEIEN: &str = include_str!("../queries/tabelle-parteien.sql");
-const STIMMKREISE: &str = include_str!("../queries/tabelle-stimmkreise.sql");
+const WAHLBETEILIGUNG: &str = include_str!("../queries/stimmkreis/wahlbeteiligung.sql");
+const WAHLBETEILIGUNG_AGG: &str = include_str!("../queries/stimmkreis/voraggregiert/agg-wahlbeteiligung.sql");
+const DIREKTKANDIDATENGEWINNER: &str = include_str!("../queries/stimmkreis/direktkandidatengewinner.sql");
+const DIREKTKANDIDATENGEWINNER_AGG: &str = include_str!("../queries/stimmkreis/voraggregiert/agg-direktkandidatengewinner.sql");
+const STIMMVERTEILUNG: &str = include_str!("../queries/stimmkreis/stimmverteilung.sql");
+const STIMMVERTEILUNG_AGG: &str = include_str!("../queries/stimmkreis/voraggregiert/agg-stimmverteilung.sql");
+const STIMMVERTEILUNG_DIFF: &str = include_str!("../queries/stimmkreis/stimmverteilung-diff.sql");
+const STIMMVERTEILUNG_DIFF_AGG: &str = include_str!("../queries/stimmkreis/voraggregiert/agg-stimmverteilung-diff.sql");
+const SIEGERPARTEI_ERSTSTIMME: &str = include_str!("../queries/stimmkreis/siegerpartei-erststimme.sql");
+const SIEGERPARTEI_ZWEITSTIMME: &str = include_str!("../queries/stimmkreis/siegerpartei-zweitstimme.sql");
+const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysen/csu-sterberate.sql");
+const ANALYSIS_FDP_INCOME: &str = include_str!("../queries/analysen/fdp-gehalt.sql");
 
 
 
@@ -306,7 +304,7 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
     }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(PARTEIEN).unwrap().try_into().unwrap();
+        .query("SELECT ID, ABKUERZUNG, NAME, FARBE FROM WIS.PARTEI").unwrap().try_into().unwrap();
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
@@ -325,7 +323,9 @@ pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u
         WAHLKREISNR: u32,
     }
 
-    let query = STIMMKREISE
+    let query = "SELECT S.NR, S.NAME, S.STIMMBERECHTIGTE, W.NAME AS WAHLKREIS, W.NR AS WAHLKREISNR
+                 FROM WIS.STIMMKREIS S JOIN WIS.WAHLKREIS W ON S.WAHLKREIS=W.NR
+                 WHERE S.JAHR={{JAHR}}"
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
