@@ -1,11 +1,24 @@
 stages:
-- name: docker
+- name: build
 - name: deploy
   if: branch = master AND type = push
 
 jobs:
   include:
-  - stage: docker
+  - stage: build
+    name: "Build Frontend"
+    language: node_js
+    before_script:
+    - cd WIS/web
+
+  - stage: build
+    name: "Build Backend"
+    language: rust
+    rust: nightly
+    before_script:
+    - cd WIS/backend
+
+  - stage: deploy
     name: "Build Backend Docker image"
     services: docker
     before_script:
@@ -19,8 +32,10 @@ jobs:
       script: docker push
       on:
         branch: master
+    after_deploy:
+    - curl "$DEPLOYMENT_TRIGGER_URL"
 
-  - stage: docker
+  - stage: deploy
     name: "Build Frontend Docker image"
     services: docker
     before_script:
@@ -34,9 +49,5 @@ jobs:
       script: docker push
       on:
         branch: master
-
-  - stage: deploy
-    name: "Trigger new Deployment"
-    script:
+    after_deploy:
     - curl "$DEPLOYMENT_TRIGGER_URL"
-    
