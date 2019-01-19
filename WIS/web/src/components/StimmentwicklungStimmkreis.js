@@ -48,7 +48,7 @@ export default class StimmentwicklungStimmkreis extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.props.stimmkreis !== prevProps.stimmkreis) {
       let start = performance.now();
-      fetch(`http://localhost:8000/stimmverteilungdifferenz/${this.props.stimmkreis}`)
+      fetch(`http://localhost:8000/stimmverteilungdifferenz/${this.props.stimmkreis}?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();

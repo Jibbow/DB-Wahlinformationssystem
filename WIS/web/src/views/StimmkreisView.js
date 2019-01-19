@@ -61,11 +61,11 @@ export default class StimmkreisView extends Component {
               </div>
               <div>
                 <h3>Verteilung der Stimmen</h3>
-                <Stimmverteilung stimmkreis={this.state.stimmkreis} /*filter={v => v.PROZENT >= 5.0}*/ />
+                <Stimmverteilung stimmkreis={this.state.stimmkreis} /*filter={v => v.PROZENT >= 5.0}*/ computeOnAggregatedData={this.props.computeOnAggregatedData} />
               </div>
               <div>
                 <h3>Entwicklung der Stimmen im Vergleich zu 2013</h3>
-                <StimmentwicklungStimmkreis stimmkreis={this.state.stimmkreis} />
+                <StimmentwicklungStimmkreis stimmkreis={this.state.stimmkreis} computeOnAggregatedData={this.props.computeOnAggregatedData} />
               </div>
               <div>
                 <h3>Anzahl an Stimmen für jede Partei</h3>
@@ -90,13 +90,13 @@ export default class StimmkreisView extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.stimmkreis !== prevState.stimmkreis) {
       let start = performance.now();
-      fetch(`http://localhost:8000/direktkandidatengewinner/${this.state.stimmkreis}/2018`)
+      fetch(`http://localhost:8000/direktkandidatengewinner/${this.state.stimmkreis}/2018?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();
           this.setState({ gewinner: { time: end - start, person: data } });
         });
-      fetch(`http://localhost:8000/wahlbeteiligung/${this.state.stimmkreis}/2018`)
+      fetch(`http://localhost:8000/wahlbeteiligung/${this.state.stimmkreis}/2018?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();

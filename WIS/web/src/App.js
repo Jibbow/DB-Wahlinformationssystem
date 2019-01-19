@@ -58,7 +58,7 @@ class App extends Component {
               <WahlkreisView />
             </Tab.Pane>
             <Tab.Pane eventKey={3}>
-              <StimmkreisView />
+              <StimmkreisView computeOnAggregatedData={this.state.useAggregatedData} />
             </Tab.Pane>
             <Tab.Pane eventKey={4}>
               <ParteiView />
