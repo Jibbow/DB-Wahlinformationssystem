@@ -49,12 +49,12 @@ export default class Stimmverteilung extends Component {
                   {
                     label: '2013 (links)',
                     data: this.state.stimmverteilung2018.map(v18 => (this.state.stimmverteilung2013.find(v13 => v13.PARTEI === v18.PARTEI) || { PROZENT: 0 }).PROZENT),
-                    backgroundColor: this.state.stimmverteilung2018.map(v18 => v18.FARBE),
+                    backgroundColor: this.state.stimmverteilung2018.map(v18 => '#' + v18.PARTEI_FARBE),
                   },
                   {
                     label: '2018 (rechts)',
                     data: this.state.stimmverteilung2018.map(v18 => v18.PROZENT),
-                    backgroundColor: this.state.stimmverteilung2018.map(v18 => v18.FARBE),
+                    backgroundColor: this.state.stimmverteilung2018.map(v18 => '#' + v18.PARTEI_FARBE),
                   },
                 ],
                 labels: this.state.stimmverteilung2018.map(v => v.PARTEI),

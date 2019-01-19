@@ -36,6 +36,7 @@ pub fn sitzverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
+        PARTEI_FARBE: String,
         SITZE: u32,
     }
 
@@ -121,6 +122,7 @@ pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
+        PARTEI_FARBE: String,
         GESAMTSTIMMEN: u32,
         PROZENT: f32,
     }
@@ -144,6 +146,7 @@ pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManag
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
+        PARTEI_FARBE: String,
         DIFF_GESAMTSTIMMEN: i32,
         DIFF_PROZENT: f32,
     }
@@ -165,6 +168,7 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
+        PARTEI_FARBE: String,
         ANZAHLERSTSTIMMEN: u32,
     }
 
@@ -186,6 +190,7 @@ pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManag
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
+        PARTEI_FARBE: String,
         ANZAHLZWEITSTIMMEN: u32,
     }
 
@@ -325,6 +330,7 @@ pub fn stimmverteilunggesamt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
     #[allow(non_snake_case)]
     struct QueryResult {
         PARTEI: String,
+        PARTEI_FARBE: String,
         GESAMTSTIMMEN: u32,
         PROZENT: f32,
     }

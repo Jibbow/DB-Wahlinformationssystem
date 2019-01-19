@@ -25,7 +25,7 @@ export default class StimmentwicklungStimmkreis extends Component {
                 datasets: [
                   {
                     data: this.state.stimmentwicklung.map(v => v.DIFF_PROZENT),
-                    backgroundColor: this.state.stimmentwicklung.map(v => v.FARBE),
+                    backgroundColor: this.state.stimmentwicklung.map(v => '#' + v.PARTEI_FARBE),
                   },
                 ],
                 labels: this.state.stimmentwicklung.map(v => v.PARTEI),

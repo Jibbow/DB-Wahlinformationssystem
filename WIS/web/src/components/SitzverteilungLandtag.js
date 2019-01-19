@@ -34,7 +34,7 @@ export default class SitzverteilungLandtag extends Component {
                 datasets: [
                   {
                     data: this.state.sitzverteilung.map(v => v.SITZE),
-                    backgroundColor: this.state.sitzverteilung.map(v => v.FARBE),
+                    backgroundColor: this.state.sitzverteilung.map(v => '#' + v.PARTEI_FARBE),
                   },
                 ],
                 labels: this.state.sitzverteilung.map(v => v.PARTEI),
