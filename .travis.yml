@@ -19,7 +19,7 @@ jobs:
     - cd WIS/backend
 
   - stage: deploy
-    name: "Build Backend Docker image"
+    name: "Deploy Backend Docker image"
     services: docker
     before_script:
     - cd WIS/backend
@@ -36,7 +36,7 @@ jobs:
     - curl "$DEPLOYMENT_TRIGGER_URL"
 
   - stage: deploy
-    name: "Build Frontend Docker image"
+    name: "Deploy Frontend Docker image"
     services: docker
     before_script:
     - cd WIS/web
