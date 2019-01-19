@@ -12,6 +12,7 @@ extern crate serde_derive;
 
 mod cors;
 mod routes;
+mod routes_stimmabgabe;
 
 
 
@@ -40,12 +41,12 @@ fn main() {
                 routes::parteien,
                 routes::stimmkreise,
                 routes::stimmverteilunggesamt,
-                routes::wahlzettel_erststimme,
-                routes::wahlzettel_zweitstimme,
                 routes::analysen_csu_sterberate,
                 routes::analysen_fdp_gehalt,
-                routes::abstimmen,
-                routes::tokeninfo,
+                routes_stimmabgabe::abstimmen,
+                routes_stimmabgabe::tokeninfo,
+                routes_stimmabgabe::wahlzettel_erststimme,
+                routes_stimmabgabe::wahlzettel_zweitstimme,
             ],
         )
         .launch();
