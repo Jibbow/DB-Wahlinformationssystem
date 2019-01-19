@@ -4,7 +4,6 @@
 extern crate dotenv;
 extern crate hdbconnect;
 extern crate r2d2;
-extern crate serde_json;
 
 #[macro_use]
 extern crate rocket;
@@ -13,6 +12,7 @@ extern crate serde_derive;
 
 mod cors;
 mod routes;
+mod routes_stimmabgabe;
 
 
 
@@ -41,11 +41,12 @@ fn main() {
                 routes::parteien,
                 routes::stimmkreise,
                 routes::stimmverteilunggesamt,
-                routes::wahlzettel_erststimme,
-                routes::wahlzettel_zweitstimme,
                 routes::analysen_csu_sterberate,
                 routes::analysen_fdp_gehalt,
-                routes::abstimmen,
+                routes_stimmabgabe::abstimmen,
+                routes_stimmabgabe::tokeninfo,
+                routes_stimmabgabe::wahlzettel_erststimme,
+                routes_stimmabgabe::wahlzettel_zweitstimme,
             ],
         )
         .launch();
@@ -54,8 +55,8 @@ fn main() {
 
 /// This route may be used for latency/performance testing or for health checks
 #[get("/")]
-pub fn hello() -> String {
-    "Hi!".to_string()
+pub fn hello() -> &'static str {
+    "Hi!"
 }
 
 

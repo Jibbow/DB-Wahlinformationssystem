@@ -1,3 +1,5 @@
+#!/bin/python
+
 import pyhdb
 import os
 import sys
