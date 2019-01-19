@@ -13,9 +13,13 @@ const UEBERHANGMANDATE: &str = include_str!("../queries/partei-überhangmandate.
 const KNAPPSTE_SIEGER: &str = include_str!("../queries/partei-top10.sql");
 const KNAPPSTE_VERLIERER: &str = include_str!("../queries/partei-top-10-knappste-verlierer.sql");
 const WAHLBETEILIGUNG: &str = include_str!("../queries/sk-wahlbeteiligung.sql");
+const WAHLBETEILIGUNG_AGG: &str = include_str!("../queries/agg-sk-wahlbeteiligung.sql");
 const DIREKTKANDIDATENGEWINNER: &str = include_str!("../queries/sk-direktkandidatengewinner.sql");
+const DIREKTKANDIDATENGEWINNER_AGG: &str = include_str!("../queries/agg-sk-direktkandidatengewinner.sql");
 const STIMMVERTEILUNG: &str = include_str!("../queries/sk-stimmverteilung.sql");
+const STIMMVERTEILUNG_AGG: &str = include_str!("../queries/agg-sk-stimmverteilung.sql");
 const STIMMVERTEILUNG_DIFF: &str = include_str!("../queries/sk-stimmverteilung-diff.sql");
+const STIMMVERTEILUNG_DIFF_AGG: &str = include_str!("../queries/agg-sk-stimmverteilung-diff.sql");
 const SIEGERPARTEI_ERSTSTIMME: &str = include_str!("../queries/sk-siegerpartei-erststimme.sql");
 const SIEGERPARTEI_ZWEITSTIMME: &str = include_str!("../queries/sk-siegerpartei-zweitstimme.sql");
 const ANALYSIS_CSU_AGE: &str = include_str!("../queries/analysis-csu-age.sql");
@@ -72,8 +76,8 @@ pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, 
 
 /// [Q3.1]
 /// Gibt die Wahlbeteiligung für einen Stimmkreis zurück.
-#[get("/wahlbeteiligung/<stimmkreis>/<jahr>")]
-pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+#[get("/wahlbeteiligung/<stimmkreis>/<jahr>?<compute_on_aggreagted_data>")]
+pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32, compute_on_aggreagted_data: Option<bool>) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -81,9 +85,11 @@ pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
         WAHLBETEILIGUNG: f32,
     }
 
-    let query = WAHLBETEILIGUNG
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
+    let query = match compute_on_aggreagted_data {
+        Some(true) => WAHLBETEILIGUNG_AGG,
+        _ => WAHLBETEILIGUNG
+    }.replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+     .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
@@ -92,8 +98,8 @@ pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
 
 /// [Q3.2]
 /// Gibt den gewählten Direktkandidaten für einen Stimmkreis zurück.
-#[get("/direktkandidatengewinner/<stimmkreis>/<jahr>")]
-pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+#[get("/direktkandidatengewinner/<stimmkreis>/<jahr>?<compute_on_aggreagted_data>")]
+pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32, compute_on_aggreagted_data: Option<bool>) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -104,9 +110,11 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         PARTEI: String,
     }
 
-    let query = DIREKTKANDIDATENGEWINNER
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
+    let query = match compute_on_aggreagted_data {
+        Some(true) => DIREKTKANDIDATENGEWINNER_AGG,
+        _ => DIREKTKANDIDATENGEWINNER
+    }.replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+     .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
@@ -115,8 +123,8 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
 
 /// [Q3.3]
 /// Gibt die prozentuale und absolute Anzahl an Stimmen für jede Partei in einem Stimmkreis zurück.
-#[get("/stimmverteilung/<stimmkreis>/<jahr>")]
-pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+#[get("/stimmverteilung/<stimmkreis>/<jahr>?<compute_on_aggreagted_data>")]
+pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32, compute_on_aggreagted_data: Option<bool>) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -127,9 +135,11 @@ pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
         PROZENT: f32,
     }
 
-    let query = STIMMVERTEILUNG
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
+    let query = match compute_on_aggreagted_data {
+        Some(true) => STIMMVERTEILUNG_AGG,
+        _ => STIMMVERTEILUNG
+    }.replace("{{STIMMKREIS}}", &stimmkreis.to_string())
+     .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
@@ -139,8 +149,8 @@ pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
 /// [Q3.4]
 /// Gibt die prozentuale und absolute Änderung an Stimmen für jede Partei in einem Stimmkreis zurück.
 /// Die Änderung bezieht sich von 2013 auf 2018.
-#[get("/stimmverteilungdifferenz/<stimmkreis>")]
-pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32) -> content::Json<String> {
+#[get("/stimmverteilungdifferenz/<stimmkreis>?<compute_on_aggreagted_data>")]
+pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, compute_on_aggreagted_data: Option<bool>) -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -151,8 +161,10 @@ pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         DIFF_PROZENT: f32,
     }
 
-    let query = STIMMVERTEILUNG_DIFF
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string());
+    let query = match compute_on_aggreagted_data {
+        Some(true) => STIMMVERTEILUNG_DIFF_AGG,
+        _ => STIMMVERTEILUNG_DIFF
+    }.replace("{{STIMMKREIS}}", &stimmkreis.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
