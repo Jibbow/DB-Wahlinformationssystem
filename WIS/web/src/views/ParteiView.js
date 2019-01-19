@@ -35,7 +35,7 @@ export default class ParteiView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000/parteien')
+    fetch('/api/parteien')
       .then(response => response.json())
       .then(data => {
         this.state.parteien = data;

@@ -72,7 +72,7 @@ export default class SitzverteilungLandtag extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch(`http://localhost:8000/sitzverteilung/2018`)
+    fetch(`/api/sitzverteilung/2018`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();

@@ -23,7 +23,7 @@ fn main() {
         .manage(create_connection_pool())
         .mount("/hello", routes![hello])
         .mount(
-            "/",
+            "/api",
             routes![
                 routes::bayern::sitzverteilung,
                 routes::bayern::landtagsmitglieder,
