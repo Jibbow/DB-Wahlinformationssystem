@@ -7,8 +7,8 @@ use rocket::response::content;
 use rocket::response::status::*;
 
 
-const STIMMZETTEL_ERSTSTIMME: &str = include_str!("../queries/stimmabgabe/stimmzettel-erststimme.sql");
-const STIMMZETTEL_ZWEITSTIMME: &str = include_str!("../queries/stimmabgabe/stimmzettel-zweitstimme.sql");
+const STIMMZETTEL_ERSTSTIMME: &str = include_str!("../../queries/stimmabgabe/stimmzettel-erststimme.sql");
+const STIMMZETTEL_ZWEITSTIMME: &str = include_str!("../../queries/stimmabgabe/stimmzettel-zweitstimme.sql");
 
 
 

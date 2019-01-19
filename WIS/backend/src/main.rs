@@ -12,8 +12,6 @@ extern crate serde_derive;
 
 mod cors;
 mod routes;
-mod routes_stimmabgabe;
-
 
 
 fn main() {
@@ -27,26 +25,26 @@ fn main() {
         .mount(
             "/",
             routes![
-                routes::sitzverteilung,
-                routes::landtagsmitglieder,
-                routes::wahlbeteiligung,
-                routes::direktkandidatengewinner,
-                routes::stimmverteilung,
-                routes::stimmverteilungdifferenz,
-                routes::siegerparteierststimmen,
-                routes::siegerparteizweitstimmen,
-                routes::ueberhangmandate,
-                routes::knappstesieger,
-                routes::knappsteverlierer,
-                routes::parteien,
-                routes::stimmkreise,
-                routes::stimmverteilunggesamt,
-                routes::analysen_csu_sterberate,
-                routes::analysen_fdp_gehalt,
-                routes_stimmabgabe::abstimmen,
-                routes_stimmabgabe::tokeninfo,
-                routes_stimmabgabe::wahlzettel_erststimme,
-                routes_stimmabgabe::wahlzettel_zweitstimme,
+                routes::bayern::sitzverteilung,
+                routes::bayern::landtagsmitglieder,
+                routes::stimmkreis::wahlbeteiligung,
+                routes::stimmkreis::direktkandidatengewinner,
+                routes::stimmkreis::stimmverteilung,
+                routes::stimmkreis::stimmverteilungdifferenz,
+                routes::stimmkreis::siegerparteierststimmen,
+                routes::stimmkreis::siegerparteizweitstimmen,
+                routes::other::ueberhangmandate,
+                routes::other::knappstesieger,
+                routes::other::knappsteverlierer,
+                routes::data::parteien,
+                routes::data::stimmkreise,
+                routes::bayern::stimmverteilung,
+                routes::analysen::csu_sterberate,
+                routes::analysen::fdp_gehalt,
+                routes::stimmabgabe::abstimmen,
+                routes::stimmabgabe::tokeninfo,
+                routes::stimmabgabe::wahlzettel_erststimme,
+                routes::stimmabgabe::wahlzettel_zweitstimme,
             ],
         )
         .launch();
