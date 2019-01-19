@@ -26,12 +26,12 @@ jobs:
     before_script:
     - cd WIS/backend
     script:
-    - docker build -t wis-backend .
+    - docker build -t dbprojekt.azurecr.io/wis-backend .
     before_deploy:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin dbprojekt.azurecr.io
     deploy:
       provider: script
-      script: docker push
+      script: docker push dbprojekt.azurecr.io/wis-backend
       on:
         branch: master
     after_deploy:
@@ -43,12 +43,12 @@ jobs:
     before_script:
     - cd WIS/web
     script:
-    - docker build -t wis-frontend .
+    - docker build -t dbprojekt.azurecr.io/wis-frontend .
     before_deploy:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin dbprojekt.azurecr.io
     deploy:
       provider: script
-      script: docker push
+      script: docker push dbprojekt.azurecr.io/wis-frontend
       on:
         branch: master
     after_deploy:
