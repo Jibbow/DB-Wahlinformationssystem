@@ -46,6 +46,7 @@ fn main() {
                 routes::analysen_csu_sterberate,
                 routes::analysen_fdp_gehalt,
                 routes::abstimmen,
+                routes::tokeninfo,
             ],
         )
         .launch();
