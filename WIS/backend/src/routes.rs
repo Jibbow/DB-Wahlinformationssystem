@@ -476,6 +476,28 @@ pub struct Stimmabgabe {
 /// Zeitpunkt noch abgegeben wird. Wenn dagegen die Erst- oder Zweitstimme nicht auf "null" sind,
 /// aber auf "enthaltung",dann wird die Stimme im System als gültig registriert, aber in der Datebank
 /// wird einfach ein "null" Wert angelegt für den gewählten Kandidaten / die gewählte Partei.
+/// ## Beispiel 1:
+/// Erststimme ist eine Enthaltung, bei der Zweitstimme wurde die Partei mit der ID 5 gewählt.
+/// ```
+/// {
+///  "token": "token-token-token-token",
+///  "erststimme": "enthaltung",
+///  "zweitstimme": {
+///    "partei": 5
+///  }
+/// }
+/// ```
+/// ## Beispiel 2:
+/// Bei der Erststimme wurde der Kandidat mit der ID 5 gewählt, die Zweitstimme wurde nicht abgegeben.
+/// ```
+/// {
+///  "token": "token-token-token-token",
+///  "erststimme": {
+///    "kandidat": 5
+///  },
+///  "zweitstimme": null
+/// }
+/// ```
 #[post("/abstimmen", data = "<stimme>")]
 pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>) -> Result<&'static str, BadRequest<&'static str>> {
     // validate token
@@ -500,13 +522,13 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query);
+                db_connection.exec(&query).unwrap();
             }
             Erststimme::enthaltung => {
                 // Bei einer Enthaltung wird einfach NULL anstelle eines Kandidaten eingefügt
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query);
+                db_connection.exec(&query).unwrap();
             }
         }
     }
@@ -525,20 +547,20 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query);
+                db_connection.exec(&query).unwrap();
             }
             // Bei der Zweitstimme kann auch eine Partei statt eines Kandidaten gewählt werden.
             Zweitstimme::partei(p) => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEPARTEI (SELECT {{PARTEI}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{PARTEI}}", &p.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query);
+                db_connection.exec(&query).unwrap();
             }
             // Auch hier kann man sich enthalten. Dabei wird ein NULL-Wert in die Tabelle ZWEITSTIMMEKANDIDAT eingefügt. Theoretisch könnte man es auch in ZWEITSTIMMEPARTEI einfügen.
             Zweitstimme::enthaltung => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query);
+                db_connection.exec(&query).unwrap();
             }
         }
     }

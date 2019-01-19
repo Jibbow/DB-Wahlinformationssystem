@@ -4,7 +4,6 @@
 extern crate dotenv;
 extern crate hdbconnect;
 extern crate r2d2;
-extern crate serde_json;
 
 #[macro_use]
 extern crate rocket;
@@ -55,8 +54,8 @@ fn main() {
 
 /// This route may be used for latency/performance testing or for health checks
 #[get("/")]
-pub fn hello() -> String {
-    "Hi!".to_string()
+pub fn hello() -> &'static str {
+    "Hi!"
 }
 
 
