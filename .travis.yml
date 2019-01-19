@@ -8,14 +8,14 @@ jobs:
   - stage: build
     name: "Build Frontend"
     language: node_js
-    before_script:
+    before_install:
     - cd WIS/web
 
   - stage: build
     name: "Build Backend"
     language: rust
     rust: nightly
-    before_script:
+    before_install:
     - cd WIS/backend
 
   - stage: deploy
