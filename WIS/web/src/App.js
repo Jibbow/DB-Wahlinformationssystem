@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Navbar, Nav, NavItem, Tab, Checkbox, FormGroup } from 'react-bootstrap';
+import { Navbar, Nav, NavItem, Tab, Alert, FormGroup } from 'react-bootstrap';
 import './App.css';
 import LandtagView from './views/LandtagView';
 import WahlkreisView from './views/WahlkreisView';
@@ -9,6 +9,7 @@ import AnalysisView from './views/AnalysisView';
 import { VoteButton } from './views/VoteView';
 import Toggle from 'react-toggle';
 import "react-toggle/style.css";
+import component from 'react-toggle';
 
 class App extends Component {
   constructor(props, context) {
@@ -70,6 +71,12 @@ class App extends Component {
         </div>
       </Tab.Container>
     );
+  }
+
+  componentDidMount() {
+    if(process.env.REACT_APP_VERSION_INFO) {
+      console.log(`VERSION: commit "${process.env.REACT_APP_COMMIT_ID}" on branch "${process.env.REACT_APP_BRANCH}"`)
+    }
   }
 }
 
