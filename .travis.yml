@@ -23,6 +23,7 @@ jobs:
   - stage: deploy
     name: "Deploy Backend Docker image"
     services: docker
+    env: BUILD_VERSION=Commit ${TRAVIS_COMMIT} on branch '${TRAVIS_BRANCH}'
     before_script:
     - cd WIS/backend
     script:
@@ -40,6 +41,7 @@ jobs:
   - stage: deploy
     name: "Deploy Frontend Docker image"
     services: docker
+    env: BUILD_VERSION=Commit ${TRAVIS_COMMIT} on branch '${TRAVIS_BRANCH}'
     before_script:
     - cd WIS/web
     script:
