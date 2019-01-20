@@ -2,6 +2,7 @@ extern crate serde;
 extern crate serde_json;
 
 use rocket::response::content;
+use rocket::response::status;
 use rocket::State;
 
 
@@ -14,7 +15,8 @@ const KNAPPSTE_VERLIERER: &str = include_str!("../../queries/partei-top-10-knapp
 /// [Q5]
 /// Gibt für einen Wahlkreis und eine Partei die Anzahl der Überhangmandate zurück.
 #[get("/ueberhangmandate/<wahlkreis>/<partei>/<jahr>")]
-pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wahlkreis: u32, partei: u32, jahr: u32) -> content::Json<String> {
+pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wahlkreis: u32, partei: u32, jahr: u32)
+ -> Result<content::Json<String>, status::NotFound<&'static str>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -31,7 +33,11 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result[0]).unwrap())
+    if result.len() == 0 {
+        Err(status::NotFound("Die Partei ist in diesem Jahr nicht in den Landtag eingezogen und hat somit keine Überhangsmandate erhalten."))
+    } else {
+        Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    }
 }
 
 /// [Q6 Teil 1]
