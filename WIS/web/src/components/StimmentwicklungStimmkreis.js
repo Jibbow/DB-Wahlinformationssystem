@@ -10,6 +10,22 @@ export default class StimmentwicklungStimmkreis extends Component {
     this.state = {
       time: 0,
       stimmentwicklung: [],
+      chartoptions: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: 0,
+            fontSize: 18,
+          },
+        },
+        scales: {
+          xAxes: [
+            {
+              categoryPercentage: 0.5,
+            },
+          ],
+        },
+      },
     };
   }
 
@@ -25,6 +41,7 @@ export default class StimmentwicklungStimmkreis extends Component {
               data={{
                 datasets: [
                   {
+                    label: "Stimmentwicklung der Parteien",
                     data: this.state.stimmentwicklung.map(v => v.DIFF_PROZENT),
                     backgroundColor: this.state.stimmentwicklung.map(v => '#' + v.PARTEI_FARBE),
                   },
