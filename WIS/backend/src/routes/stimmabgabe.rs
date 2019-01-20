@@ -162,7 +162,7 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
     // validate token
     let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
     if !validator.is_match(&token) {
-        Err(BadRequest(Some("Format des Tokens ist ungültig.")))
+        return Err(BadRequest(Some("Format des Tokens ist ungültig.")));
     }
 
     // define result from DB (names must match column names!)
