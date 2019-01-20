@@ -1,13 +1,11 @@
 FROM node:8 as react-build
 
-ARG TRAVIS=false
-ARG TRAVIS_COMMIT=
-ARG TRAVIS_BRANCH=
+ARG BUILD_VERSION
 
 WORKDIR /app
 COPY . ./
 RUN yarn
-RUN REACT_APP_VERSION_INFO=${TRAVIS} REACT_APP_COMMIT_ID=${TRAVIS_COMMIT} REACT_APP_BRANCH=${TRAVIS_BRANCH} yarn build
+RUN REACT_APP_BUILD_VERSION=${BUILD_VERSION} yarn build
 
 FROM nginx:alpine
 COPY --from=react-build /app/build /etc/nginx/html

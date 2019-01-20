@@ -1,5 +1,8 @@
 # temporary build image
 FROM rust:1.31.0 as build
+
+ARG BUILD_VERSION
+
 # install MUSL wrapper for GCC
 RUN apt-get update && apt-get install -y musl-tools
 # nightly toolchain needed for this project (because of rocket)
@@ -10,7 +13,7 @@ RUN rustup target add x86_64-unknown-linux-musl --toolchain=nightly
 # Copy the code
 COPY ./ ./wis-backend/
 # Compile the binary
-RUN cargo +nightly build --release --target x86_64-unknown-linux-musl --manifest-path=wis-backend/Cargo.toml
+RUN BUILD_VERSION=${BUILD_VERSION} cargo +nightly build --release --target x86_64-unknown-linux-musl --manifest-path=wis-backend/Cargo.toml
 
 
 # final release image

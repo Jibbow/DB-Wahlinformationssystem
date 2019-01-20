@@ -13,6 +13,8 @@ extern crate serde_derive;
 mod cors;
 mod routes;
 
+const BUILD_VERSION: Option<&'static str> = option_env!("BUILD_VERSION");
+
 
 fn main() {
     // get configuration for database connection from environment or .env file
@@ -54,7 +56,7 @@ fn main() {
 /// This route may be used for latency/performance testing or for health checks
 #[get("/")]
 pub fn hello() -> &'static str {
-    "Hi!"
+    BUILD_VERSION.unwrap_or("Hi!")
 }
 
 

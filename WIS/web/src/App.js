@@ -74,8 +74,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    if(process.env.REACT_APP_VERSION_INFO) {
-      console.log(`VERSION: commit "${process.env.REACT_APP_COMMIT_ID}" on branch "${process.env.REACT_APP_BRANCH}"`)
+    if(process.env.REACT_APP_BUILD_VERSION) {
+      console.log(`Build Version: ${process.env.REACT_APP_BUILD_VERSION}`);
     }
   }
 }
