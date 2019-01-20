@@ -2,8 +2,10 @@
  * Berechnet das Ergebnis für die Parteien im Jahr 2013.
  * Sowohl absolute Anzahl an Stimmen als auch die relative Verteilung der Stimmen auf die Parteien.
  * Vergleiche @file/stimmkreis-parteiergebnis.sql
+ *
+ * Hier werden für den direkten Vergleicht die IDs der Stimmkreise an die IDs von 2018 angeglichen,
+ * da 2018 der Stimmkreis 109 dazugekommen ist und somit alle IDs in Oberbayern ab 109 um 1 verrutschen.
  */
-
 WITH AGGREGATPARTEISTIMMEN_2013 AS (
 SELECT PARTEI, JAHR, STIMMKREIS, SUM(STIMMEN) AS ANZAHLGESAMTZWEITSTIMMEN
 FROM (
