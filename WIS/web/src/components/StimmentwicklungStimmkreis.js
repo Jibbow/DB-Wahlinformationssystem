@@ -5,6 +5,7 @@ import { BeatLoader } from 'react-spinners';
 export default class StimmentwicklungStimmkreis extends Component {
   constructor(props) {
     super(props);
+    this.updateData = this.updateData.bind(this);
     
     this.state = {
       time: 0,
@@ -45,16 +46,24 @@ export default class StimmentwicklungStimmkreis extends Component {
     }
   }
 
+  updateData() {
+    let start = performance.now();
+    fetch(`http://localhost:8000/stimmverteilungdifferenz/${this.props.stimmkreis}?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
+      .then(response => response.json())
+      .then(data => {
+        let end = performance.now();
+        this.setState({ time: end - start });
+        this.setState({ stimmentwicklung: data });
+      });
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (this.props.stimmkreis !== prevProps.stimmkreis) {
-      let start = performance.now();
-      fetch(`http://localhost:8000/stimmverteilungdifferenz/${this.props.stimmkreis}?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
-        .then(response => response.json())
-        .then(data => {
-          let end = performance.now();
-          this.setState({ time: end - start });
-          this.setState({ stimmentwicklung: data });
-        });
+      this.updateData();
     }
+  }
+
+  componentDidMount() {
+    this.updateData();
   }
 }
