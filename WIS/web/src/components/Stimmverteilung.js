@@ -92,7 +92,7 @@ export default class Stimmverteilung extends Component {
       }
     }
 
-    fetch(`http://localhost:8000/stimmverteilung/${stimmkreis2013}/2013${(this.props.stimmkreis)? `?compute_on_aggregated_date=${this.props.computeOnAggregatedData}` : ''}`)
+    fetch(`/api/stimmverteilung/${stimmkreis2013}/2013${(this.props.stimmkreis)? `?compute_on_aggregated_date=${this.props.computeOnAggregatedData}` : ''}`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();
