@@ -34,7 +34,7 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
     if result.len() == 0 {
-        Err(status::NotFound("Die Partei ist in diesem Jahr nicht in den Landtag eingezogen und hat somit keine Überhangsmandate erhalten."))
+        Err(status::NotFound("Die Partei ist in diesem Jahr nicht in den Landtag eingezogen und hat somit keine Überhangmandate erhalten."))
     } else {
         Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
     }
