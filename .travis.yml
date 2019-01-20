@@ -23,11 +23,10 @@ jobs:
   - stage: deploy
     name: "Deploy Backend Docker image"
     services: docker
-    env: BUILD_VERSION=Commit ${TRAVIS_COMMIT} on branch '${TRAVIS_BRANCH}'
     before_script:
     - cd WIS/backend
     script:
-    - docker build -t dbprojekt.azurecr.io/wis-backend .
+    - docker build -t dbprojekt.azurecr.io/wis-backend --build-arg BUILD_VERSION="Commit $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
     before_deploy:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin dbprojekt.azurecr.io
     deploy:
@@ -41,11 +40,10 @@ jobs:
   - stage: deploy
     name: "Deploy Frontend Docker image"
     services: docker
-    env: BUILD_VERSION=Commit ${TRAVIS_COMMIT} on branch '${TRAVIS_BRANCH}'
     before_script:
     - cd WIS/web
     script:
-    - docker build -t dbprojekt.azurecr.io/wis-frontend .
+    - docker build -t dbprojekt.azurecr.io/wis-frontend --build-arg BUILD_VERSION="Commit $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
     before_deploy:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin dbprojekt.azurecr.io
     deploy:
