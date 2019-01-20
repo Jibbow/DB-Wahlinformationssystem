@@ -11,7 +11,6 @@ const STIMMZETTEL_ERSTSTIMME: &str = include_str!("../../queries/stimmabgabe/sti
 const STIMMZETTEL_ZWEITSTIMME: &str = include_str!("../../queries/stimmabgabe/stimmzettel-zweitstimme.sql");
 
 
-
 #[derive(Deserialize)]
 #[allow(non_camel_case_types)]
 pub enum Erststimme {
@@ -32,6 +31,7 @@ pub struct Stimmabgabe {
     zweitstimme: Option<Zweitstimme>,
 }
 
+/// # Abstimmen
 /// Mit dieser Anfrage kann man eine Stimme abgeben, die dann im Wahlsystem gespeichert wird,
 /// falls sie gültig ist und das Token (=Ausweisnummer) noch nicht für die jeweilige Stimme
 /// eingesetzt wurde.
@@ -44,7 +44,7 @@ pub struct Stimmabgabe {
 /// wird einfach ein "null" Wert angelegt für den gewählten Kandidaten / die gewählte Partei.
 /// ## Beispiel 1:
 /// Erststimme ist eine Enthaltung, bei der Zweitstimme wurde die Partei mit der ID 5 gewählt.
-/// ```
+/// ```JSON
 /// {
 ///  "token": "token-token-token-token",
 ///  "erststimme": "enthaltung",
@@ -55,7 +55,7 @@ pub struct Stimmabgabe {
 /// ```
 /// ## Beispiel 2:
 /// Bei der Erststimme wurde der Kandidat mit der ID 5 gewählt, die Zweitstimme wurde nicht abgegeben.
-/// ```
+/// ```JSON
 /// {
 ///  "token": "token-token-token-token",
 ///  "erststimme": {
@@ -65,7 +65,8 @@ pub struct Stimmabgabe {
 /// }
 /// ```
 #[post("/abstimmen", data = "<stimme>")]
-pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>) -> Result<&'static str, BadRequest<&'static str>> {
+pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: rocket_contrib::json::Json<Stimmabgabe>)
+ -> Result<&'static str, BadRequest<&'static str>> {
     // validate token
     let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
     if !validator.is_match(&stimme.token) {
@@ -133,13 +134,35 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
     Ok("Stimme abgegeben")
 }
 
-
+/// # Tokeninfo
+/// Gibt einige wichtige Informationen zu einem gegebenen Token zurück.
+/// Das Token muss hierbei der Form einer UUIDv4 entsprechen:
+/// 
+/// `00000000-0000-0000-0000-000000000000`
+/// 
+/// ## Result
+/// Das Ergebnis entspricht dem folgenden Format (JSON):
+/// ```JSON
+/// {
+///   "WAHLTOKEN": "00000000-0000-0000-0000-000000000000",
+///   "JAHR": 2018,
+///   "STIMMKREIS": 101,
+///   "ERSTSTIMMEABGEGEBEN": 0,
+///   "ZWEITSTIMMEABGEGEBEN": 0
+/// }
+/// ```
+/// Hierbei ist `ERSTSTIMMEABGEGEBEN`/`ZWEITSTIMMEABGEGEBEN` gleich `0`,
+/// falls die jeweilige Stimme noch nicht abgegeben wurde, andernfalls `1`.
+/// 
+/// ## Error
+/// Falls das Token ungültig ist, wird ein Fehler zurückgegeben (HTML: BadRequest).
 #[get("/tokeninfo/<token>")]
-pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: String) -> Result<content::Json<String>, BadRequest<&'static str>> {
+pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: String)
+ -> Result<content::Json<String>, BadRequest<&'static str>> {
     // validate token
     let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
     if !validator.is_match(&token) {
-        return Err(BadRequest(Some("Format des Tokens ist ungültig.")));
+        Err(BadRequest(Some("Format des Tokens ist ungültig.")))
     }
 
     // define result from DB (names must match column names!)
@@ -158,12 +181,41 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
         .query(&query).unwrap().try_into().unwrap();
-    Ok(content::Json(serde_json::to_string(&result).unwrap()))
+    if result.len() == 0 {
+        Err(BadRequest(Some("Token ungültig!")))
+    } else {
+        Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    }
 }
 
-
+/// # Wahlzettel Erststimme
+/// Diese Anfrage gibt den Wahlzettel für die Erststimme zurück.
+/// Jeder Stimmkreis hat dabei eine eigene Auswahl an Kandidaten.
+/// Der Stimmkreis wird hierbei normalerweise aus dem verwendeten
+/// Token inferiert. Siehe dazu auch die Route [/tokeninfo/<token>](fn.tokeninfo.html).
+/// 
+/// ## Result
+/// Das Ergebnis entspricht dem folgenden Format (JSON):
+/// ```JSON
+/// [
+///   {
+///     "PARTEI": "Christlich Soziale Union",
+///     "PARTEI_ABKUERZUNG": "CSU",
+///     "KANDIDAT_VORNAME": "Hans",
+///     "KANDIDAT_NACHNAME": "Dieters",
+///     "LISTENPOSITION": 1
+///   },
+///   ...
+/// ]
+/// ```
+/// Hierbei entspricht die `LISTENPOSITION` der _eindeutigen_ Reihenfolge,
+/// in der die Partei in _einem Stimmkreis_ aufgelistet ist.
+/// 
+/// Der Wahlzettel für die Erststimme ist für gewöhnlich sehr kurz,
+/// da jede Partei nur maximal einen Kandidaten aufstellen darf.
 #[get("/wahlzettel/erststimme/<stimmkreis>/<jahr>")]
-pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
+ -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -184,9 +236,34 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
     content::Json(serde_json::to_string(&result).unwrap())
 }
 
-
+/// # Wahlzettel Zweitstimme
+/// Diese Anfrage gibt den Wahlzettel für die Zweitstimme zurück.
+/// Jeder Stimmkreis hat dabei eine eigene Auswahl an Kandidaten.
+/// Der Stimmkreis wird hierbei normalerweise aus dem verwendeten
+/// Token inferiert. Siehe dazu auch die Route [/tokeninfo/<token>](fn.tokeninfo.html).
+/// 
+/// ## Result
+/// Das Ergebnis entspricht dem folgenden Format (JSON):
+/// ```JSON
+/// [
+///   {
+///     "PARTEI": "Christlich Soziale Union",
+///     "PARTEI_ABKUERZUNG": "CSU",
+///     "KANDIDAT_VORNAME": "Hans",
+///     "KANDIDAT_NACHNAME": "Dieters",
+///     "LISTENPOSITION": 1
+///   },
+///   ...
+/// ]
+/// ```
+/// Hierbei entspricht die `LISTENPOSITION` der _eindeutigen_ Reihenfolge,
+/// in der die Kandidaten für _eine Partei_ in _einem Stimmkreis_ aufgestellt sind.
+/// 
+/// Der Wahlzettel für die Zweitstimme ist oft sehr lang (mehrere 100 Einträge) für
+/// einen Stimmkreis, da jede Partei beliebig viele Kandidaten aufstellen darf.
 #[get("/wahlzettel/zweitstimme/<stimmkreis>/<jahr>")]
-pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32) -> content::Json<String> {
+pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
+ -> content::Json<String> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
