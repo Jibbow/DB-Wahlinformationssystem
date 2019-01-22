@@ -6,7 +6,7 @@ authors = ["Andreas Zimmerer <andreas.zimmerer@tum.de>"]
 [dependencies]
 rocket = "0.4.0"
 rocket_codegen = "0.4.0"
-hdbconnect = "0.9"
+hdbconnect = "0.12.2"
 dotenv = "0.13.0"
 serde = "1.0"
 serde_derive = "1.0"

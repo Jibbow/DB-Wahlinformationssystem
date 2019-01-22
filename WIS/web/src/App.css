@@ -73,6 +73,9 @@
   text-align: center;
 }
 
+.chart {
+  filter: grayscale(0.3);
+}
 @media (min-width: 1200px) {
   .chart {
     margin-left: 50px;
