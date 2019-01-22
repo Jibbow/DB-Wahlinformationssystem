@@ -11,7 +11,8 @@ const ANALYSIS_FDP_INCOME: &str = include_str!("../../queries/analysen/fdp-gehal
 
 /// Vergleicht die Sterberate mit der Prozentualen Anzahl der CSU-Wähler
 #[get("/analysen/csu-sterberate")]
-pub fn csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
+pub fn csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -22,13 +23,14 @@ pub fn csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> c
     }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(ANALYSIS_CSU_AGE).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(ANALYSIS_CSU_AGE)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
 /// Vergleicht das Durchschnittsgehalt mit der Prozentualen Anzahl der FDP-Wähler
 #[get("/analysen/fdp-gehalt")]
-pub fn fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
+pub fn fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -39,6 +41,6 @@ pub fn fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> conte
     }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(ANALYSIS_FDP_INCOME).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(ANALYSIS_FDP_INCOME)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
