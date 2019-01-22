@@ -4,7 +4,9 @@ extern crate regex;
 
 use rocket::State;
 use rocket::response::content;
+use rocket::http::Status;
 use rocket::response::status::*;
+use hdbconnect::HdbValue;
 
 
 const STIMMZETTEL_ERSTSTIMME: &str = include_str!("../../queries/stimmabgabe/stimmzettel-erststimme.sql");
@@ -218,8 +220,8 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
 /// Der Wahlzettel für die Erststimme ist für gewöhnlich sehr kurz,
 /// da jede Partei nur maximal einen Kandidaten aufstellen darf.
 #[get("/wahlzettel/erststimme/<stimmkreis>/<jahr>")]
-pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> Result<content::Json<String>, hdbconnect::HdbError> {
+pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -231,13 +233,14 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
         LISTENPOSITION: String,
     }
 
-    let query = STIMMZETTEL_ERSTSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
-    connection.commit()?;
-    Ok(content::Json(serde_json::to_string(&result).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        STIMMZETTEL_ERSTSTIMME, 
+        vec![HdbValue::INT(stimmkreis), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
 
 /// # Wahlzettel Zweitstimme

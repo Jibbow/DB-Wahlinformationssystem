@@ -8,6 +8,7 @@ pub mod stimmkreis;
 #[derive(Serialize)]
 struct DbResult<T> {
     processing_time: i32,
+    memory_usage: i32,
     data: Vec<T>,
 }
 
@@ -27,11 +28,13 @@ where
     // query database
     let data: Vec<T> = prepared_statement.execute_batch()?.into_resultset()?.try_into()?;
     let processing_time = connection.get_server_resource_consumption_info()?.server_proc_time;
+    let memory_usage = connection.get_server_resource_consumption_info()?.server_memory_usage;
 
     connection.commit()?;
 
     Ok(DbResult {
         processing_time,
+        memory_usage,
         data
     })
 }
