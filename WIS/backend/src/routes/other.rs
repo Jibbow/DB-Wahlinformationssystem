@@ -30,9 +30,9 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
         .replace("{{WAHLKREIS}}", &wahlkreis.to_string())
         .replace("{{PARTEI}}", &partei.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(&query).unwrap().try_into().unwrap();
+    connection.commit().unwrap();
     if result.len() == 0 {
         Err(status::NotFound("Die Partei ist in diesem Jahr nicht in den Landtag eingezogen und hat somit keine Überhangmandate erhalten."))
     } else {
@@ -62,9 +62,9 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, part
     let query = KNAPPSTE_SIEGER
         .replace("{{PARTEI}}", &partei.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query)?.try_into()?;
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
+    connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
@@ -90,8 +90,8 @@ pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, p
     let query = KNAPPSTE_VERLIERER
         .replace("{{PARTEI}}", &partei.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
-
-    //let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-    //    .query(&query).unwrap().try_into().unwrap();
+    let mut connection = db.get().expect("failed to connect to DB");
+    //let result: Vec<QueryResult> = connection.query(&query).unwrap().try_into().unwrap();
+    connection.commit()?;
     Ok(content::Json("not yet implemented".to_string())) // TODO
 }

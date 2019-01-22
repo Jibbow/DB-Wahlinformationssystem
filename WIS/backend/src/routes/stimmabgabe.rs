@@ -73,13 +73,15 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
         return Err(BadRequest(Some("Format des Tokens ist ungültig.")));
     }
 
-    let mut db_connection = db.get().expect("failed to connect to DB");
+    let mut connection = db.get().expect("failed to connect to DB");
+    connection.set_auto_commit(false).unwrap();
 
     if let Some(ref erststimme) = stimme.erststimme {
         // falls eine Erststimme mitgeliefert wurde, dann wird in der Datenbank das Token markiert als "Erststimme abgegeben"
         let query = "UPDATE WIS.WAHLTOKEN SET ERSTSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ERSTSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
-        let altered_rows = db_connection.dml(&query).unwrap();
+        let altered_rows = connection.dml(&query).unwrap();
         if altered_rows != 1 {
+            connection.rollback().unwrap();
             return Err(BadRequest(Some("Token ungültig oder Erststimme bereits abgegeben! Es wurde keine Stimme abgegeben.")));
         }
 
@@ -89,13 +91,13 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
             Erststimme::enthaltung => {
                 // Bei einer Enthaltung wird einfach NULL anstelle eines Kandidaten eingefügt
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
         }
     }
@@ -103,8 +105,9 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
     if let Some(ref zweitstimme) = stimme.zweitstimme {
         // falls eine Zweitstimme mitgeliefert wurde, dann wird in der Datenbank das Token markiert als "Zweitstimme abgegeben"
         let query = "UPDATE WIS.WAHLTOKEN SET ZWEITSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ZWEITSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
-        let altered_rows = db_connection.dml(&query).unwrap();
+        let altered_rows = connection.dml(&query).unwrap();
         if altered_rows != 1 {
+            connection.rollback().unwrap();
             return Err(BadRequest(Some("Token ungültig oder Zweitstimme bereits abgegeben! Es wurde keine Zweitstimme abgegeben.")));
         }
 
@@ -114,23 +117,24 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
             // Bei der Zweitstimme kann auch eine Partei statt eines Kandidaten gewählt werden.
             Zweitstimme::partei(p) => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEPARTEI (SELECT {{PARTEI}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{PARTEI}}", &p.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
             // Auch hier kann man sich enthalten. Dabei wird ein NULL-Wert in die Tabelle ZWEITSTIMMEKANDIDAT eingefügt. Theoretisch könnte man es auch in ZWEITSTIMMEPARTEI einfügen.
             Zweitstimme::enthaltung => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
         }
     }
+    connection.commit().unwrap();
     Ok("Stimme abgegeben")
 }
 
@@ -178,9 +182,9 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
 
     let query = "SELECT * FROM WIS.WAHLTOKEN WHERE WAHLTOKEN='{{TOKEN}}'"
         .replace("{{TOKEN}}", &token);
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(&query).unwrap().try_into().unwrap();
+    connection.commit().unwrap();
     if result.len() == 0 {
         Err(BadRequest(Some("Token ungültig!")))
     } else {
@@ -230,9 +234,9 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
     let query = STIMMZETTEL_ERSTSTIMME
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query)?.try_into()?;
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
+    connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
@@ -278,8 +282,8 @@ pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager
     let query = STIMMZETTEL_ZWEITSTIMME
         .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
         .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query)?.try_into()?;
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
+    connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }

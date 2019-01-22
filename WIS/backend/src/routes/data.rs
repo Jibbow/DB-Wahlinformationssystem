@@ -18,9 +18,9 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
         ABKUERZUNG: String,
         FARBE: String,
     }
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query("SELECT ID, ABKUERZUNG, NAME, FARBE FROM WIS.PARTEI")?.try_into()?;
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query("SELECT ID, ABKUERZUNG, NAME, FARBE FROM WIS.PARTEI")?.try_into()?;
+    connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
@@ -44,8 +44,8 @@ pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u
                  FROM WIS.STIMMKREIS S JOIN WIS.WAHLKREIS W ON S.WAHLKREIS=W.NR
                  WHERE S.JAHR={{JAHR}}"
         .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query)?.try_into()?;
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
+    connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }

@@ -21,9 +21,9 @@ pub fn csu_sterberate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
         PARTEI: String,
         STERBERATE: f64,
     }
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(ANALYSIS_CSU_AGE)?.try_into()?;
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(ANALYSIS_CSU_AGE)?.try_into()?;
+    connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
@@ -39,8 +39,8 @@ pub fn fdp_gehalt(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
         PARTEI: String,
         GEHALT: u32,
     }
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(ANALYSIS_FDP_INCOME)?.try_into()?;
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result: Vec<QueryResult> = connection.query(ANALYSIS_FDP_INCOME)?.try_into()?;
+    connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
