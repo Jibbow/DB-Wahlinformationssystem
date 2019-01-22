@@ -7,7 +7,8 @@ use rocket::response::content;
 
 /// Gibt eine Liste aller Parteien bei der Landtagswahl zurück.
 #[get("/parteien")]
-pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content::Json<String> {
+pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -19,14 +20,15 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>) -> content
     }
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query("SELECT ID, ABKUERZUNG, NAME, FARBE FROM WIS.PARTEI").unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query("SELECT ID, ABKUERZUNG, NAME, FARBE FROM WIS.PARTEI")?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
 /// Gibt eine Liste aller Stimmkreise in Bayern zurück.
 /// Vorsicht: die IDs der Stimmkreise ändern sich über die Jahre hinweg!
 #[get("/stimmkreise/<jahr>")]
-pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -44,6 +46,6 @@ pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }

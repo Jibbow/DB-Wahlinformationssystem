@@ -45,7 +45,8 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
 /// Die knappsten Sieger sind die gewählten Erstkandidaten, welche mit dem geringsten
 /// Vorsprung gegenüber ihren Konkurrenten gewonnen haben.
 #[get("/knappstesieger/<partei>/<jahr>")]
-pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: u32, jahr: u32) -> content::Json<String> {
+pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: u32, jahr: u32)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -63,8 +64,8 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, part
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
 /// [Q6 Teil 2]
@@ -72,7 +73,8 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, part
 /// Die knappsten Verlierer sind die Erstkandidaten, welche mit dem geringsten
 /// Abstand gegenüber ihren Konkurrenten verloren haben.
 #[get("/knappsteverlierer/<partei>/<jahr>")]
-pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: u32, jahr: u32) -> content::Json<String> {
+pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: u32, jahr: u32)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -91,6 +93,5 @@ pub fn knappsteverlierer(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, p
 
     //let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
     //    .query(&query).unwrap().try_into().unwrap();
-    content::Json("not yet implemented".to_string()) // TODO
+    Ok(content::Json("not yet implemented".to_string())) // TODO
 }
-

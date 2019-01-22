@@ -215,7 +215,7 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
 /// da jede Partei nur maximal einen Kandidaten aufstellen darf.
 #[get("/wahlzettel/erststimme/<stimmkreis>/<jahr>")]
 pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> content::Json<String> {
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -232,8 +232,8 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
 /// # Wahlzettel Zweitstimme
@@ -263,7 +263,7 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
 /// einen Stimmkreis, da jede Partei beliebig viele Kandidaten aufstellen darf.
 #[get("/wahlzettel/zweitstimme/<stimmkreis>/<jahr>")]
 pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> content::Json<String> {
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -280,6 +280,6 @@ pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }

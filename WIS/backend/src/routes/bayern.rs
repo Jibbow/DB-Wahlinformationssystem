@@ -13,7 +13,8 @@ const STIMMVERTEILUNG_GESAMT: &str = include_str!("../../queries/bayern/stimmver
 /// [Q1]
 /// Gibt die Sitzverteilung aller Parteien im Landtag zurück.
 #[get("/sitzverteilung/<jahr>")]
-pub fn sitzverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+pub fn sitzverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -27,14 +28,15 @@ pub fn sitzverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
 /// [Q2]
 /// Gibt eine Liste aller gewählten Landtagsmitglieder zurück.
 #[get("/landtagsmitglieder/<jahr>")]
-pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -49,8 +51,8 @@ pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, 
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
 
 
@@ -58,7 +60,8 @@ pub fn landtagsmitglieder(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, 
 /// Gibt die prozentuale Verteilung aller Stimmen im Freistaat Bayern auf die Parteien zurück.
 /// Gleiche Route wie für einen einzelnen Stimmkreis, aber das Argument für den Stimmkreis wird weggelassen.
 #[get("/stimmverteilung/<jahr>")]
-pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32) -> content::Json<String> {
+pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: u32)
+ -> Result<content::Json<String>, hdbconnect::HdbError> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -73,6 +76,6 @@ pub fn stimmverteilung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jah
         .replace("{{JAHR}}", &jahr.to_string());
 
     let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+        .query(&query)?.try_into()?;
+    Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }
