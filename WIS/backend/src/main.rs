@@ -83,6 +83,6 @@ fn create_connection_pool() -> r2d2::Pool<hdbconnect::ConnectionManager> {
         .unwrap();
 
     r2d2::Pool::builder()
-        .max_size(15)
+        .max_size(150)
         .build_unchecked(hdbconnect::ConnectionManager::new(&db_connection_params))
 }
