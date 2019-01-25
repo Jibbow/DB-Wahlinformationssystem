@@ -31,8 +31,9 @@ export class VoteButton extends Component {
     .then(data => {
       if (data.length == 1) {
           let tokeninfo = data[0];
-          this.setState({jahr: tokeninfo.JAHR});
-          console.log("Jahr: " + this.state.jahr);
+          this.setState({jahr: tokeninfo.JAHR}); //TODO: Test
+          this.setState({stimmkreis: tokeninfo.STIMMKREIS}); //TODO: Test
+          // console.log("Jahr: " + this.state.jahr);
           if (tokeninfo.ERSTSTIMMEABGEGEBEN == false) {
             this.handleErststimme();
           }
@@ -215,13 +216,13 @@ export class VoteButton extends Component {
   }
 
   componentDidMount() {
-    fetch(`http://localhost:8000/wahlzettel/erststimme/101/2018`) //Test mit Jahr und Stimmkreis fest
+    fetch(`http://localhost:8000/wahlzettel/erststimme/${this.state.stimmkreis}/${this.state.jahr}`) //TODO: Test
       .then(response => response.json())
       .then(data => {
         this.setState({ erststimmekandidaten: data});
         console.log(this.state.erststimmekandidaten);
       });
-    fetch(`http://localhost:8000/wahlzettel/zweitstimme/101/2018`) //Test mit Jahr und Stimmkreis fest
+    fetch(`http://localhost:8000/wahlzettel/zweitstimme/${this.state.stimmkreis}/${this.state.jahr}`) //TODO: Test
       .then(response => response.json())
       .then(data => {
         let parteikandidaten_temp = this.getParteikandidaten(data);
