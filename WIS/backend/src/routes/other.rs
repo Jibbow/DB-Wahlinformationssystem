@@ -35,7 +35,7 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
         Ok(r) => if r.len() == 0 {
                     Err(Custom(Status::NotFound, "Die Partei ist in diesem Jahr nicht in den Landtag eingezogen und hat somit keine Überhangmandate erhalten.".to_string()))
                 } else {
-                    Ok(content::Json(serde_json::to_string(&r).unwrap()))
+                    Ok(content::Json(serde_json::to_string(&r[0]).unwrap()))
                 },
         Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
     }
