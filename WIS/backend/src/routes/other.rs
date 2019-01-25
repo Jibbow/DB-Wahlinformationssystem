@@ -1,9 +1,11 @@
 extern crate serde;
 extern crate serde_json;
 
-use rocket::response::content;
-use rocket::response::status;
 use rocket::State;
+use rocket::response::content;
+use rocket::http::Status;
+use rocket::response::status::*;
+use hdbconnect::HdbValue;
 
 
 // load sql queries during compile time
@@ -15,8 +17,8 @@ const KNAPPSTE_VERLIERER: &str = include_str!("../../queries/partei-top-10-knapp
 /// [Q5]
 /// Gibt für einen Wahlkreis und eine Partei die Anzahl der Überhangmandate zurück.
 #[get("/ueberhangmandate/<wahlkreis>/<partei>/<jahr>")]
-pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wahlkreis: u32, partei: u32, jahr: u32)
- -> Result<content::Json<String>, status::NotFound<&'static str>> {
+pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wahlkreis: i32, partei: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -26,17 +28,17 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
         PARTEI: String
     }
 
-    let query = UEBERHANGMANDATE
-        .replace("{{WAHLKREIS}}", &wahlkreis.to_string())
-        .replace("{{PARTEI}}", &partei.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query).unwrap().try_into().unwrap();
-    connection.commit().unwrap();
-    if result.len() == 0 {
-        Err(status::NotFound("Die Partei ist in diesem Jahr nicht in den Landtag eingezogen und hat somit keine Überhangmandate erhalten."))
-    } else {
-        Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        UEBERHANGMANDATE, 
+        vec![HdbValue::INT(wahlkreis), HdbValue::INT(partei), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => if r.len() == 0 {
+                    Err(Custom(Status::NotFound, "Die Partei ist in diesem Jahr nicht in den Landtag eingezogen und hat somit keine Überhangmandate erhalten.".to_string()))
+                } else {
+                    Ok(content::Json(serde_json::to_string(&r).unwrap()))
+                },
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
     }
 }
 
