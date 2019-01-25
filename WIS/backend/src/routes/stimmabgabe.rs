@@ -164,11 +164,11 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
 /// Falls das Token ungültig ist, wird ein Fehler zurückgegeben (HTML: BadRequest).
 #[get("/tokeninfo/<token>")]
 pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: String)
- -> Result<content::Json<String>, BadRequest<&'static str>> {
+ -> Result<content::Json<String>, Custom<String>> {
     // validate token
     let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
     if !validator.is_match(&token) {
-        return Err(BadRequest(Some("Format des Tokens ist ungültig.")));
+        return Err(Custom(Status::BadRequest, format!("Format des Tokens ist ungültig: {}", token)));
     }
 
     // define result from DB (names must match column names!)
@@ -182,15 +182,13 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
 	    ZWEITSTIMMEABGEGEBEN: u32,
     }
 
-    let query = "SELECT * FROM WIS.WAHLTOKEN WHERE WAHLTOKEN='{{TOKEN}}'"
-        .replace("{{TOKEN}}", &token);
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query).unwrap().try_into().unwrap();
-    connection.commit().unwrap();
-    if result.len() == 0 {
-        Err(BadRequest(Some("Token ungültig!")))
-    } else {
-        Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        "SELECT * FROM WIS.WAHLTOKEN WHERE WAHLTOKEN=?", 
+        vec![HdbValue::CHAR(token)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
     }
 }
 

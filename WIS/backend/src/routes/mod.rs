@@ -13,7 +13,7 @@ pub mod stimmkreis;
 fn query_database<'de, T>(connection: &mut hdbconnect::Connection, query: &str, params: Vec<hdbconnect::HdbValue>)
  -> Result<Vec<T>, hdbconnect::HdbError> 
 where
-        T: serde::de::Deserialize<'de>,
+    T: serde::de::Deserialize<'de>,
 {
     // prepared statements for safety
     let mut prepared_statement = connection.prepare(query)?;
