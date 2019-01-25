@@ -366,4 +366,4 @@ finalA1 as (SELECT P.NAME AS PARTEI, SUM(SITZEGES) AS SITZE
 )
 
 select ID, VORNAME, NACHNAME, POS AS PLATZIERUNG, DIFF AS DIFFERENZ, VKANDIDAT AS RIVALE
-from finalA6 where partei={{PARTEI}} and jahr={{JAHR}}
+from finalA6 where partei=? and jahr=?

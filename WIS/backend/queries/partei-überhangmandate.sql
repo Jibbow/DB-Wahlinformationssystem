@@ -307,4 +307,4 @@ finalA1 as (SELECT P.NAME AS PARTEI, SUM(SITZEGES) AS SITZE
 select UEBERHANGMANDATE, WAHLKREIS, abkuerzung as partei
 from finalA5 f
     join WIS.partei p on P.id = f.partei
-where wahlkreisid={{WAHLKREIS}} and partei={{PARTEI}} and jahr={{JAHR}}
+where wahlkreisid=? and partei=? and jahr=?
