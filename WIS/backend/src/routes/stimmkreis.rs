@@ -133,8 +133,8 @@ pub fn stimmverteilungdifferenz(db: State<r2d2::Pool<hdbconnect::ConnectionManag
 /// [Q4 Teil 1]
 /// Gibt die Siegerpartei über die Erststimmen für einen Stimmkreis zurück.
 #[get("/siegerpartei/erststimmen/<stimmkreis>/<jahr>")]
-pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> Result<content::Json<String>, hdbconnect::HdbError> {
+pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -144,20 +144,21 @@ pub fn siegerparteierststimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManage
         ANZAHLERSTSTIMMEN: u32,
     }
 
-    let query = SIEGERPARTEI_ERSTSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
-    connection.commit()?;
-    Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        SIEGERPARTEI_ERSTSTIMME, 
+        vec![HdbValue::INT(stimmkreis), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
 
 /// [Q4 Teil 2]
 /// Gibt die Siegerpartei über die Zweitstimmen für einen Stimmkreis zurück.
 #[get("/siegerpartei/zweitstimmen/<stimmkreis>/<jahr>")]
-pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> Result<content::Json<String>, hdbconnect::HdbError> {
+pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -167,11 +168,12 @@ pub fn siegerparteizweitstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManag
         ANZAHLZWEITSTIMMEN: u32,
     }
 
-    let query = SIEGERPARTEI_ZWEITSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
-    connection.commit()?;
-    Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        SIEGERPARTEI_ZWEITSTIMME, 
+        vec![HdbValue::INT(stimmkreis), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
