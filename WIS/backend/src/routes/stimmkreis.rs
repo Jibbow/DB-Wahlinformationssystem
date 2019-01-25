@@ -49,8 +49,8 @@ pub fn wahlbeteiligung(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, sti
 /// [Q3.2]
 /// Gibt den gewählten Direktkandidaten für einen Stimmkreis zurück.
 #[get("/direktkandidatengewinner/<stimmkreis>/<jahr>?<compute_on_aggreagted_data>")]
-pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32, compute_on_aggreagted_data: Option<bool>)
- -> Result<content::Json<String>, hdbconnect::HdbError> {
+pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: i32, jahr: i32, compute_on_aggreagted_data: Option<bool>)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -64,12 +64,15 @@ pub fn direktkandidatengewinner(db: State<r2d2::Pool<hdbconnect::ConnectionManag
     let query = match compute_on_aggreagted_data {
         Some(true) => DIREKTKANDIDATENGEWINNER_AGG,
         _ => DIREKTKANDIDATENGEWINNER
-    }.replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-     .replace("{{JAHR}}", &jahr.to_string());
+    };
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
-    connection.commit()?;
-    Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        query, 
+        vec![HdbValue::INT(stimmkreis), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
 
 /// [Q3.3]
