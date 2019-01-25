@@ -37,7 +37,7 @@ export default class StimmkreisView extends Component {
         <div>
           {(this.state.stimmkreis !== 0 && (
             <div>
-              {this.state.stimmkreise && (
+              {this.state.stimmkreise.length > 0 && (
                 <div>
                   <h1>{this.state.stimmkreise.find(s => s.NR === this.state.stimmkreis).NAME}</h1>
                   <p>Stimmkreis: {this.state.stimmkreise.find(s => s.NR === this.state.stimmkreis).NR}</p>
