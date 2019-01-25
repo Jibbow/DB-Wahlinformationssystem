@@ -46,7 +46,7 @@ pub fn stimmkreise(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, jahr: i
     let mut connection = db.get().expect("failed to connect to DB");
     let result = super::query_database::<QueryResult>(&mut connection, 
         "SELECT S.NR, S.NAME, S.STIMMBERECHTIGTE, W.NAME AS WAHLKREIS, W.NR AS WAHLKREISNR
-        FROM WIS.STIMMKREIS S JOIN WIS.WAHLKREIS W ON S.WAHLKREIS=W.NR
+        FROM WIS.STIMMKREIS S JOIN WIS.WAHLKREIS W ON S.WAHLKREIS=W.NR AND S.JAHR=W.JAHR
         WHERE S.JAHR=?", 
         vec![HdbValue::INT(jahr)]);
     match result {

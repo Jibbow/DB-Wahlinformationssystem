@@ -90,13 +90,13 @@ export default class StimmkreisView extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.stimmkreis !== prevState.stimmkreis) {
       let start = performance.now();
-      fetch(`http://localhost:8000/direktkandidatengewinner/${this.state.stimmkreis}/2018?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
+      fetch(`http://localhost:8000/direktkandidatengewinner/${this.state.stimmkreis}/2018?compute_on_aggregated_data=${this.props.computeOnAggregatedData}`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();
           this.setState({ gewinner: { time: end - start, person: data } });
         });
-      fetch(`http://localhost:8000/wahlbeteiligung/${this.state.stimmkreis}/2018?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
+      fetch(`http://localhost:8000/wahlbeteiligung/${this.state.stimmkreis}/2018?compute_on_aggregated_data=${this.props.computeOnAggregatedData}`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();
