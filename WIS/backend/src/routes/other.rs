@@ -46,8 +46,8 @@ pub fn ueberhangmandate(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, wa
 /// Die knappsten Sieger sind die gewählten Erstkandidaten, welche mit dem geringsten
 /// Vorsprung gegenüber ihren Konkurrenten gewonnen haben.
 #[get("/knappstesieger/<partei>/<jahr>")]
-pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: u32, jahr: u32)
- -> Result<content::Json<String>, hdbconnect::HdbError> {
+pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, partei: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -60,11 +60,12 @@ pub fn knappstesieger(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, part
         RIVALE: u32,
     }
 
-    let query = KNAPPSTE_SIEGER
-        .replace("{{PARTEI}}", &partei.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
-    connection.commit()?;
-    Ok(content::Json(serde_json::to_string(&result).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        KNAPPSTE_SIEGER, 
+        vec![HdbValue::INT(partei), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
