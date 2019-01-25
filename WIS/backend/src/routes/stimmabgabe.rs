@@ -269,8 +269,8 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
 /// Der Wahlzettel für die Zweitstimme ist oft sehr lang (mehrere 100 Einträge) für
 /// einen Stimmkreis, da jede Partei beliebig viele Kandidaten aufstellen darf.
 #[get("/wahlzettel/zweitstimme/<stimmkreis>/<jahr>")]
-pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> Result<content::Json<String>, hdbconnect::HdbError> {
+pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -282,11 +282,12 @@ pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager
         LISTENPOSITION: String,
     }
 
-    let query = STIMMZETTEL_ZWEITSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query(&query)?.try_into()?;
-    connection.commit()?;
-    Ok(content::Json(serde_json::to_string(&result).unwrap()))
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        STIMMZETTEL_ZWEITSTIMME, 
+        vec![HdbValue::INT(stimmkreis), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
