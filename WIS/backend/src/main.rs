@@ -37,7 +37,6 @@ fn main() {
                 routes::stimmkreis::siegerparteizweitstimmen,
                 routes::other::ueberhangmandate,
                 routes::other::knappstesieger,
-                routes::other::knappsteverlierer,
                 routes::data::parteien,
                 routes::data::stimmkreise,
                 routes::bayern::stimmverteilung,
