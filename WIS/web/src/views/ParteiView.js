@@ -9,7 +9,7 @@ export default class ParteiView extends Component {
     super(props);
     this.state = {
       parteien: [],
-      selectedParteiId: 1,
+      selectedParteiId: 0,
       sieger: []
     };
   }
@@ -21,7 +21,6 @@ export default class ParteiView extends Component {
         <div>
           <DropdownButton title={'Wähle eine Partei'} id={'dropdown-parteien'}
             onSelect={(key, event) => {
-              console.log("key is: " + key)
               this.setState({ selectedParteiId: key })
               this.fetchSieger(key);
               }
@@ -32,7 +31,10 @@ export default class ParteiView extends Component {
               </MenuItem>
             ))}
           </DropdownButton>
-          <WikipediaInfo title="CSU"/>
+          {this.state.selectedParteiId !== 0 &&
+            <WikipediaInfo title={this.state.parteien.find(p => p.ID === this.state.selectedParteiId).NAME}/>
+          }
+          
           <h2>Knappste Gewinner / Verlierer</h2>
           <Table>
             <thead>
