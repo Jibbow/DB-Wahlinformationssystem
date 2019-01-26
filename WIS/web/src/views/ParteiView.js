@@ -19,7 +19,7 @@ export default class ParteiView extends Component {
       <div className="two-column-tab-content">
         <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
         <div>
-          <DropdownButton title={'Wähle eine Partei'} id={'dropdown-parteien'}
+          <DropdownButton title={(this.state.selectedParteiId === 0)? 'Wähle eine Partei' : 'Partei: ' + this.state.parteien.find(p => p.ID === this.state.selectedParteiId).ABKUERZUNG} id={'dropdown-parteien'}
             onSelect={(key, event) => {
               this.setState({ selectedParteiId: key })
               this.fetchSieger(key);
@@ -32,7 +32,7 @@ export default class ParteiView extends Component {
             ))}
           </DropdownButton>
           {this.state.selectedParteiId !== 0 &&
-            <WikipediaInfo title={this.state.parteien.find(p => p.ID === this.state.selectedParteiId).NAME}/>
+            <WikipediaInfo className="wikipediainfo" title={this.state.parteien.find(p => p.ID === this.state.selectedParteiId).NAME}/>
           }
           
           <h2>Knappste Gewinner / Verlierer</h2>

@@ -83,6 +83,11 @@
   }
 }
 
+.wikipediainfo {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
 #personalausweis {
   width: 220px;
 }
