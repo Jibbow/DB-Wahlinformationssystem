@@ -46,7 +46,7 @@ export default class ParteiView extends Component {
             </thead>
             <tbody>
               {this.state.sieger.map(v => (
-                <tr key={'knappste-tr-' + v.PLATZIERUNG}>
+                <tr key={'knappste-tr-' + v.PLATZIERUNG} className={(v.DIFFERENZ >= 0)? 'kandidat-knapper-sieger' : 'kandidat-knapper-verlierer'}>
                   <td key={'knappste-td-platz-' + v.PLATZIERUNG}>{v.PLATZIERUNG}</td>
                   <td key={'knappste-td-name-' + v.PLATZIERUNG}>{v.VORNAME} {v.NACHNAME}</td>
                   <td key={'knappste-td-diff-' + v.DIFFERENZ}>{v.DIFFERENZ}</td>

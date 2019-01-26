@@ -88,6 +88,14 @@
   margin-bottom: 30px;
 }
 
+.kandidat-knapper-sieger {
+  background-color: rgba(30, 200, 50, 0.2);
+}
+
+.kandidat-knapper-verlierer {
+  background-color: rgba(200, 30, 50, 0.2);
+}
+
 #personalausweis {
   width: 220px;
 }
