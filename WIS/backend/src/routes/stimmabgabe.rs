@@ -185,7 +185,7 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
     let mut connection = db.get().expect("failed to connect to DB");
     let result = super::query_database::<QueryResult>(&mut connection, 
         "SELECT * FROM WIS.WAHLTOKEN WHERE WAHLTOKEN=?", 
-        vec![HdbValue::CHAR(token)]);
+        vec![HdbValue::STRING(token)]);
     match result {
         Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
         Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
