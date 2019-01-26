@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { Table } from 'react-bootstrap';
-import bayern_map from '../assets/Bayern_Landtagswahlkreise_2018.svg';
+import BayernMap from '../components/BayernMap';
 import WikipediaInfo from '../components/WikipediaInfo';
 
 export default class ParteiView extends Component {
@@ -9,7 +9,7 @@ export default class ParteiView extends Component {
     super(props);
     this.state = {
       parteien: [],
-      selectedParteiId: 1,
+      selectedParteiId: 0,
       sieger: []
     };
   }
@@ -17,11 +17,10 @@ export default class ParteiView extends Component {
   render() {
     return (
       <div className="two-column-tab-content">
-        <img src={bayern_map} className="bayern-map" alt="Karte von Bayern" />
+        <BayernMap mode={'none'} onClick={x => this.setState({ stimmkreis: x })} />
         <div>
-          <DropdownButton title={'Wähle eine Partei'} id={'dropdown-parteien'}
+          <DropdownButton title={(this.state.selectedParteiId === 0)? 'Wähle eine Partei' : 'Partei: ' + this.state.parteien.find(p => p.ID === this.state.selectedParteiId).ABKUERZUNG} id={'dropdown-parteien'}
             onSelect={(key, event) => {
-              console.log("key is: " + key)
               this.setState({ selectedParteiId: key })
               this.fetchSieger(key);
               }
@@ -32,7 +31,10 @@ export default class ParteiView extends Component {
               </MenuItem>
             ))}
           </DropdownButton>
-          <WikipediaInfo title="CSU"/>
+          {this.state.selectedParteiId !== 0 &&
+            <WikipediaInfo className="wikipediainfo" title={this.state.parteien.find(p => p.ID === this.state.selectedParteiId).NAME}/>
+          }
+          
           <h2>Knappste Gewinner / Verlierer</h2>
           <Table>
             <thead>
@@ -44,7 +46,7 @@ export default class ParteiView extends Component {
             </thead>
             <tbody>
               {this.state.sieger.map(v => (
-                <tr key={'knappste-tr-' + v.PLATZIERUNG}>
+                <tr key={'knappste-tr-' + v.PLATZIERUNG} className={(v.DIFFERENZ >= 0)? 'kandidat-knapper-sieger' : 'kandidat-knapper-verlierer'}>
                   <td key={'knappste-td-platz-' + v.PLATZIERUNG}>{v.PLATZIERUNG}</td>
                   <td key={'knappste-td-name-' + v.PLATZIERUNG}>{v.VORNAME} {v.NACHNAME}</td>
                   <td key={'knappste-td-diff-' + v.DIFFERENZ}>{v.DIFFERENZ}</td>
@@ -58,24 +60,20 @@ export default class ParteiView extends Component {
   }
 
   componentDidMount() {
-    let start = performance.now();
     fetch('http://localhost:8000/parteien')
       .then(response => response.json())
       .then(data => {
         this.state.parteien = data;
         this.forceUpdate();
       });
-      this.fetchSieger(1);
   }
 
   fetchSieger(id) {
-    if (id === 1 || id < this.state.parteien.length) {
-      fetch('http://localhost:8000/knappstesieger/' + id + '/2018')
-        .then(response => response.json())
-        .then(data => {
-          this.setState({sieger: data});
-          this.forceUpdate();
-        })
-    }
+    fetch('http://localhost:8000/knappstesieger/' + id + '/2018')
+      .then(response => response.json())
+      .then(data => {
+        this.setState({sieger: data});
+        this.forceUpdate();
+      });
   }
 }

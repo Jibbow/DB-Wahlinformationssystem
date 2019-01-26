@@ -22,7 +22,7 @@ pub fn parteien(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>)
         FARBE: String,
     }
     let mut connection = db.get().expect("failed to connect to DB");
-    let result: Vec<QueryResult> = connection.query("SELECT ID, ABKUERZUNG, NAME, FARBE FROM WIS.PARTEI")?.try_into()?;
+    let result: Vec<QueryResult> = connection.query("SELECT ID, ABKUERZUNG, NAME, FARBE FROM WIS.PARTEI ORDER BY ID")?.try_into()?;
     connection.commit()?;
     Ok(content::Json(serde_json::to_string(&result).unwrap()))
 }

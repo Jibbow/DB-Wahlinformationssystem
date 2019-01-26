@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Doughnut, Bar } from 'react-chartjs-2';
 import { Button, Collapse } from 'react-bootstrap';
 import BayernMap from '../components/BayernMap';
 import SitzverteilungLandtag from '../components/SitzverteilungLandtag';

@@ -83,5 +83,6 @@ fn create_connection_pool() -> r2d2::Pool<hdbconnect::ConnectionManager> {
 
     r2d2::Pool::builder()
         .max_size(150)
+        .max_lifetime(Some(std::time::Duration::from_secs(1)))
         .build_unchecked(hdbconnect::ConnectionManager::new(&db_connection_params))
 }

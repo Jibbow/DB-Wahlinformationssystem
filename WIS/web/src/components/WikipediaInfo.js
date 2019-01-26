@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { BeatLoader } from 'react-spinners';
-import { Panel, Table } from 'react-bootstrap';
+import { Panel } from 'react-bootstrap';
 
 export default class WikipediaInfo extends Component {
   constructor(props) {
@@ -16,7 +15,7 @@ export default class WikipediaInfo extends Component {
 
   render() {
     return (
-      <Panel>
+      <Panel className={this.props.className}>
         <Panel.Heading>
           {this.state.title} <small className="text-muted">(Source: Wikipedia - {this.state.time} milliseconds)</small>
         </Panel.Heading>
