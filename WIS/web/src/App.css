@@ -111,3 +111,7 @@
 .checkbox-aggregate > .react-toggle {
   margin: 8px;
 }
+
+.stimmabgabeTable{
+  overflow: scroll;
+}

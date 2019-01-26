@@ -7,9 +7,12 @@ export class VoteButton extends Component {
 
     this.handleIdentity = this.handleIdentity.bind(this);
     this.handleErststimme = this.handleErststimme.bind(this);
+    this.handleErststimmeAbgeben = this.handleErststimmeAbgeben.bind(this);
+    this.handleErststimmeEnthalten = this.handleErststimmeEnthalten.bind(this);
     this.handleZweitstimme = this.handleZweitstimme.bind(this);
     this.handleAbschluss = this.handleAbschluss.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.updateWahltoken = this.updateWahltoken.bind(this);
     this.validateWahltokenState = this.validateWahltokenState.bind(this);
 
     this.state = {
@@ -21,9 +24,31 @@ export class VoteButton extends Component {
       zweitstimmekandidaten: [], 
       erststimmekandidaten: [],
       jahr: 0,
-      stimmkreis: 0
+      stimmkreis: 0,
+      erststimmeabgegeben: 0,
+      zweitstimmeabgegeben: 0
     };
   }
+
+  updateWahltoken() {
+    const formData = new FormData();
+    formData.append('WAHLTOKEN', this.state.wahltoken);
+    formData.append('JAHR',this.state.jahr);
+    formData.append('STIMMKREIS', this.state.stimmkreis);
+    formData.append('ERSTSTIMMEABGEGEBEN', this.state.erststimmeabgegeben);
+    formData.append('ZWEITSTIMMEABGEGEBEN', this.state.zweitstimmeabgegeben);
+    return fetch('http://localhost:8000/tokeninfo', {
+      method: 'DELETE',
+      body: JSON.stringify({id: this.state.wahltoken})
+    })
+    .then(
+      fetch('http://localhost:8000/tokeninfo', {
+        method: 'POST',
+        body: formData
+    }))
+    .then(response => response.json())
+  }
+  
 
   validateWahltokenState() {
     fetch(`http://localhost:8000/tokeninfo/`.concat(this.state.wahltoken)) 
@@ -31,17 +56,33 @@ export class VoteButton extends Component {
     .then(data => {
       if (data.length == 1) {
           let tokeninfo = data[0];
-          this.setState({jahr: tokeninfo.JAHR}); //TODO: Test
-          this.setState({stimmkreis: tokeninfo.STIMMKREIS}); //TODO: Test
-          // console.log("Jahr: " + this.state.jahr);
-          if (tokeninfo.ERSTSTIMMEABGEGEBEN == false) {
+          this.setState({jahr: tokeninfo.JAHR});
+          this.setState({stimmkreis: tokeninfo.STIMMKREIS});
+          this.setState({erststimmeabgegeben: tokeninfo.ERSTSTIMMEABGEGEBEN});
+          this.setState({zweitstimmeabgegeben: tokeninfo.ZWEITSTIMMEABGEGEBEN});
+          fetch(`http://localhost:8000/wahlzettel/erststimme/${this.state.stimmkreis}/${this.state.jahr}`)
+          .then(response => response.json())
+          .then(data => {
+            this.setState({ erststimmekandidaten: data});
+            console.log(this.state.erststimmekandidaten);
+          });
+          fetch(`http://localhost:8000/wahlzettel/zweitstimme/${this.state.stimmkreis}/${this.state.jahr}`)
+          .then(response => response.json())
+          .then(data => {
+            let parteikandidaten_temp = this.getParteikandidaten(data);
+            this.setState({ zweitstimmekandidaten: parteikandidaten_temp});
+            console.log(this.state.zweitstimmekandidaten);
+          });
+          if (this.state.erststimmeabgegeben == false) {
             this.handleErststimme();
           }
-          else if (tokeninfo.ZWEITSTIMMEABGEGEBEN == false) {
+          else if (this.state.zweitstimmeabgegeben == false) {
             window.error("Sie haben schon eine Erststimme abgegeben. Weiter zur Zweitstimme.");
             this.handleZweitstimme();
           }
-          window.error("Sie haben schon eine Erststimme und eine Zweitstimme abgegeben.");
+          else {
+            window.error("Sie haben schon eine Erststimme und eine Zweitstimme abgegeben.");
+          }
       }
       else {
         window.alert("Ihr Wahltoken ist ungültig.");
@@ -50,6 +91,7 @@ export class VoteButton extends Component {
     .catch(error => {
       window.alert("Ihr Wahltoken ist ungültig.");
     });
+
   }
 
   validateWahltoken() {
@@ -157,8 +199,8 @@ export class VoteButton extends Component {
             </FormGroup>
           </Modal.Body>
           <Modal.Footer>
-          <Button onClick={this.handleZweitstimme}>Erststimme enthalten</Button>
-            <Button onClick={this.handleZweitstimme}>Erststimme abgeben</Button>
+          <Button onClick={this.handleErststimmeEnthalten}>Erststimme enthalten</Button>
+            <Button onClick={this.handleErststimmeAbgeben}>Erststimme abgeben</Button>
           </Modal.Footer>
         </Modal>
 
@@ -215,22 +257,6 @@ export class VoteButton extends Component {
     );
   }
 
-  componentDidMount() {
-    fetch(`http://localhost:8000/wahlzettel/erststimme/${this.state.stimmkreis}/${this.state.jahr}`) //TODO: Test
-      .then(response => response.json())
-      .then(data => {
-        this.setState({ erststimmekandidaten: data});
-        console.log(this.state.erststimmekandidaten);
-      });
-    fetch(`http://localhost:8000/wahlzettel/zweitstimme/${this.state.stimmkreis}/${this.state.jahr}`) //TODO: Test
-      .then(response => response.json())
-      .then(data => {
-        let parteikandidaten_temp = this.getParteikandidaten(data);
-        this.setState({ parteikandidaten: parteikandidaten_temp});
-        console.log(this.state.zweitstimmekandidaten);
-      });
-  }
-
   handleClose() {
     this.setState({ identity: false });
     this.setState({ erststimme: false });
@@ -250,6 +276,18 @@ export class VoteButton extends Component {
     this.setState({ erststimme: true });
     this.setState({ zweitstimme: false });
     this.setState({ abschluss: false });
+  }
+
+  handleErststimmeAbgeben() {
+    this.setState({ erststimmeabgegeben: 1 });
+    this.updateWahltoken();
+    this.handleZweitstimme();
+  }
+
+  handleErststimmeEnthalten() {
+    this.setState({ erststimmeabgegeben: 1 });
+    this.updateWahltoken();
+    this.handleZweitstimme();
   }
 
   handleZweitstimme() {
