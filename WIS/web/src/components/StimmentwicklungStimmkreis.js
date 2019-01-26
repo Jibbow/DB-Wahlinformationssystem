@@ -65,7 +65,7 @@ export default class StimmentwicklungStimmkreis extends Component {
 
   updateData() {
     let start = performance.now();
-    fetch(`/api/stimmverteilungdifferenz/${this.props.stimmkreis}?compute_on_aggregated_date=${this.props.computeOnAggregatedData}`)
+    fetch(`/api/stimmverteilungdifferenz/${this.props.stimmkreis}?compute_on_aggregated_data=${this.props.computeOnAggregatedData}`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();

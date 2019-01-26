@@ -37,7 +37,6 @@ fn main() {
                 routes::stimmkreis::siegerparteizweitstimmen,
                 routes::other::ueberhangmandate,
                 routes::other::knappstesieger,
-                routes::other::knappsteverlierer,
                 routes::data::parteien,
                 routes::data::stimmkreise,
                 routes::bayern::stimmverteilung,
@@ -83,6 +82,7 @@ fn create_connection_pool() -> r2d2::Pool<hdbconnect::ConnectionManager> {
         .unwrap();
 
     r2d2::Pool::builder()
-        .max_size(15)
+        .max_size(150)
+        .max_lifetime(Some(std::time::Duration::from_secs(1)))
         .build_unchecked(hdbconnect::ConnectionManager::new(&db_connection_params))
 }

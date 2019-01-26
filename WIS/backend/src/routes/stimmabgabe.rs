@@ -4,7 +4,9 @@ extern crate regex;
 
 use rocket::State;
 use rocket::response::content;
+use rocket::http::Status;
 use rocket::response::status::*;
+use hdbconnect::HdbValue;
 
 
 const STIMMZETTEL_ERSTSTIMME: &str = include_str!("../../queries/stimmabgabe/stimmzettel-erststimme.sql");
@@ -73,13 +75,15 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
         return Err(BadRequest(Some("Format des Tokens ist ungültig.")));
     }
 
-    let mut db_connection = db.get().expect("failed to connect to DB");
+    let mut connection = db.get().expect("failed to connect to DB");
+    connection.set_auto_commit(false).unwrap();
 
     if let Some(ref erststimme) = stimme.erststimme {
         // falls eine Erststimme mitgeliefert wurde, dann wird in der Datenbank das Token markiert als "Erststimme abgegeben"
         let query = "UPDATE WIS.WAHLTOKEN SET ERSTSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ERSTSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
-        let altered_rows = db_connection.dml(&query).unwrap();
+        let altered_rows = connection.dml(&query).unwrap();
         if altered_rows != 1 {
+            connection.rollback().unwrap();
             return Err(BadRequest(Some("Token ungültig oder Erststimme bereits abgegeben! Es wurde keine Stimme abgegeben.")));
         }
 
@@ -89,13 +93,13 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
             Erststimme::enthaltung => {
                 // Bei einer Enthaltung wird einfach NULL anstelle eines Kandidaten eingefügt
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
         }
     }
@@ -103,8 +107,9 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
     if let Some(ref zweitstimme) = stimme.zweitstimme {
         // falls eine Zweitstimme mitgeliefert wurde, dann wird in der Datenbank das Token markiert als "Zweitstimme abgegeben"
         let query = "UPDATE WIS.WAHLTOKEN SET ZWEITSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ZWEITSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
-        let altered_rows = db_connection.dml(&query).unwrap();
+        let altered_rows = connection.dml(&query).unwrap();
         if altered_rows != 1 {
+            connection.rollback().unwrap();
             return Err(BadRequest(Some("Token ungültig oder Zweitstimme bereits abgegeben! Es wurde keine Zweitstimme abgegeben.")));
         }
 
@@ -114,23 +119,24 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
             // Bei der Zweitstimme kann auch eine Partei statt eines Kandidaten gewählt werden.
             Zweitstimme::partei(p) => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEPARTEI (SELECT {{PARTEI}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{PARTEI}}", &p.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
             // Auch hier kann man sich enthalten. Dabei wird ein NULL-Wert in die Tabelle ZWEITSTIMMEKANDIDAT eingefügt. Theoretisch könnte man es auch in ZWEITSTIMMEPARTEI einfügen.
             Zweitstimme::enthaltung => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                db_connection.exec(&query).unwrap();
+                connection.exec(&query).unwrap();
             }
         }
     }
+    connection.commit().unwrap();
     Ok("Stimme abgegeben")
 }
 
@@ -158,11 +164,11 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
 /// Falls das Token ungültig ist, wird ein Fehler zurückgegeben (HTML: BadRequest).
 #[get("/tokeninfo/<token>")]
 pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: String)
- -> Result<content::Json<String>, BadRequest<&'static str>> {
+ -> Result<content::Json<String>, Custom<String>> {
     // validate token
     let validator = regex::Regex::new(r"^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$").unwrap();
     if !validator.is_match(&token) {
-        return Err(BadRequest(Some("Format des Tokens ist ungültig.")));
+        return Err(Custom(Status::BadRequest, format!("Format des Tokens ist ungültig: {}", token)));
     }
 
     // define result from DB (names must match column names!)
@@ -176,15 +182,13 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
 	    ZWEITSTIMMEABGEGEBEN: u32,
     }
 
-    let query = "SELECT * FROM WIS.WAHLTOKEN WHERE WAHLTOKEN='{{TOKEN}}'"
-        .replace("{{TOKEN}}", &token);
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    if result.len() == 0 {
-        Err(BadRequest(Some("Token ungültig!")))
-    } else {
-        Ok(content::Json(serde_json::to_string(&result[0]).unwrap()))
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        "SELECT * FROM WIS.WAHLTOKEN WHERE WAHLTOKEN=?", 
+        vec![HdbValue::CHAR(token)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
     }
 }
 
@@ -214,8 +218,8 @@ pub fn tokeninfo(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, token: St
 /// Der Wahlzettel für die Erststimme ist für gewöhnlich sehr kurz,
 /// da jede Partei nur maximal einen Kandidaten aufstellen darf.
 #[get("/wahlzettel/erststimme/<stimmkreis>/<jahr>")]
-pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> content::Json<String> {
+pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -227,13 +231,14 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
         LISTENPOSITION: String,
     }
 
-    let query = STIMMZETTEL_ERSTSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        STIMMZETTEL_ERSTSTIMME, 
+        vec![HdbValue::INT(stimmkreis), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
 
 /// # Wahlzettel Zweitstimme
@@ -262,8 +267,8 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
 /// Der Wahlzettel für die Zweitstimme ist oft sehr lang (mehrere 100 Einträge) für
 /// einen Stimmkreis, da jede Partei beliebig viele Kandidaten aufstellen darf.
 #[get("/wahlzettel/zweitstimme/<stimmkreis>/<jahr>")]
-pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: u32, jahr: u32)
- -> content::Json<String> {
+pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimmkreis: i32, jahr: i32)
+ -> Result<content::Json<String>, Custom<String>> {
     // define result from DB (names must match column names!)
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -275,11 +280,12 @@ pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager
         LISTENPOSITION: String,
     }
 
-    let query = STIMMZETTEL_ZWEITSTIMME
-        .replace("{{STIMMKREIS}}", &stimmkreis.to_string())
-        .replace("{{JAHR}}", &jahr.to_string());
-
-    let result: Vec<QueryResult> = db.get().expect("failed to connect to DB")
-        .query(&query).unwrap().try_into().unwrap();
-    content::Json(serde_json::to_string(&result).unwrap())
+    let mut connection = db.get().expect("failed to connect to DB");
+    let result = super::query_database::<QueryResult>(&mut connection, 
+        STIMMZETTEL_ZWEITSTIMME, 
+        vec![HdbValue::INT(stimmkreis), HdbValue::INT(jahr)]);
+    match result {
+        Ok(r) => Ok(content::Json(serde_json::to_string(&r).unwrap())),
+        Err(e) => Err(Custom(Status::InternalServerError, format!("Error while processing query: {}", e)))
+    }
 }
