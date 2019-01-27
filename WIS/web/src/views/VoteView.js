@@ -30,8 +30,6 @@ export class VoteButton extends Component {
       erststimmekandidaten: [],
       jahr: 0,
       stimmkreis: 0,
-      erststimmeabgegeben: 0,
-      zweitstimmeabgegeben: 0,
       erststimmeenthaltung: false,
       erststimmewahl: -1,
       zweitstimmeenthaltung: false,
@@ -49,7 +47,7 @@ export class VoteButton extends Component {
       erststimme = 'enthaltung';
     }
     else if (this.state.erststimmewahl === -1) {
-      erststimme = null;
+      erststimme = 'enthaltung';
     }
     else {
       erststimme = {
@@ -70,7 +68,7 @@ export class VoteButton extends Component {
     }
     }
     else {
-      zweitstimme = null
+      zweitstimme = 'enthaltung'
     }
     let ergebnis = {
       'token': this.state.wahltoken,
@@ -112,14 +110,11 @@ export class VoteButton extends Component {
             let parteikandidaten_temp = this.getParteikandidaten(data);
             this.setState({ zweitstimmekandidaten: parteikandidaten_temp});
           });
-          if (this.state.erststimmeabgegeben == 0) {
+          if ((this.state.erststimmeabgegeben == 0) && (this.state.zweitstimmeabgegeben == 0)) {
             this.handleErststimme();
           }
-          else if (this.state.zweitstimmeabgegeben == 0) {
-            this.handleZweitstimme();
-          }
           else {
-            window.alert("Sie haben schon eine Erststimme und eine Zweitstimme abgegeben.");
+            window.alert("Sie haben schon gewählt.");
           }
       }
       else {
@@ -378,7 +373,7 @@ export class VoteButton extends Component {
     this.setState({ zweitstimme: false });
     this.setState({ abschluss: true });
     this.setState({ erststimmewahl: -1 });
-    this.setState({ zweitstimmekandidat: -1 });
+    this.setState({ zweitstimmewahlkandidat: -1 });
     this.setState({ zweitstimmewahlpartei: -1 });
   }
 }
