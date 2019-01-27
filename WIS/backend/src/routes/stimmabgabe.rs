@@ -226,9 +226,11 @@ pub fn wahlzettel_erststimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager>
     struct QueryResult {
         PARTEI: String,
         PARTEI_ABKUERZUNG: String,
+        PARTEI_ID: u32,
         KANDIDAT_VORNAME: String,
         KANDIDAT_NACHNAME: String,
-        LISTENPOSITION: String,
+        KANDIDAT_ID: u32,
+        LISTENPOSITION: u32,
     }
 
     let mut connection = db.get().expect("failed to connect to DB");
@@ -275,9 +277,11 @@ pub fn wahlzettel_zweitstimme(db: State<r2d2::Pool<hdbconnect::ConnectionManager
     struct QueryResult {
         PARTEI: String,
         PARTEI_ABKUERZUNG: String,
+        PARTEI_ID: u32,
         KANDIDAT_VORNAME: String,
         KANDIDAT_NACHNAME: String,
-        LISTENPOSITION: String,
+        KANDIDAT_ID: u32,
+        LISTENPOSITION: u32,
     }
 
     let mut connection = db.get().expect("failed to connect to DB");
