@@ -4,7 +4,9 @@ WIS - Wahlinformationssystem für die Landtagswahl Bayern
 
 The project itself is located in `WIS` and can be run with docker. A external SAP HANA database is required.
 
-##
+![screenshot](./screenshot.png)
+
+## Online Version
 An online version of the project can be found under [http://wis.jibbow.com](http://wis.jibbow.com). Make sure that HANA as well as the application itself are running... 😅
 
 ## Schema
