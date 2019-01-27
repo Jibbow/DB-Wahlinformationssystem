@@ -81,9 +81,9 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
     if let Some(ref erststimme) = stimme.erststimme {
         // falls eine Erststimme mitgeliefert wurde, dann wird in der Datenbank das Token markiert als "Erststimme abgegeben"
         let query = "UPDATE WIS.WAHLTOKEN SET ERSTSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ERSTSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
-        let altered_rows = connection.dml(&query).unwrap();
+        let altered_rows = connection.dml(&query).expect("Failed to to update ERSTSTIMMEABGEGEBEN");
         if altered_rows != 1 {
-            connection.rollback().unwrap();
+            connection.rollback().expect("Failed to abort Stimmabgabe");
             return Err(BadRequest(Some("Token ungültig oder Erststimme bereits abgegeben! Es wurde keine Stimme abgegeben.")));
         }
 
@@ -93,13 +93,13 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                connection.exec(&query).unwrap();
+                connection.statement(&query).expect("Failed to insert new vote for ERSTSTIMME");
             }
             Erststimme::enthaltung => {
                 // Bei einer Enthaltung wird einfach NULL anstelle eines Kandidaten eingefügt
                 let query = "INSERT INTO WIS.ERSTSTIMME (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                connection.exec(&query).unwrap();
+                connection.statement(&query).expect("Failed to insert new vote for ERSTSTIMME");
             }
         }
     }
@@ -107,9 +107,9 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
     if let Some(ref zweitstimme) = stimme.zweitstimme {
         // falls eine Zweitstimme mitgeliefert wurde, dann wird in der Datenbank das Token markiert als "Zweitstimme abgegeben"
         let query = "UPDATE WIS.WAHLTOKEN SET ZWEITSTIMMEABGEGEBEN = 1 WHERE WAHLTOKEN='{{TOKEN}}' AND ZWEITSTIMMEABGEGEBEN = 0".replace("{{TOKEN}}", &stimme.token);
-        let altered_rows = connection.dml(&query).unwrap();
+        let altered_rows = connection.dml(&query).expect("Failed to to update ZWEITSTIMMEABGEGEBEN");
         if altered_rows != 1 {
-            connection.rollback().unwrap();
+            connection.rollback().expect("Failed to abort Stimmabgabe");
             return Err(BadRequest(Some("Token ungültig oder Zweitstimme bereits abgegeben! Es wurde keine Zweitstimme abgegeben.")));
         }
 
@@ -119,20 +119,20 @@ pub fn abstimmen(db: State<r2d2::Pool<hdbconnect::ConnectionManager>>, stimme: r
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT {{KANDIDAT}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{KANDIDAT}}", &k.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                connection.exec(&query).unwrap();
+                connection.statement(&query).expect("Failed to insert new vote for ZWEITSTIMME");
             }
             // Bei der Zweitstimme kann auch eine Partei statt eines Kandidaten gewählt werden.
             Zweitstimme::partei(p) => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEPARTEI (SELECT {{PARTEI}}, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{PARTEI}}", &p.to_string())
                     .replace("{{TOKEN}}", &stimme.token);
-                connection.exec(&query).unwrap();
+                connection.statement(&query).expect("Failed to insert new vote for ZWEITSTIMME");
             }
             // Auch hier kann man sich enthalten. Dabei wird ein NULL-Wert in die Tabelle ZWEITSTIMMEKANDIDAT eingefügt. Theoretisch könnte man es auch in ZWEITSTIMMEPARTEI einfügen.
             Zweitstimme::enthaltung => {
                 let query = "INSERT INTO WIS.ZWEITSTIMMEKANDIDAT (SELECT NULL, T.STIMMKREIS , 2018 FROM WIS.WAHLTOKEN T WHERE T.WAHLTOKEN='{{TOKEN}}')"
                     .replace("{{TOKEN}}", &stimme.token);
-                connection.exec(&query).unwrap();
+                connection.statement(&query).expect("Failed to insert new vote for ZWEITSTIMME");
             }
         }
     }
