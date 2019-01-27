@@ -14,6 +14,7 @@ export class VoteButton extends Component {
     this.handleZweitstimmeEnthalten = this.handleZweitstimmeEnthalten.bind(this);
     this.handleAbschluss = this.handleAbschluss.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.vote = this.vote.bind(this);
     this.validateWahltokenState = this.validateWahltokenState.bind(this);
 
     this.state = {
@@ -34,18 +35,13 @@ export class VoteButton extends Component {
     };
   }
 
- /*updateWahltoken() {
-    return fetch('http://localhost:8000/tokeninfo', {
-      method: 'DELETE',
-      body: JSON.stringify({id: this.state.wahltoken})
+ vote() {
+    return fetch('http://localhost:8000/abstimmen', {
+      method: 'POST',
+      body: JSON.stringify({})
     })
-    .then(
-      fetch('http://localhost:8000/tokeninfo', {
-        method: 'POST',
-        body: formData
-    }))
     .then(response => response.json())
-  }*/
+  }
   
 
   validateWahltokenState() {
@@ -55,9 +51,9 @@ export class VoteButton extends Component {
       if (data.length == 1) {
           let tokeninfo = data[0];
           this.setState({stimmkreis: tokeninfo.STIMMKREIS});
+          this.setState({jahr: tokeninfo.JAHR});
           this.setState({erststimmeabgegeben: tokeninfo.ERSTSTIMMEABGEGEBEN});
           this.setState({zweitstimmeabgegeben: tokeninfo.ZWEITSTIMMEABGEGEBEN});
-          this.setState({zweitstimmeabgegeben: 1});
           fetch(`http://localhost:8000/wahlzettel/erststimme/${this.state.stimmkreis}/${this.state.jahr}`)
           .then(response => response.json())
           .then(data => {
@@ -303,17 +299,16 @@ export class VoteButton extends Component {
 
   handleZweitstimmeAbgeben() {
     this.setState({ zweitstimmeabgegeben: 1 });
-    this.updateWahltoken();
     this.handleAbschluss();
   }
 
   handleZweitstimmeEnthalten() {
     this.setState({ zweitstimmeabgegeben: 1 });
-    this.updateWahltoken();
     this.handleAbschluss();
   }
 
   handleAbschluss() {
+    this.vote();
     this.setState({ identity: false });
     this.setState({ erststimme: false });
     this.setState({ zweitstimme: false });
