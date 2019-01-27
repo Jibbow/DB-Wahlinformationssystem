@@ -17,6 +17,8 @@ export class VoteButton extends Component {
     this.vote = this.vote.bind(this);
     this.validateWahltokenState = this.validateWahltokenState.bind(this);
     this.onErststimmeAuswahl = this.onErststimmeAuswahl.bind(this);
+    this.onZweitstimmeKandidatAuswahl = this.onZweitstimmeKandidatAuswahl.bind(this);
+    this.onZweitstimmeParteiAuswahl = this.onZweitstimmeParteiAuswahl.bind(this);
 
     this.state = {
       identity: false,
@@ -33,15 +35,16 @@ export class VoteButton extends Component {
       erststimmeenthaltung: false,
       erststimmewahl: -1,
       zweitstimmeenthaltung: false,
-      zweitstimmewahlpartei: 0,
-      zweitstimmewahlkandidat: 0
+      zweitstimmewahlpartei: -1,
+      zweitstimmewahlkandidat: -1
     };
   }
 
   vote() {
-    console.log("Enthaltung? " + this.state.erststimmeenthaltung);
-    console.log("Auswahl? " + this.state.erststimmewahl);
-    let erststimme = ""
+    console.log("Enthaltung? " + this.state.zweitstimmeenthaltung);
+    console.log("Auswahl? " + this.state.zweitstimmewahlkandidat);
+    let erststimme = "";
+    let zweitstimme = "";
     if (this.state.erststimmeenthaltung === true) {
       erststimme = "enthaltung";
     }
@@ -53,10 +56,26 @@ export class VoteButton extends Component {
         "kandidat": this.state.erststimmewahl
       };
     }
+    if (this.state.zweitstimmeenthaltung === true) {
+      zweitstimme = "enthaltung";
+    }
+    else if (this.state.zweitstimmewahlkandidat > -1) {
+      zweitstimme = {
+        "kandidat": this.state.zweitstimmewahlkandidat
+    }
+    }
+    else if (this.state.zweitstimmewahlpartei > -1) {
+      zweitstimme = {
+        "partei": this.state.zweitstimmewahlpartei
+    }
+    }
+    else {
+      zweitstimme = null
+    }
     let ergebnis = JSON.stringify({
       "token": this.state.wahltoken,
       "erststimme": erststimme,
-      "zweitstimme": null 
+      "zweitstimme": zweitstimme
     });
     console.log(ergebnis);
     return fetch('http://localhost:8000/abstimmen', {
@@ -125,12 +144,12 @@ export class VoteButton extends Component {
       let gefunden = false;
       for (const pk of parteikandidaten_temp) {
         if (pk.partei.abkuerzung === p.PARTEI_ABKUERZUNG) {
-          pk.kandidaten.push({position: p.LISTENPOSITION, name: p.KANDIDAT_NACHNAME, vorname: p.KANDIDAT_VORNAME});
+          pk.kandidaten.push({id: p.KANDIDAT_ID, position: p.LISTENPOSITION, name: p.KANDIDAT_NACHNAME, vorname: p.KANDIDAT_VORNAME});
           gefunden = true
         }
       }
       if (!gefunden) {
-        parteikandidaten_temp.push({partei: { name: p.PARTEI, abkuerzung: p.PARTEI_ABKUERZUNG }, kandidaten: [{position: p.LISTENPOSITION, name: p.KANDIDAT_NACHNAME, vorname: p.KANDIDAT_VORNAME}]});
+        parteikandidaten_temp.push({partei: { id: p.PARTEI_ID, name: p.PARTEI, abkuerzung: p.PARTEI_ABKUERZUNG }, kandidaten: [{id: p.KANDIDAT_ID, position: p.LISTENPOSITION, name: p.KANDIDAT_NACHNAME, vorname: p.KANDIDAT_VORNAME}]});
       }
     });
     return parteikandidaten_temp;
@@ -204,7 +223,7 @@ export class VoteButton extends Component {
                 <tbody>
                   <tr>
                   {this.state.erststimmekandidaten.map(k =>
-                    <td><Radio name="radioGroup" value={k.KANDIDAT_ID} checked={this.state.erststimmewahl === k.KANDIDAT_ID} onChange={this.onErststimmeAuswahl} inline>
+                    <td><Radio name="radioGroup" value={k.KANDIDAT_ID} onChange={this.onErststimmeAuswahl} inline>
                       <div>{k.LISTENPOSITION}</div>
                       <div>{k.KANDIDAT_NACHNAME}</div>
                       <div>{k.KANDIDAT_VORNAME}</div>
@@ -233,9 +252,9 @@ export class VoteButton extends Component {
                   <thead>
                     <tr>
                       {this.state.zweitstimmekandidaten.map((p, i) =>
-                        <th><Radio name="radioGroup" inline>
+                        <th><Radio name="radioGroup" value={p.partei.id} onChange={this.onZweitstimmeParteiAuswahl} inline>
                           <div>Wahlvorschlag Nr. {i + 1}</div>
-                          <div>{p.partei.name}</div>
+                          <div>{p.partei.id}</div>
                           <div>{p.partei.abkuerzung}</div>
                         </Radio></th>
                       )}
@@ -245,7 +264,7 @@ export class VoteButton extends Component {
                     {this.getPositionskandidaten().map((p, i) =>
                       <tr>
                         {p.map((k, j) =>
-                          <td><Radio name="radioGroup" inline>
+                          <td><Radio name="radioGroup" value={k.id} onChange={this.onZweitstimmeKandidatAuswahl} inline>
                             <div>{k.position} {k.name}, {k.vorname}</div>
                           </Radio></td>
                         )}
@@ -277,7 +296,16 @@ export class VoteButton extends Component {
 
   onErststimmeAuswahl(e) {
     this.setState({ erststimmewahl: e.currentTarget.value });
-    console.log("Auswahl: " + this.state.erststimmewahl);
+  }
+
+  onZweitstimmeKandidatAuswahl(e) {
+    this.setState({ zweitstimmewahlkandidat: e.currentTarget.value });
+    this.setState({ zweitstimmewahlpartei: -1 });
+  }
+
+  onZweitstimmeParteiAuswahl(e) {
+    this.setState({ zweitstimmewahlpartei: e.currentTarget.value });
+    this.setState({ zweitstimmewahlkandidat: -1 });
   }
 
   handleClose() {
@@ -331,11 +359,13 @@ export class VoteButton extends Component {
   }
 
   handleZweitstimmeAbgeben() {
+    this.setState({ zweitstimmeenthaltung: false });
     this.setState({ zweitstimmeabgegeben: 1 });
     this.handleAbschluss();
   }
 
   handleZweitstimmeEnthalten() {
+    this.setState({ zweitstimmeenthaltung: true });
     this.setState({ zweitstimmeabgegeben: 1 });
     this.handleAbschluss();
   }
