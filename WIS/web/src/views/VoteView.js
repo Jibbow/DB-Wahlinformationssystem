@@ -119,15 +119,15 @@ export class VoteButton extends Component {
             this.handleZweitstimme();
           }
           else {
-            window.error("Sie haben schon eine Erststimme und eine Zweitstimme abgegeben.");
+            window.alert("Sie haben schon eine Erststimme und eine Zweitstimme abgegeben.");
           }
       }
       else {
-        window.alert("Ihr Wahltoken ist ungültig1.");
+        window.alert("Ihr Wahltoken ist ungültig.");
       }
     })
     .catch(error => {
-      window.alert("Ihr Wahltoken ist ungültig2.");
+      window.alert("Ihr Wahltoken ist ungültig.");
     });
 
   }
@@ -366,8 +366,8 @@ export class VoteButton extends Component {
   }
 
   handleZweitstimmeEnthalten() {
-    this.setState({ zweitstimmeenthaltung: true });
-    this.setState({ zweitstimmeabgegeben: 1 });
+    this.setState({ zweitstimmeenthaltung: true })
+    this.setState({ zweitstimmeabgegeben: 1 }); 
     this.handleAbschluss();
   }
 
@@ -377,5 +377,8 @@ export class VoteButton extends Component {
     this.setState({ erststimme: false });
     this.setState({ zweitstimme: false });
     this.setState({ abschluss: true });
+    this.setState({ erststimmewahl: -1 });
+    this.setState({ zweitstimmekandidat: -1 });
+    this.setState({ zweitstimmewahlpartei: -1 });
   }
 }
