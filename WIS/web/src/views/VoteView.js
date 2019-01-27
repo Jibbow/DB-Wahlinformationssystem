@@ -16,6 +16,7 @@ export class VoteButton extends Component {
     this.handleClose = this.handleClose.bind(this);
     this.vote = this.vote.bind(this);
     this.validateWahltokenState = this.validateWahltokenState.bind(this);
+    this.onErststimmeAuswahl = this.onErststimmeAuswahl.bind(this);
 
     this.state = {
       identity: false,
@@ -35,10 +36,16 @@ export class VoteButton extends Component {
     };
   }
 
- vote() {
+  vote() {
     return fetch('http://localhost:8000/abstimmen', {
       method: 'POST',
-      body: JSON.stringify({})
+      body: JSON.stringify({
+        "token": this.state.wahltoken,
+        "erststimme": {
+          "kandidat": 5
+        },
+        "zweitstimme": null 
+      })
     })
     .then(response => response.json())
   }
@@ -65,11 +72,12 @@ export class VoteButton extends Component {
             let parteikandidaten_temp = this.getParteikandidaten(data);
             this.setState({ zweitstimmekandidaten: parteikandidaten_temp});
           });
-          if (this.state.erststimmeabgegeben == false) {
+          console.log("Erststimme: " + this.state.erststimmeabgegeben);
+          console.log("Zweitstimme: " + this.state.zweitstimmeabgegeben);
+          if (this.state.erststimmeabgegeben == 0) {
             this.handleErststimme();
           }
-          else if (this.state.zweitstimmeabgegeben == false) {
-            window.error("Sie haben schon eine Erststimme abgegeben. Weiter zur Zweitstimme.");
+          else if (this.state.zweitstimmeabgegeben == 0) {
             this.handleZweitstimme();
           }
           else {
@@ -77,11 +85,11 @@ export class VoteButton extends Component {
           }
       }
       else {
-        window.alert("Ihr Wahltoken ist ungültig.");
+        window.alert("Ihr Wahltoken ist ungültig1.");
       }
     })
     .catch(error => {
-      window.alert("Ihr Wahltoken ist ungültig.");
+      window.alert("Ihr Wahltoken ist ungültig2.");
     });
 
   }
@@ -178,7 +186,7 @@ export class VoteButton extends Component {
                 <tbody>
                   <tr>
                   {this.state.erststimmekandidaten.map(k =>
-                    <td><Radio name="radioGroup" inline>
+                    <td><Radio name="radioGroup" value={this.state.erststimmewahl} onChange={this.onErststimmeAuswahl} inline>
                       <div>{k.LISTENPOSITION}</div>
                       <div>{k.KANDIDAT_NACHNAME}</div>
                       <div>{k.KANDIDAT_VORNAME}</div>
@@ -247,6 +255,11 @@ export class VoteButton extends Component {
 
       </div>
     );
+  }
+
+  onErststimmeAuswahl(e) {
+    this.setState({ erststimmewahl: e.currentTarget.value });
+    console.log("Auswahl: " + e.currentTarget.value);
   }
 
   handleClose() {
