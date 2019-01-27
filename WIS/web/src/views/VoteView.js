@@ -43,46 +43,51 @@ export class VoteButton extends Component {
   vote() {
     console.log("Enthaltung? " + this.state.zweitstimmeenthaltung);
     console.log("Auswahl? " + this.state.zweitstimmewahlkandidat);
-    let erststimme = "";
-    let zweitstimme = "";
+    let erststimme = '';
+    let zweitstimme = '';
     if (this.state.erststimmeenthaltung === true) {
-      erststimme = "enthaltung";
+      erststimme = 'enthaltung';
     }
     else if (this.state.erststimmewahl === -1) {
       erststimme = null;
     }
     else {
       erststimme = {
-        "kandidat": this.state.erststimmewahl
+        'kandidat': this.state.erststimmewahl
       };
     }
     if (this.state.zweitstimmeenthaltung === true) {
-      zweitstimme = "enthaltung";
+      zweitstimme = 'enthaltung';
     }
     else if (this.state.zweitstimmewahlkandidat > -1) {
       zweitstimme = {
-        "kandidat": this.state.zweitstimmewahlkandidat
+        'kandidat': this.state.zweitstimmewahlkandidat
     }
     }
     else if (this.state.zweitstimmewahlpartei > -1) {
       zweitstimme = {
-        "partei": this.state.zweitstimmewahlpartei
+        'partei': this.state.zweitstimmewahlpartei
     }
     }
     else {
       zweitstimme = null
     }
     let ergebnis = {
-      "token": this.state.wahltoken,
-      "erststimme": erststimme,
-      "zweitstimme": zweitstimme
+      'token': this.state.wahltoken,
+      'erststimme': erststimme,
+      'zweitstimme': zweitstimme
     };
     console.log(ergebnis);
     return fetch('http://localhost:8000/abstimmen', {
       method: 'POST',
       body: JSON.stringify(ergebnis)
     })
-    .then(response => response.json())
+    .then(function (data) {  
+      console.log('Request success: ', data);  
+    })  
+    .catch(function (error) {  
+      console.log('Request failure: ', error);  
+    });
   }
   
 
@@ -291,16 +296,16 @@ export class VoteButton extends Component {
   }
 
   onErststimmeAuswahl(e) {
-    this.setState({ erststimmewahl: e.currentTarget.value });
+    this.setState({ erststimmewahl: parseInt(e.currentTarget.value) });
   }
 
   onZweitstimmeKandidatAuswahl(e) {
-    this.setState({ zweitstimmewahlkandidat: e.currentTarget.value });
+    this.setState({ zweitstimmewahlkandidat: parseInt(e.currentTarget.value) });
     this.setState({ zweitstimmewahlpartei: -1 });
   }
 
   onZweitstimmeParteiAuswahl(e) {
-    this.setState({ zweitstimmewahlpartei: e.currentTarget.value });
+    this.setState({ zweitstimmewahlpartei: parseInt(e.currentTarget.value) });
     this.setState({ zweitstimmewahlkandidat: -1 });
   }
 
