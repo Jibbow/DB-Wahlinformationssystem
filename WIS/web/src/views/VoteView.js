@@ -72,19 +72,15 @@ export class VoteButton extends Component {
     else {
       zweitstimme = null
     }
-    let ergebnis = JSON.stringify({
+    let ergebnis = {
       "token": this.state.wahltoken,
       "erststimme": erststimme,
       "zweitstimme": zweitstimme
-    });
+    };
     console.log(ergebnis);
     return fetch('http://localhost:8000/abstimmen', {
       method: 'POST',
-      body: JSON.stringify({
-        "token": this.state.wahltoken,
-        "erststimme": erststimme,
-        "zweitstimme": null 
-      })
+      body: JSON.stringify(ergebnis)
     })
     .then(response => response.json())
   }
