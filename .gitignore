@@ -4,3 +4,7 @@ Session4/generator/secrets\.py
 Session4/generator/secrets\.pyc
 
 Session4/generator/\.idea/workspace\.xml
+WIS/database/db/data/07__WIS.ERSTSTIMME.csv
+WIS/database/db/data/08__WIS.ZWEITSTIMMEPARTEI.csv
+WIS/database/db/data/09__WIS.ZWEITSTIMMEKANDIDAT.csv
+WIS/database/db/data/13__WIS.WAHLTOKEN.csv
