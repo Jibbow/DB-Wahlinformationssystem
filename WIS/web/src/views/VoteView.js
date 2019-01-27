@@ -30,20 +30,40 @@ export class VoteButton extends Component {
       stimmkreis: 0,
       erststimmeabgegeben: 0,
       zweitstimmeabgegeben: 0,
-      erststimmewahl: 0,
+      erststimmeenthaltung: false,
+      erststimmewahl: -1,
+      zweitstimmeenthaltung: false,
       zweitstimmewahlpartei: 0,
       zweitstimmewahlkandidat: 0
     };
   }
 
   vote() {
+    console.log("Enthaltung? " + this.state.erststimmeenthaltung);
+    console.log("Auswahl? " + this.state.erststimmewahl);
+    let erststimme = ""
+    if (this.state.erststimmeenthaltung === true) {
+      erststimme = "enthaltung";
+    }
+    else if (this.state.erststimmewahl === -1) {
+      erststimme = null;
+    }
+    else {
+      erststimme = {
+        "kandidat": this.state.erststimmewahl
+      };
+    }
+    let ergebnis = JSON.stringify({
+      "token": this.state.wahltoken,
+      "erststimme": erststimme,
+      "zweitstimme": null 
+    });
+    console.log(ergebnis);
     return fetch('http://localhost:8000/abstimmen', {
       method: 'POST',
       body: JSON.stringify({
         "token": this.state.wahltoken,
-        "erststimme": {
-          "kandidat": 5
-        },
+        "erststimme": erststimme,
         "zweitstimme": null 
       })
     })
@@ -72,8 +92,6 @@ export class VoteButton extends Component {
             let parteikandidaten_temp = this.getParteikandidaten(data);
             this.setState({ zweitstimmekandidaten: parteikandidaten_temp});
           });
-          console.log("Erststimme: " + this.state.erststimmeabgegeben);
-          console.log("Zweitstimme: " + this.state.zweitstimmeabgegeben);
           if (this.state.erststimmeabgegeben == 0) {
             this.handleErststimme();
           }
@@ -186,7 +204,7 @@ export class VoteButton extends Component {
                 <tbody>
                   <tr>
                   {this.state.erststimmekandidaten.map(k =>
-                    <td><Radio name="radioGroup" value={this.state.erststimmewahl} onChange={this.onErststimmeAuswahl} inline>
+                    <td><Radio name="radioGroup" value={k.KANDIDAT_ID} checked={this.state.erststimmewahl === k.KANDIDAT_ID} onChange={this.onErststimmeAuswahl} inline>
                       <div>{k.LISTENPOSITION}</div>
                       <div>{k.KANDIDAT_NACHNAME}</div>
                       <div>{k.KANDIDAT_VORNAME}</div>
@@ -259,7 +277,7 @@ export class VoteButton extends Component {
 
   onErststimmeAuswahl(e) {
     this.setState({ erststimmewahl: e.currentTarget.value });
-    console.log("Auswahl: " + e.currentTarget.value);
+    console.log("Auswahl: " + this.state.erststimmewahl);
   }
 
   handleClose() {
@@ -284,6 +302,7 @@ export class VoteButton extends Component {
   }
 
   handleErststimmeAbgeben() {
+    this.setState({ erststimmeenthaltung: false });
     this.setState({ erststimmeabgegeben: 1 });
     if (this.state.zweitstimmeabgegeben === 0) {
       this.handleZweitstimme();
@@ -294,6 +313,7 @@ export class VoteButton extends Component {
   }
 
   handleErststimmeEnthalten() {
+    this.setState({ erststimmeenthaltung: true });
     this.setState({ erststimmeabgegeben: 1 });
     if (this.state.zweitstimmeabgegeben === 0) {
       this.handleZweitstimme();
