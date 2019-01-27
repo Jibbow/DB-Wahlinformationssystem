@@ -76,7 +76,7 @@ export class VoteButton extends Component {
       'zweitstimme': zweitstimme
     };
     console.log(ergebnis);
-    return fetch('http://localhost:8000/abstimmen', {
+    return fetch('/api/abstimmen', {
       method: 'POST',
       body: JSON.stringify(ergebnis)
     })
@@ -90,7 +90,7 @@ export class VoteButton extends Component {
   
 
   validateWahltokenState() {
-    fetch(`http://localhost:8000/tokeninfo/`.concat(this.state.wahltoken)) 
+    fetch(`/api/tokeninfo/`.concat(this.state.wahltoken)) 
     .then(response => response.json())
     .then(data => {
       if (data.length == 1) {
@@ -99,12 +99,12 @@ export class VoteButton extends Component {
           this.setState({jahr: tokeninfo.JAHR});
           this.setState({erststimmeabgegeben: tokeninfo.ERSTSTIMMEABGEGEBEN});
           this.setState({zweitstimmeabgegeben: tokeninfo.ZWEITSTIMMEABGEGEBEN});
-          fetch(`http://localhost:8000/wahlzettel/erststimme/${this.state.stimmkreis}/${this.state.jahr}`)
+          fetch(`/api/wahlzettel/erststimme/${this.state.stimmkreis}/${this.state.jahr}`)
           .then(response => response.json())
           .then(data => {
             this.setState({ erststimmekandidaten: data});
           });
-          fetch(`http://localhost:8000/wahlzettel/zweitstimme/${this.state.stimmkreis}/${this.state.jahr}`)
+          fetch(`/api/wahlzettel/zweitstimme/${this.state.stimmkreis}/${this.state.jahr}`)
           .then(response => response.json())
           .then(data => {
             let parteikandidaten_temp = this.getParteikandidaten(data);
