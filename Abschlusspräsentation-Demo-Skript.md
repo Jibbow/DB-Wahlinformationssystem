@@ -9,6 +9,8 @@ ERZÄHLER: Andreas ist sich noch nicht sicher, für welche Partei er heute stimm
 
 WÄHLER: Das Bündnis 90/Die Grünen ist eine politische Partei in Deutschland. Ein wesentlicher inhaltlicher Schwerpunkt ist die Umweltpolitik. Ich hab’s! Ich werde die Grünen wählen. 
 
+ERZÄHLER: Andreas interessiert sich für das aktuelle Ergebnis der Partei Bündnis90/Die Grünen in seinem Stimmkreis. Andreas ist verwirrt. ... Er hat seinen Stimmkreis vergessen. Helfen Sie bitte Andreas, einen Stimmkreis auszuwählen.
+
 ABSCHNITT III - STIMMABGABE
 
 ERZÄHLER: Andreas hat sich dazu entschieden, bei der heutigen Landtagswahl für die Partei Bündnis90/Die Grünen zu stimmen. Er benutzt das Wahlinformationssystem WIS. Um das Bündnis90/Die Grünen wählen zu können, klickt Andreas am oberen Bildschirmrand den Knopf Meine Stimme abgeben. 
