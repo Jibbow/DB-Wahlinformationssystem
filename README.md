@@ -21,4 +21,4 @@ Schema file can be found here:
  - [Erste UI-Entwürfe](https://github.com/Jibbow/DB-Wahlinformationssystem/blob/master/Session3/ui_main.PNG)
  - [Data-Scraping](https://github.com/Jibbow/DB-Wahlinformationssystem/tree/master/Session4)
  - [SQL-Queries](https://github.com/Jibbow/DB-Wahlinformationssystem/tree/master/WIS/backend/queries)
- - [Benachmarking](https://github.com/Jibbow/DB-Wahlinformationssystem/tree/master/Benchmarking)
+ - [Benchmarking](https://github.com/Jibbow/DB-Wahlinformationssystem/tree/master/Benchmarking)
