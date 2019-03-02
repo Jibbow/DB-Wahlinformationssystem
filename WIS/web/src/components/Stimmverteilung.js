@@ -77,6 +77,7 @@ export default class Stimmverteilung extends Component {
   updateData() {
     let start = performance.now();
 
+
     // mapping for stimmkreisid 2018<->2013
     let stimmkreis2013 = '';
     if(this.props.stimmkreis){
@@ -91,7 +92,7 @@ export default class Stimmverteilung extends Component {
       }
     }
 
-    fetch(`http://localhost:8000/stimmverteilung/${stimmkreis2013}/2013${(this.props.stimmkreis)? `?compute_on_aggregated_data=${this.props.computeOnAggregatedData}` : ''}`)
+    fetch(`/api/stimmverteilung/${stimmkreis2013}/2013${(this.props.stimmkreis)? `?compute_on_aggregated_data=${this.props.computeOnAggregatedData}` : ''}`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();
@@ -99,7 +100,7 @@ export default class Stimmverteilung extends Component {
         this.setState({ stimmverteilung2013: data });
         this.setState({ isLoaded2013: true });
       });
-    fetch(`http://localhost:8000/stimmverteilung/${this.props.stimmkreis || ''}/2018${(this.props.stimmkreis)? `?compute_on_aggregated_data=${this.props.computeOnAggregatedData}` : ''}`)
+    fetch(`/api/stimmverteilung/${this.props.stimmkreis || ''}/2018${(this.props.stimmkreis)? `?compute_on_aggregated_data=${this.props.computeOnAggregatedData}` : ''}`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();

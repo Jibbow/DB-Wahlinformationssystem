@@ -60,7 +60,7 @@ export default class ParteiView extends Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:8000/parteien')
+    fetch('/api/parteien')
       .then(response => response.json())
       .then(data => {
         this.state.parteien = data;
@@ -69,7 +69,7 @@ export default class ParteiView extends Component {
   }
 
   fetchSieger(id) {
-    fetch('http://localhost:8000/knappstesieger/' + id + '/2018')
+    fetch('/api/knappstesieger/' + id + '/2018')
       .then(response => response.json())
       .then(data => {
         this.setState({sieger: data});

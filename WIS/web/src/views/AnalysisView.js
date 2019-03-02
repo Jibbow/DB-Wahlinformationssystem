@@ -47,7 +47,7 @@ export default class AnalysisView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000//analysen/fdp-gehalt')
+    fetch('/api/analysen/fdp-gehalt')
       .then(response => response.json())
       .then(data => {
         let end = performance.now();
@@ -60,7 +60,7 @@ export default class AnalysisView extends Component {
         });
         this.forceUpdate();
       });
-    fetch('http://localhost:8000//analysen/csu-sterberate')
+    fetch('/api/analysen/csu-sterberate')
       .then(response => response.json())
       .then(data => {
         let end = performance.now();

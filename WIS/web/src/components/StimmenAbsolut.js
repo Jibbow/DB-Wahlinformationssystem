@@ -50,7 +50,7 @@ export default class Stimmverteilung extends Component {
 
   updateData() {
     let start = performance.now();
-    fetch(`http://localhost:8000/stimmverteilung/${this.props.stimmkreis || ''}/2018`)
+    fetch(`/api/stimmverteilung/${this.props.stimmkreis || ''}/2018`)
       .then(response => response.json())
       .then(data => {
         let end = performance.now();

@@ -78,7 +78,7 @@ export default class StimmkreisView extends Component {
   }
 
   componentDidMount() {
-    fetch(`http://localhost:8000/stimmkreise/2018`)
+    fetch(`/api/stimmkreise/2018`)
       .then(response => response.json())
       .then(data => {
         this.setState({ stimmkreise: data });
@@ -89,25 +89,25 @@ export default class StimmkreisView extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.stimmkreis !== prevState.stimmkreis) {
       let start = performance.now();
-      fetch(`http://localhost:8000/direktkandidatengewinner/${this.state.stimmkreis}/2018?compute_on_aggregated_data=${this.props.computeOnAggregatedData}`)
+      fetch(`/api/direktkandidatengewinner/${this.state.stimmkreis}/2018?compute_on_aggregated_data=${this.props.computeOnAggregatedData}`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();
           this.setState({ gewinner: { time: end - start, person: data } });
         });
-      fetch(`http://localhost:8000/wahlbeteiligung/${this.state.stimmkreis}/2018?compute_on_aggregated_data=${this.props.computeOnAggregatedData}`)
+      fetch(`/api/wahlbeteiligung/${this.state.stimmkreis}/2018?compute_on_aggregated_data=${this.props.computeOnAggregatedData}`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();
           this.setState({ wahlbeteiligung: { time: end - start, value: data.WAHLBETEILIGUNG } });
         });
-      fetch(`http://localhost:8000/siegerpartei/erststimmen/${this.state.stimmkreis}/2018`)
+      fetch(`/api/siegerpartei/erststimmen/${this.state.stimmkreis}/2018`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();
           this.setState({ siegerparteierststimmen: { time: end - start, partei: data.PARTEI } });
         });
-      fetch(`http://localhost:8000/siegerpartei/zweitstimmen/${this.state.stimmkreis}/2018`)
+      fetch(`/api/siegerpartei/zweitstimmen/${this.state.stimmkreis}/2018`)
         .then(response => response.json())
         .then(data => {
           let end = performance.now();

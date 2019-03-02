@@ -23,9 +23,9 @@ fn main() {
     // start webserver
     rocket::ignite().attach(cors::CORS())
         .manage(create_connection_pool())
-        .mount("/hello", routes![hello])
+        .mount("/api/hello", routes![hello])
         .mount(
-            "/",
+            "/api",
             routes![
                 routes::bayern::sitzverteilung,
                 routes::bayern::landtagsmitglieder,

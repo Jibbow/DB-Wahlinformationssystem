@@ -54,7 +54,7 @@ export default class WahlkreisView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000/parteien')
+    fetch('/api/parteien')
       .then(response => response.json())
       .then(data => {
         this.state.parteien = data;
@@ -62,7 +62,7 @@ export default class WahlkreisView extends Component {
       .then(() => {
         for (const x of Array(7).keys()) {
           for (const p in this.state.parteien) {
-            const url = "http://localhost:8000/ueberhangmandate/" + (x + 1)
+            const url = "/api/ueberhangmandate/" + (x + 1)
                         + "/" +  p + "/2018";
             fetch(url)
               .then(response => {

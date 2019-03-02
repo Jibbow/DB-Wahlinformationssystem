@@ -56,7 +56,7 @@ export default class LandtagView extends Component {
 
   componentDidMount() {
     let start = performance.now();
-    fetch('http://localhost:8000/landtagsmitglieder/2018')
+    fetch('/api/landtagsmitglieder/2018')
       .then(response => response.json())
       .then(data => {
         let end = performance.now();
