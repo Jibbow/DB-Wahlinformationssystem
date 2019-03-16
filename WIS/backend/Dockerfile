@@ -19,5 +19,5 @@ RUN BUILD_VERSION=${BUILD_VERSION} cargo +nightly build --release --target x86_6
 # final release image
 FROM scratch
 COPY --from=build /wis-backend/target/x86_64-unknown-linux-musl/release/wis-backend /bin/wis-backend
-ENTRYPOINT ["/bin/wis-backend"]
+CMD ["ROCKET_PORT=${PORT:-8000}", "/bin/wis-backend"]
 EXPOSE 8000
