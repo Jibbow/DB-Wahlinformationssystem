@@ -20,8 +20,14 @@ fn main() {
     // get configuration for database connection from environment or .env file
     dotenv::dotenv().ok();
 
+    // set rocket port to $PORT if given and leave everything else untouched
+    let mut rocket_config = rocket::config::Config::active().unwrap();
+    if let Some(port) = std::env::var("PORT").map(|p| p.parse::<u16>().expect("Unable to parse $PORT")).ok() {
+        rocket_config.set_port(port);
+    }
+
     // start webserver
-    rocket::ignite().attach(cors::CORS())
+    rocket::custom(rocket_config).attach(cors::CORS())
         .manage(create_connection_pool())
         .mount("/api/hello", routes![hello])
         .mount(
@@ -63,15 +69,15 @@ pub fn hello() -> &'static str {
 /// given by according environment variables.
 fn create_connection_pool() -> r2d2::Pool<hdbconnect::ConnectionManager> {
     let database_url = std::env::var("DATABASE_URL")
-        .expect("Please provide DATABASE_URL env var");
+        .expect("Please provide $DATABASE_URL env var");
     let database_port = std::env::var("DATABASE_PORT")
-        .expect("Please provide DATABASE_PORT env var")
+        .expect("Please provide $DATABASE_PORT env var")
         .parse::<u16>()
-        .expect("Unable to parse DATABASE_PORT");
+        .expect("Unable to parse $DATABASE_PORT");
     let database_user = std::env::var("DATABASE_USER")
-        .expect("Please provide DATABASE_USER env var");
+        .expect("Please provide $DATABASE_USER env var");
     let database_password = std::env::var("DATABASE_PASSWORD")
-        .expect("Please provide DATABASE_PASSWORD env var");
+        .expect("Please provide $DATABASE_PASSWORD env var");
 
     let db_connection_params = hdbconnect::ConnectParams::builder()
         .hostname(database_url)
