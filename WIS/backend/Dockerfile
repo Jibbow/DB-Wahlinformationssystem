@@ -21,5 +21,6 @@ RUN BUILD_VERSION=${BUILD_VERSION} cargo +nightly build --release --target x86_6
 # final release image
 FROM scratch
 COPY --from=build /wis-backend/target/x86_64-unknown-linux-musl/release/wis-backend /bin/wis-backend
-CMD ["/bin/wis-backend"]
+ENTRYPOINT ["/bin/wis-backend"]
+CMD [""]
 EXPOSE 8000
