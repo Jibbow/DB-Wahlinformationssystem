@@ -11,6 +11,9 @@ services:
   frontend:
     build: web
     image: wis-frontend
+    environment:
+      - PORT=80
+      - BACKEND_URL=http://backend:8000
     ports:
       - "3000:80"
     depends_on:
