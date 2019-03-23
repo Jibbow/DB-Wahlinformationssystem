@@ -2,6 +2,8 @@ stages:
 - name: build
 - name: deploy
   if: branch = master AND type = push
+- name: release
+  if: branch = master AND type = push
 
 jobs:
   include:
@@ -46,3 +48,13 @@ jobs:
     deploy:
       provider: script
       script: docker push registry.heroku.com/wis-frontend/web
+
+  - stage: release
+    name: "Releasing images to Heroku"
+    addons:
+      apt:
+        sources:
+          - heroku
+    script:
+    - heroku container:release web --app wis-backend
+    - heroku container:release web --app wis-frontend
