@@ -28,7 +28,7 @@ jobs:
     before_script:
     - cd WIS/backend
     script:
-    - docker docker build -t registry.heroku.com/wis-backend/web --build-arg BUILD_VERSION="Commit $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
+    - docker build -t registry.heroku.com/wis-backend/web --build-arg BUILD_VERSION="Commit $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
     deploy:
       provider: script
       script: heroku container:push registry.heroku.com/wis-backend/web && heroku container:release web --app wis-backend
@@ -42,8 +42,7 @@ jobs:
     before_script:
     - cd WIS/web
     script:
-    - docker docker build -t registry.heroku.com/wis-frontend/web --build-arg BUILD_VERSION="Commit
-      $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
+    - docker build -t registry.heroku.com/wis-frontend/web --build-arg BUILD_VERSION="Commit $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
     deploy:
       provider: script
       script: heroku container:push registry.heroku.com/wis-frontend/web && heroku container:release web --app wis-frontend
