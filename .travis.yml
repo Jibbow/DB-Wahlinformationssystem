@@ -24,27 +24,25 @@ jobs:
   - stage: deploy
     name: "Deploy Backend Docker image"
     services: docker
-    provider: heroku
     before_script:
     - cd WIS/backend
     script:
     - docker build -t registry.heroku.com/wis-backend/web --build-arg BUILD_VERSION="Commit $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
+    before_deploy:
+    - echo "$DOCKER_PASSWORD" | docker login --username=_ --password-stdin registry.heroku.com
     deploy:
       provider: script
-      script: heroku container:push registry.heroku.com/wis-backend/web && heroku container:release web --app wis-backend
-      api_key:
-        secure: KRKVePjx0Fz2SJtJc8a9fb8N7SjzhqVndO7r4oVMCN8hc2x76+ygsGREVcesKWtG5JgBs3PVwYXGzu6hN5NyVUCacE4AaWXxX6OpQ2I3ycUAm+1jwq8MUOiJ2ZxUEEWWCugF0E/qmXjS4UI7L23flqPQZrGeN6Tvgj2YYaAT2R8QMl8jH14pqmLLmaCPvhx8Seh5USmHELY/BpFxZNx4TtDQqeMzKtWiCoIsFDE5ECDQ/m2Z0eaS+WEChcUKoyq40uXitEtJtAP1jbC5cEkIFvItPRtRO8BL/S+kpKE8MyDU9yai3OBkMsc2QVlKAmU6pw8n40yX5J5p7Hw2xOFdr+oczq8p11zH1rzbaSr0i/E/nXOVSSDVsmKd4KR677utvb+fV8mU6XC438NKXFH+4WpOuxttSAJ5eEC25QYHx/IS8ocheoM0YKUVzYfRvsozwMw336fKPlgQ2He5DF62Km6H18qHKlUnbmMqgdlIa0Zw990alS5xRgWtAYJmBSyXoNJ1jGHG8Tz1MgjJUFH3zDJNytBhic6FU6o5rcPjYxuKje7mKVjAoxncmx056l3LbuvCMh+asRarrQ81CtS3oQ2bUCbrjWXXi7LPYMN5oPLyri2ufNBoXU4LJD9oB8EJG4BxkaoKUGmuql0kK46BNGaOAW4vPjJ0gN8M82RKsAI=
-
+      script: docker push registry.heroku.com/wis-backend/web
+      
   - stage: deploy
     name: "Deploy Frontend Docker image"
     services: docker
-    provider: heroku
     before_script:
     - cd WIS/web
     script:
     - docker build -t registry.heroku.com/wis-frontend/web --build-arg BUILD_VERSION="Commit $TRAVIS_COMMIT on branch '$TRAVIS_BRANCH'" .
+    before_deploy:
+    - echo "$DOCKER_PASSWORD" | docker login --username=_ --password-stdin registry.heroku.com
     deploy:
       provider: script
-      script: heroku container:push registry.heroku.com/wis-frontend/web && heroku container:release web --app wis-frontend
-      api_key:
-        secure: KRKVePjx0Fz2SJtJc8a9fb8N7SjzhqVndO7r4oVMCN8hc2x76+ygsGREVcesKWtG5JgBs3PVwYXGzu6hN5NyVUCacE4AaWXxX6OpQ2I3ycUAm+1jwq8MUOiJ2ZxUEEWWCugF0E/qmXjS4UI7L23flqPQZrGeN6Tvgj2YYaAT2R8QMl8jH14pqmLLmaCPvhx8Seh5USmHELY/BpFxZNx4TtDQqeMzKtWiCoIsFDE5ECDQ/m2Z0eaS+WEChcUKoyq40uXitEtJtAP1jbC5cEkIFvItPRtRO8BL/S+kpKE8MyDU9yai3OBkMsc2QVlKAmU6pw8n40yX5J5p7Hw2xOFdr+oczq8p11zH1rzbaSr0i/E/nXOVSSDVsmKd4KR677utvb+fV8mU6XC438NKXFH+4WpOuxttSAJ5eEC25QYHx/IS8ocheoM0YKUVzYfRvsozwMw336fKPlgQ2He5DF62Km6H18qHKlUnbmMqgdlIa0Zw990alS5xRgWtAYJmBSyXoNJ1jGHG8Tz1MgjJUFH3zDJNytBhic6FU6o5rcPjYxuKje7mKVjAoxncmx056l3LbuvCMh+asRarrQ81CtS3oQ2bUCbrjWXXi7LPYMN5oPLyri2ufNBoXU4LJD9oB8EJG4BxkaoKUGmuql0kK46BNGaOAW4vPjJ0gN8M82RKsAI=
+      script: docker push registry.heroku.com/wis-frontend/web
