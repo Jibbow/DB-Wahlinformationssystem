@@ -7,7 +7,7 @@ The project itself is located in `WIS` and can be run with docker. A external SA
 ![screenshot](./screenshot.png)
 
 ## Online Version
-An online version of the project can be found under [http://wis.jibbow.com](http://wis.jibbow.com). Make sure that HANA as well as the application itself are running... 😅
+The project can be found under [https://wis-frontend.herokuapp.com/](https://wis-frontend.herokuapp.com/). Make sure HANA is running if you want to see results... 😅
 
 ## Schema
 Schema file can be found here:  
