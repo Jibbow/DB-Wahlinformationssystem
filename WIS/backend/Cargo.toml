@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Andreas Zimmerer <andreas.zimmerer@tum.de>"]
 
 [dependencies]
-rocket = "0.4.2"
+rocket = "0.4.7"
 rocket_codegen = "0.4.2"
 hdbconnect = "0.12.2"
 dotenv = "0.13.0"
